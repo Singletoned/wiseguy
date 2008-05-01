@@ -17,9 +17,9 @@ except:
 
 class WikiPage(PicardDocument):
     class meta:        
-        _db = db
-        _id_name = 'stub'
-        doc_type = "wiki_page"
+        db = db
+        id_default_column = "stub"
+        content_type = "wiki_page"
     
     address = TextField()
     stub = TextField(keyable=True)

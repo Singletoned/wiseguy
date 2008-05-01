@@ -13,20 +13,20 @@ class Query(object):
         self.name = name
         self.code = code
         self.wrapper = wrapper
-        self._db = db
+        self.db = db
     
     def __call__(self, key, db=None):
         "Returns the first item from the query"
-        db = db or self._db
+        db = db or self.db
         return list(db.query(self.code, wrapper=self.wrapper)[key])[0]
 
 
 class SchemaMetaData(object):
     """A placeholder for bits of data about the schema"""
     def __init__(self, metadata):
-        self._db = getattr(metadata, 'db', None)
-        self._id_name = getattr(metadata, 'stub', None)
-        self.doc_type = getattr(metadata, "wiki_page", None)
+        self.db = getattr(metadata, 'db', None)
+        self.id_default_column = getattr(metadata, 'id_default_column', None)
+        self.content_type = getattr(metadata, 'content_type', None)
 
 
 class PicardDocumentMeta(SchemaMeta):
@@ -49,18 +49,19 @@ class PicardDocumentMeta(SchemaMeta):
         meta = SchemaMetaData(d.get('meta', None))
         
         pd_class = SchemaMeta.__new__(cls, name, bases, d)
+        pd_class.meta = meta
         queries = {}
         for attrname, field in pd_class._fields.items():
             if getattr(field, 'keyable', False):
                 code = """
                 function(doc) {
-                  if (doc.doc_type == "%s") {
+                  if (doc.content_type == "%s") {
                     map(doc.%s, doc);
                   }
                 }
-                """ % (pd_class.doc_type, attrname)
+                """ % (pd_class.meta.content_type, attrname)
                 query_name = "get_by_%s" % attrname
-                query = Query(query_name, code, pd_class.init_from_row, db=meta._db)
+                query = Query(query_name, code, pd_class.init_from_row, db=meta.db)
                 queries[query_name] = query
                 setattr(pd_class, query_name, query)
         setattr(pd_class, '_queries', queries)
@@ -75,14 +76,13 @@ class PicardDocument(Document):
         
     def __init__(self, *args, **kwargs):
         super(PicardDocument, self).__init__(**kwargs)
-        # self._db = self.meta.db
-        self._data['doc_type'] = self.doc_type
+        self._data['content_type'] = self.meta.content_type
         for query_name, query in self._queries.items():
-            query._db = self._db
+            query.db = self.meta.db
     
     @classmethod
     def by_id(cls, id):
-        item = cls.load(cls.meta.db, id)
+        item = cls.load(id)
         if item is None:
             raise ResourceNotFound()
         return item
@@ -91,15 +91,15 @@ class PicardDocument(Document):
         """Checks to see if `meta` defines a default column to use for an id"""
         if getattr(self._data, 'id', None) is None:
             if self._data.get('_id', None) is None:
-                self._data['_id'] = getattr(self, self.meta._id)
+                self._data['_id'] = getattr(self, self.meta.id_default_column)
         
-        item = self.store(self.meta._db)
+        item = self.store(self.meta.db)
         return item
     
     @classmethod
     def load(cls, id, db=None):
         """Load a specific document from the given database."""
-        db = db or cls.meta._db
+        db = db or cls.meta.db
         item = db.get(id)
         if item is None:
             raise ResourceNotFound()
@@ -107,7 +107,7 @@ class PicardDocument(Document):
 
     def store(self, db=None):
         """Store the document in the given database."""
-        db = db or cls.meta._db
+        db = db or cls.meta.db
         if getattr(self._data, 'id', None) is None:
             if self._data.get('_id', None) is not None:
                 db[self._data['_id']] = self._data
@@ -120,7 +120,7 @@ class PicardDocument(Document):
     
     @classmethod
     def delete(cls, id, db=None):
-        db = db or cls.meta._db
+        db = db or cls.meta.db
         del db[id]
     
     @classmethod
