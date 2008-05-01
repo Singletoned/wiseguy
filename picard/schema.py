@@ -87,14 +87,16 @@ class PicardDocument(Document):
             raise ResourceNotFound()
         return item
     
-    def save(self):
-        """Checks to see if `meta` defines a default column to use for an id"""
-        if getattr(self._data, 'id', None) is None:
-            if self._data.get('_id', None) is None:
-                self._data['_id'] = getattr(self, self.meta.id_default_column)
-        
-        item = self.store(self.meta.db)
-        return item
+    def save(self, db=None):
+        """Save the document to the given or default database.  Use `id_default_column` if set"""
+        db = db or self.meta.db
+        id = self.id or getattr(self, self.meta.id_default_column) or None
+        if id:
+            db[id] = self._data
+        else:
+            docid = db.create(self._data)
+            self._data = db[docid]
+        return self
     
     @classmethod
     def load(cls, id, db=None):
@@ -104,19 +106,6 @@ class PicardDocument(Document):
         if item is None:
             raise ResourceNotFound()
         return cls.wrap(item)
-
-    def store(self, db=None):
-        """Store the document in the given database."""
-        db = db or cls.meta.db
-        if getattr(self._data, 'id', None) is None:
-            if self._data.get('_id', None) is not None:
-                db[self._data['_id']] = self._data
-            else:
-                docid = db.create(self._data)
-                self._data = db.get(docid)
-        else:
-            db[self._data.id] = self._data
-        return self
     
     @classmethod
     def delete(cls, id, db=None):
