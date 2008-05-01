@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+
+{% block title %}All Pages{% endblock %}
+
+{% block body %}
+<h1>All Pages</h1>
+
+<div class="main">
+    <ul>
+{% for page in pages %}
+        <li><a href="/{{ page['stub'] }}">{{ page['stub'] }}</a></li>
+{% endfor %}
+    </ul>
+</div>
+
+<p>
+    <a href="/edit/{{ page['stub'] }}">Edit this page</a>
+</p>        
+
+<h2>Tags</h2>
+<ul id="tags">
+    {% for tag in page.tags %}
+    <li class="tag">
+        {{ tag }}
+    </li>&nbsp;
+    {% endfor %}
+</ul>
+{% endblock %}
