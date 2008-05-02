@@ -74,7 +74,7 @@ def delete(request, stub=None):
 @render('list')
 def list(request):
     """Lists all the pages, as links"""
-    pages = WikiPage.all_pages()
+    pages = WikiPage.get_all()
     return dict(pages=pages)
 
 

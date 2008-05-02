@@ -27,24 +27,24 @@ class SchemaMetaData(object):
         self.db = getattr(metadata, 'db', None)
         self.id_default_column = getattr(metadata, 'id_default_column', None)
         self.content_type = getattr(metadata, 'content_type', None)
+        self.revisioned = getattr(metadata, 'revisioned', False)
 
 
 class PicardDocumentMeta(SchemaMeta):
 
     def __new__(cls, name, bases, d):
-        pprint('cls')
-        pprint(cls)
-        pprint('name')
-        pprint(name)
-        pprint('bases')
-        pprint(bases)
-        pprint('d')
-        pprint(d)
-        
-        if d.has_key('meta'):
-            pprint(d['meta'].__dict__)
-        else:
-            pprint("No meta available")
+        # pprint('cls')
+        # pprint(cls)
+        # pprint('name')
+        # pprint(name)
+        # pprint('bases')
+        # pprint(bases)
+        # pprint('d')
+        # pprint(d)        
+        # if d.has_key('meta'):
+        #     pprint(d['meta'].__dict__)
+        # else:
+        #     pprint("No meta available")
         
         meta = SchemaMetaData(d.get('meta', None))
         
@@ -117,3 +117,16 @@ class PicardDocument(Document):
         """initialises an item from a view result row"""
         return cls.wrap(row.value)
 
+    @classmethod
+    def get_all(cls, db=None):
+        db = db or cls.meta.db
+        """Fetches all documents that match the classes content_type"""
+        code = """
+        function(doc) {
+          if (doc.doc_type == "%s") {
+            map(null, doc);
+          }
+        }
+        """ % cls.meta.content_type
+        return db.query(code, wrapper=cls.init_from_row)
+    

@@ -36,15 +36,3 @@ class WikiPage(PicardDocument):
         ))
     )
     
-    @classmethod
-    def all_pages(cls):
-        """Returns a query of all pages"""
-        code = """
-        function(doc) {
-          if (doc.doc_type == "wiki_page") {
-            map(null, doc);
-          }
-        }
-        """
-        return db.query(code, wrapper=cls.init_from_row)
-
