@@ -20,6 +20,7 @@ class WikiPage(PicardDocument):
         db = db
         id_default_column = "stub"
         content_type = "wiki_page"
+        revisioned = True
     
     address = TextField()
     stub = TextField(keyable=True)

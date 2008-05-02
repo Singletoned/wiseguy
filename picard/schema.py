@@ -1,11 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from pprint import pprint
+from datetime import datetime
+from calendar import timegm
 
 import couchdb
 from couchdb.client import Server, ResourceNotFound
 
 from couchdb.schema import Document, TextField, IntegerField, DateTimeField, ListField, DictField, Schema, Field, SchemaMeta
+
+from utils import simple_decorator
+
+@simple_decorator
+def revisioned_save(save_func):
+    """Adds the current data (except revisions) into revisions before saving"""
+    def revisioned_func(*args, **kwargs):
+        self = args[0]
+        revisions = self._data.setdefault('revisions', [])
+        data = {'date_revised':datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'}
+        data.update(self._data)
+        del data['revisions']
+        revisions.append(data)
+        return save_func(*args, **kwargs)
+    return revisioned_func
 
 class Query(object):
     """A callable holder for a few attributes of a query"""
@@ -31,25 +48,20 @@ class SchemaMetaData(object):
 
 
 class PicardDocumentMeta(SchemaMeta):
-
     def __new__(cls, name, bases, d):
-        # pprint('cls')
-        # pprint(cls)
-        # pprint('name')
-        # pprint(name)
-        # pprint('bases')
-        # pprint(bases)
-        # pprint('d')
-        # pprint(d)        
-        # if d.has_key('meta'):
-        #     pprint(d['meta'].__dict__)
-        # else:
-        #     pprint("No meta available")
-        
         meta = SchemaMetaData(d.get('meta', None))
-        
+        if meta.revisioned:
+            date_revised = DateTimeField(default=datetime.now)
+            d['date_revised'] = date_revised
+            def revisions(self):
+                revisions = self._data.setdefault('revisions', [])
+                return [self.wrap[rev] for rev in revisions]
+            d['revisions'] = property(revisions)
+            d['save'] = revisioned_save(bases[0].save)
         pd_class = SchemaMeta.__new__(cls, name, bases, d)
         pd_class.meta = meta
+        
+        
         queries = {}
         for attrname, field in pd_class._fields.items():
             if getattr(field, 'keyable', False):
@@ -65,6 +77,7 @@ class PicardDocumentMeta(SchemaMeta):
                 queries[query_name] = query
                 setattr(pd_class, query_name, query)
         setattr(pd_class, '_queries', queries)
+            
         return pd_class
     
 
@@ -129,4 +142,5 @@ class PicardDocument(Document):
         }
         """ % cls.meta.content_type
         return db.query(code, wrapper=cls.init_from_row)
+    
     
