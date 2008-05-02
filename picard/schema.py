@@ -55,7 +55,7 @@ class PicardDocumentMeta(SchemaMeta):
             d['date_revised'] = date_revised
             def revisions(self):
                 revisions = self._data.setdefault('revisions', [])
-                return [self.wrap[rev] for rev in revisions]
+                return [self.wrap(rev) for rev in revisions]
             d['revisions'] = property(revisions)
             d['save'] = revisioned_save(bases[0].save)
         pd_class = SchemaMeta.__new__(cls, name, bases, d)
