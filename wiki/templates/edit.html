@@ -19,7 +19,7 @@
 
         <p class="form-item">
             <label for="tags">Tags</label>
-            <input type="text" name="tags" value="{{ page.get(tags, []) | join(', ') }}" id="tags" />
+            <input type="text" name="tags" value="{{ page.tags | join(', ') }}" id="tags" />
         </p>
 
       <p class="form-submit">

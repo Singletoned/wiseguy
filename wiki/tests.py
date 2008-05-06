@@ -21,18 +21,21 @@ random_stub = random_string(20)
 random_tags = ' '.join([random_string() for j in range(5)])
 
 def test_wiki_save_page():
-    response = app.post('/save/homepage', params={'stub':'', 'body':'This is the modified home page'})
+    response = app.post('/save/homepage', params={'stub':'', 'body':'This is the modified home page', 'tags':'foo,bar baz'})
     print response
     response = response.follow()
     print response
     response = response.follow()
     print response
     assert 'This is the modified home page' in response.normal_body
+    assert "foo,bar baz" not in response.normal_body
+    assert "foo" in response.normal_body
+    assert "bar" in response.normal_body
+    assert "baz" in response.normal_body
     response = app.post('/save/test', params={'body':'This is the modified test page'})
     response = response.follow()
     print response
     assert 'This is the modified test page' in response.normal_body
-    
 
 def test_list_pages():
     response = app.get('/list')
@@ -54,6 +57,10 @@ def test_wiki_edit_page():
     response = response.follow()
     print response.normal_body
     assert "Edit homepage" in response.normal_body
+    assert "foo,bar baz" not in response.normal_body
+    assert "foo" in response.normal_body
+    assert "bar" in response.normal_body
+    assert "baz" in response.normal_body
     response = app.get('/edit/hello')
     print response.normal_body
     assert "Edit hello" in response.normal_body

@@ -47,7 +47,7 @@ def save(request, stub=None):
     
     page.body = request.form['body']
     try:
-        page.tags = request.form['tags'].split()
+        page.tags = request.form['tags'].replace(',', ' ').split()
     except KeyError:
         pass
     page = page.save()
