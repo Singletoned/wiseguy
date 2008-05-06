@@ -52,7 +52,6 @@ def save(request, stub=None):
         pass
     page = page.save()
     url = request.script_root + '/' + stub
-    log = logging.getLogger('picard_wiki')
     return redirect(url, 303)
         
 @render('not_found')
