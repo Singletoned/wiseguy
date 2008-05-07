@@ -8,21 +8,24 @@ from werkzeug.exceptions import NotFound
 
 from werkzeug.utils import redirect
 
-from utils import expose
+from utils import expose, render
 
-from utils import render
-
-from models import ResourceNotFound, WikiPage
+from models import ResourceNotFound, WikiPage, User
 
 @expose('/', defaults={'stub':'homepage'})
 @expose('/<string:stub>')
 @render('view')
 def view(request, stub):
+    if request.session.get('logged_in', False):
+        user = User.get_by_username(request.session['username'])
+    else:
+        user = None
+        
     try:
         page = WikiPage.by_id(stub)
     except ResourceNotFound:
         raise NotFound
-    return dict(page=page)
+    return dict(page=page, user=user)
 
 @expose('/edit/', defaults={'stub':'homepage'})
 @expose('/edit/<string:stub>')
@@ -75,5 +78,57 @@ def list(request):
     """Lists all the pages, as links"""
     pages = WikiPage.get_all()
     return dict(pages=pages)
+
+@expose('/register', ['GET', 'POST'])
+@render('register')
+def register(request):
+    if request.method == 'GET':
+        return dict()
+    else:
+        form = request.form
+        errors = {}
+        for key in ['username', 'email', 'password']:
+            if not form[key]:
+                errors[key] = "Please enter the %s" % key
+        if not errors:
+            if len(User.get_by_username(form['username'])):
+                errors['username'] = "That username is already taken"
+            if len(User.get_by_email(form['email'])):
+                errors['email'] = "That email address is already taken"
+        if errors:
+            return dict(form_data=form, errors=errors)
+        else:
+            user = User.create_from_form(form)
+            user.save()
+            session = request.session
+            session['username'] = user.username
+            session['logged_in'] = True
+            session.save()
+            return redirect('/')
+    
+
+@expose('/login', ['GET', 'POST'])
+@render('login')
+def login(request):
+    if request.method == 'GET':
+        return dict()
+    else:
+        form = request.form
+        errors = {}
+        user = User.get_by_username(form['username'])
+        if not user:
+            errors['username'] = """That username is not in use.  Have you misplet it or would you like to <a href="/register">register</a>?"""
+            errors['password'] = """That password would be incorrect if the user existed (which it doesn't)."""
+        else:
+            if not form['password'] == user.password:
+                errors['password'] == """That password is incorrect.  Do you need a <a href="/reminder">reminder</a>?"""
+            else:
+                session = request.session
+                session.invalidate()
+                session['username'] = user.username
+                session['logged_in'] = True
+                session.save()
+                return redirect(form.get('from_page', False) or '/')
+        return dict(form_data=form, errors=errors)
 
 

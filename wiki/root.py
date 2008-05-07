@@ -5,8 +5,9 @@ import logging
 
 from werkzeug import Request, ClosingIterator, SharedDataMiddleware
 from werkzeug.exceptions import HTTPException, NotFound
+from beaker.middleware import SessionMiddleware
 
-from utils import local, local_manager, url_map, session
+from utils import local, local_manager, url_map
 import views
 
 root_path = path.abspath(path.dirname(__file__))
@@ -29,6 +30,7 @@ class Wiki(object):
     def __call__(self, environ, start_response):
         local.application = self
         request = Request(environ)
+        request.session = request.environ['beaker.session']
         local.url_adapter = adapter = url_map.bind_to_environ(environ)
         try:
             endpoint, values = adapter.match()
@@ -47,6 +49,7 @@ if __name__ == '__main__':
     app = Wiki()
     app = DebuggedApplication(app, evalex=True)
     app = SharedDataMiddleware(app, {'/static':  path.join(root_path, 'static')})
+    app = SessionMiddleware(app, type="memory")
 
     
     run_simple('localhost', 8080, app, use_reloader=True)

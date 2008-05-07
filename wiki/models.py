@@ -14,6 +14,10 @@ try:
 except:
    db = server['picard_wiki']
 
+try:
+    user_db = server.create('picard_users')
+except:
+    user_db = server['picard_users']
 
 class WikiPage(PicardDocument):
     class meta:        
@@ -37,3 +41,22 @@ class WikiPage(PicardDocument):
         ))
     )
     
+
+class User(PicardDocument):
+    class meta:
+        db=user_db
+        id_default_column = "username"
+        content_type = "user"
+    
+    username = TextField(keyable=True)
+    email = TextField(keyable=True)
+    password = TextField()
+
+    @classmethod
+    def create_from_form(cls, form):
+        """Ignores extra fields"""
+        return cls(username=form['username'], email=form['email'], password=form['password'])
+
+
+
+

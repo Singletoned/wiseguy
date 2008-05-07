@@ -6,13 +6,14 @@
 <h1>{{ page['stub'] }}</h1>
 
 <div class="main">
-    {{ page['body'] }}
+    {{ page['body'] | markdown }}
 </div>
 
 <p>
     <a href="/edit/{{ page['stub'] }}">Edit this page</a>
 </p>        
 
+{% if page.tags %}
 <h2>Tags</h2>
 <ul id="tags">
     {% for tag in page.tags %}
@@ -21,4 +22,24 @@
     </li>&nbsp;
     {% endfor %}
 </ul>
+{% endif %}
+
+{% if page.comments %}
+<h2>Comments</h2>
+    {% for comment in comments %}
+<div class="comment">
+    <a href="mailto:{{ comment['author_email'] }}">{{ comment['author_name'] }}</a> said:<br>
+    {{ comment['body'] }}
+</div>
+    {% endfor %}
+{% endif %}
+
+<h2>Leave a comment</h2>
+<form action="/comments/save" method="post" accept-charset="utf-8" id="comment-form">
+    <label for="name">Name:</label><input type="text" name="name" value="">
+    <label for="email">Email:</label><input type="text" name="email" value="">
+    <label for="comment">Comment:</label><textarea name="comment" rows="8" cols="40"></textarea>
+    <p><input type="submit" value="Submit"></p>
+</form>
+
 {% endblock %}

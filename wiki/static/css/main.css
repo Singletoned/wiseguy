@@ -6,3 +6,7 @@
 div.main {
     padding-bottom: 50px;
 }
+
+.error {
+    color:red;
+}
