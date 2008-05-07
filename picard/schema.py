@@ -26,16 +26,24 @@ def revisioned_save(save_func):
 
 class Query(object):
     """A callable holder for a few attributes of a query"""
-    def __init__(self, name, code, wrapper, db=None):
+    def __init__(self, name, code, wrapper, db=None, unique=True):
         self.name = name
         self.code = code
         self.wrapper = wrapper
         self.db = db
+        self._unique = unique
     
     def __call__(self, key, db=None):
         "Returns the first item from the query"
         db = db or self.db
-        return list(db.query(self.code, wrapper=self.wrapper)[key])[0]
+        results = db.query(self.code, wrapper=self.wrapper)[key]
+        if self._unique:
+            if len(results):
+                return list(results)[0]
+            else:
+                return []
+        else:
+            return results
 
 
 class SchemaMetaData(object):
@@ -64,18 +72,21 @@ class PicardDocumentMeta(SchemaMeta):
         
         queries = {}
         for attrname, field in pd_class._fields.items():
-            if getattr(field, 'keyable', False):
-                code = """
-                function(doc) {
-                  if (doc.content_type == "%s") {
-                    map(doc.%s, doc);
-                  }
-                }
-                """ % (pd_class.meta.content_type, attrname)
-                query_name = "get_by_%s" % attrname
-                query = Query(query_name, code, pd_class.init_from_row, db=meta.db)
-                queries[query_name] = query
-                setattr(pd_class, query_name, query)
+            for query_type in ['get_by', 'by']:
+                if query_type == 'get_by':
+                    unique = True
+                if getattr(field, 'keyable', False):
+                    code = """
+                    function(doc) {
+                      if (doc.content_type == "%s") {
+                        map(doc.%s, doc);
+                      }
+                    }
+                    """ % (pd_class.meta.content_type, attrname)
+                    query_name = "%s_%s" % (query_type, attrname)
+                    query = Query(query_name, code, pd_class.init_from_row, db=meta.db, unique=unique)
+                    queries[query_name] = query
+                    setattr(pd_class, query_name, query)
         setattr(pd_class, '_queries', queries)
             
         return pd_class
@@ -136,7 +147,7 @@ class PicardDocument(Document):
         """Fetches all documents that match the classes content_type"""
         code = """
         function(doc) {
-          if (doc.doc_type == "%s") {
+          if (doc.content_type == "%s") {
             map(null, doc);
           }
         }
