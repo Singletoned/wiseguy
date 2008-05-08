@@ -26,16 +26,16 @@ def revisioned_save(save_func):
 
 class Query(object):
     """A callable holder for a few attributes of a query"""
-    def __init__(self, name, code, wrapper, db=None, unique=True):
+    def __init__(self, name, code, wrapper, parent_class, unique=True):
         self.name = name
         self.code = code
         self.wrapper = wrapper
-        self.db = db
+        self.parent_class = parent_class
         self._unique = unique
     
     def __call__(self, key, db=None):
         "Returns the first item from the query"
-        db = db or self.db
+        db = db or self.parent_class.meta.db
         results = db.query(self.code, wrapper=self.wrapper)[key]
         if self._unique:
             if len(results):
@@ -84,7 +84,7 @@ class PicardDocumentMeta(SchemaMeta):
                     }
                     """ % (pd_class.meta.content_type, attrname)
                     query_name = "%s_%s" % (query_type, attrname)
-                    query = Query(query_name, code, pd_class.init_from_row, db=meta.db, unique=unique)
+                    query = Query(query_name, code, pd_class.init_from_row, parent_class=pd_class, unique=unique)
                     queries[query_name] = query
                     setattr(pd_class, query_name, query)
         setattr(pd_class, '_queries', queries)
