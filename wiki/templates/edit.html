@@ -29,7 +29,15 @@
     
 </div>
 
-<p>
-    <a href="/edit/{{ page['stub'] }}">Edit this page</a>
-</p>
+{% if page.revisions %}
+<div id="revisions">
+    <h2>Revisions</h2>
+    <ol>
+    {% for rev in page.revisions %}
+        <li><a href="/{{ page.stub }}/r/{{ loop.index }}">{{ rev.date_modified }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 {% endblock %}        

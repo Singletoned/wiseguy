@@ -14,8 +14,9 @@ from models import ResourceNotFound
 
 @expose('/', defaults={'stub':'homepage'})
 @expose('/<string:stub>')
+@expose('/<string:stub>/r/<int:rev>')
 @render('view')
-def view(request, stub):
+def view(request, stub, rev=None):
     WikiPage = request.models.WikiPage
     User = request.models.User
     if request.session.get('logged_in', False):
@@ -27,6 +28,10 @@ def view(request, stub):
         page = WikiPage.by_id(stub)
     except ResourceNotFound:
         raise NotFound
+    
+    if rev:
+        page = page.revisions[rev]
+    
     return dict(page=page, user=user)
 
 @expose('/edit/', defaults={'stub':'homepage'})
