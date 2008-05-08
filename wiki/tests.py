@@ -41,7 +41,7 @@ def random_string(length=5):
 random_stub = random_string(20)
 random_tags = ' '.join([random_string() for j in range(5)])
 
-def test_wiki_save_page():
+def test_wiki_create_pages():
     response = app.post('/save/homepage', params={'stub':'', 'body':'This is the modified home page', 'tags':'foo,bar baz'})
     print response
     response = response.follow()
@@ -118,7 +118,7 @@ def test_delete_pages():
     assert "404" in response.normal_body
 
 def wiki_suite():
-    test_wiki_save_page()
+    test_wiki_create_pages()
     test_list_pages()
     test_wiki_homepage()
     test_wiki_page()
@@ -128,17 +128,10 @@ def wiki_suite():
     test_delete_pages()
 
 def test_register():
-    test_wiki_save_page()
+    test_wiki_create_pages()
     response = app.post('/register', params=dict(username="mr_test", email="mr_test@example.com", password="test"))
     response = response.follow()
     print response.body
     assert "Logged in as: mr_test" in response.normal_body
     wiki_suite()
-
-# def test_login():
-#     response = app.post('/login', params=dict(username))
-    
-
-
-
 
