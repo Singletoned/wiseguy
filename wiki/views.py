@@ -16,14 +16,14 @@ from models import ResourceNotFound
 @expose('/<string:stub>')
 @render('view')
 def view(request, stub):
-    print request.models.WikiPage.meta.db
+    WikiPage = request.models.WikiPage
     if request.session.get('logged_in', False):
         user = User.get_by_username(request.session['username'])
     else:
         user = None
         
     try:
-        page = request.models.WikiPage.by_id(stub)
+        page = WikiPage.by_id(stub)
     except ResourceNotFound:
         raise NotFound
     return dict(page=page, user=user)

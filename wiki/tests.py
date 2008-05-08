@@ -3,12 +3,33 @@
 import string
 import random
 
+from beaker.middleware import SessionMiddleware
 from paste.fixture import TestApp, TestResponse
+from couchdb.client import Server
 
 from root import Wiki
 
-app = TestApp(Wiki())
+server = Server('http://localhost:5984/')
 
+try:
+    db = server.create('picard_wiki_test')
+    print 'database created'
+except:
+    del server['picard_wiki_test']
+    db = server.create('picard_wiki_test')
+
+try:
+    user_db = server.create('picard_users_test')
+except:
+    del server['picard_users_test']
+    user_db = server.create('picard_users_test')
+
+
+app = Wiki(db=db, user_db=user_db)
+app = SessionMiddleware(app, type="memory")
+app = TestApp(app)
+
+    
 def start_response_func(status, content_type):
     assert status == '200 OK'
     # print content_type
@@ -92,8 +113,8 @@ def test_delete_pages():
     response = app.get('/' + random_stub)
     assert "404" in response.normal_body
 
-def test_login():
-    response = app.post()
+# def test_login():
+#     response = app.post()
     
 
 
