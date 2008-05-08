@@ -3,12 +3,35 @@
 import string
 import random
 
+from nose import with_setup
+
+from beaker.middleware import SessionMiddleware
 from paste.fixture import TestApp, TestResponse
+from couchdb.client import Server
 
 from root import Wiki
 
-app = TestApp(Wiki())
+server = Server('http://localhost:5984/')
 
+try:
+    db = server.create('picard_wiki_test')
+    print 'database created'
+except:
+    del server['picard_wiki_test']
+    db = server.create('picard_wiki_test')
+
+try:
+    user_db = server.create('picard_users_test')
+except:
+    del server['picard_users_test']
+    user_db = server.create('picard_users_test')
+
+
+app = Wiki(db=db, user_db=user_db)
+app = SessionMiddleware(app, type="memory")
+app = TestApp(app)
+
+    
 def start_response_func(status, content_type):
     assert status == '200 OK'
     # print content_type
@@ -20,19 +43,45 @@ def random_string(length=5):
 random_stub = random_string(20)
 random_tags = ' '.join([random_string() for j in range(5)])
 
-def test_wiki_save_page():
-    response = app.post('/save/homepage', params={'stub':'', 'body':'This is the modified home page'})
+def create_pages():
+    response = app.post('/save/homepage', params={'stub':'', 'body':'This is the modified home page', 'tags':'foo,bar baz'})
+    response = response.follow()
+    response = response.follow()
+    assert 'This is the modified home page' in response.normal_body
+    assert not "foo,bar baz" in response.normal_body
+    assert "foo" in response.normal_body
+    assert "bar" in response.normal_body
+    assert "baz" in response.normal_body
+    response = app.post('/save/test', params={'body':'This is the modified test page'})
+    response = response.follow()
+    assert 'This is the modified test page' in response.normal_body
+
+def delete_pages():
+    response = app.post('/delete/test')
+    response = response.follow()
+    response = app.get('/test')
+    assert "404" in response.normal_body
+    response = app.post('/delete/homepage')
+    response = response.follow()
+    response = app.get('/')
+    assert "404" in response.normal_body
+
+def test_wiki_create_pages():
+    response = app.post('/save/homepage', params={'stub':'', 'body':'This is the modified home page', 'tags':'foo,bar baz'})
     print response
     response = response.follow()
     print response
     response = response.follow()
     print response
     assert 'This is the modified home page' in response.normal_body
+    assert not "foo,bar baz" in response.normal_body
+    assert "foo" in response.normal_body
+    assert "bar" in response.normal_body
+    assert "baz" in response.normal_body
     response = app.post('/save/test', params={'body':'This is the modified test page'})
     response = response.follow()
     print response
     assert 'This is the modified test page' in response.normal_body
-    
 
 def test_list_pages():
     response = app.get('/list')
@@ -54,6 +103,10 @@ def test_wiki_edit_page():
     response = response.follow()
     print response.normal_body
     assert "Edit homepage" in response.normal_body
+    assert not "foo,bar baz" in response.normal_body
+    assert "foo" in response.normal_body
+    assert "bar" in response.normal_body
+    assert "baz" in response.normal_body
     response = app.get('/edit/hello')
     print response.normal_body
     assert "Edit hello" in response.normal_body
@@ -84,7 +137,43 @@ def test_delete_pages():
     response = response.follow()
     response = app.get('/' + random_stub)
     assert "404" in response.normal_body
-    
+    response = app.post('/delete/homepage')
+    response = response.follow()
+    response = app.get('/')
+    assert "404" in response.normal_body
+
+def wiki_suite():
+    test_wiki_create_pages()
+    test_list_pages()
+    test_wiki_homepage()
+    test_wiki_page()
+    test_wiki_edit_page()
+    test_wiki_tagging()
+    test_page_not_found()
+    test_delete_pages()
+
+@with_setup(create_pages, wiki_suite)
+def test_register():
+    response = app.post('/register', params=dict(username="mr_test", email="mr_test@example.com", password="test"))
+    response = response.follow()
+    print response.body
+    assert "Logged in as: mr_test" in response.normal_body
+
+@with_setup(create_pages, delete_pages)
+def test_logout():
+    response = app.get('/logout')
+    response = response.follow()
+    print response
+    assert not "Logged in as: mr_test" in response.normal_body
+
+@with_setup(create_pages, delete_pages)
+def test_login():
+    response = app.get('/')
+    print response.body
+    assert not "Logged in as: mr_test" in response.normal_body
+    response = app.post('/login', params=dict(username="mr_test", password="test"))
+    response = response.follow()
+    assert "Logged in as: mr_test" in response.normal_body
 
 
 

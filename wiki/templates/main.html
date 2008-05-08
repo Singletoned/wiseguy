@@ -7,6 +7,14 @@
         <link rel="stylesheet" href="/static/css/main.css" type="text/css" media="screen" charset="utf-8" />
     </head>
     <body>
+<div id="login">
+{% if user %}
+    Logged in as: {{ user.username }} | <a href="/logout">Logout</a>
+{% else %}
+    <a href="/register">Register</a>
+{% endif %}
+</div>
+
 {% block body %}
 
 {% endblock %}

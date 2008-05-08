@@ -1,23 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from sqlalchemy import MetaData
-from sqlalchemy.orm import create_session, scoped_session
-
-from werkzeug import Local, LocalManager, Response
+from werkzeug import Response
 from werkzeug.wrappers import BaseResponse
 from werkzeug.routing import Map, Rule
 
-from templating import render_template
-
 from picard.utils import simple_decorator
 
-local = Local()
-local_manager = LocalManager([local])
-application = local('application')
-
-metadata = MetaData()
-session = scoped_session(lambda: create_session(application.database_engine,
-                         transactional=True), local_manager.get_ident)
+from templating import render_template
 
 url_map = Map()
 
