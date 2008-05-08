@@ -31,21 +31,39 @@ def view(request, stub, rev=None):
     
     if rev:
         page = page.revisions[rev]
+        revision = True
+    else:
+        revision = False
     
-    return dict(page=page, user=user)
+    return dict(
+        page=page,
+        user=user,
+        revision=revision
+    )
 
 @expose('/edit/', defaults={'stub':'homepage'})
 @expose('/edit/<string:stub>')
+@expose('/edit/<string:stub>/r/<int:rev>')
 @render('edit')
-def edit(request, stub):
+def edit(request, stub, rev=None):
     WikiPage = request.models.WikiPage
     # See if the page exists...
     try:
         page = WikiPage.by_id(stub)
-    # If not, create a temporary page that doesn't get saved
+    # If not, redirect to the page so that the correct 404 is generated
     except ResourceNotFound:
-        page = WikiPage(stub=stub)
-    return dict(page=page)
+        return redirect('/%s' % stub)
+    
+    if rev:
+        page = page.revisions[rev]
+        revision = True
+    else:
+        revision = False
+    
+    return dict(
+        page=page,
+        revision=revision
+    )
 
 @expose('/save/<string:stub>', ['POST'])
 def save(request, stub=None):

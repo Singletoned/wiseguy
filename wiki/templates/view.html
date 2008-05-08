@@ -1,16 +1,16 @@
 {% extends "main.html" %}
 
-{% block title %}{{ page['stub'] }}{% endblock %}
+{% block title %}{{ revision and 'Revision of ' }}{{ page['stub'] }}{% endblock %}
 
 {% block body %}
-<h1>{{ page['stub'] }}</h1>
+<h1>{{ revision and 'Revision of ' }}{{ page['stub'] }}</h1>
 
 <div class="main">
     {{ page['body'] | markdown }}
 </div>
 
 <p>
-    <a href="/edit/{{ page['stub'] }}">Edit this page</a>
+    <a href="/edit/{{ page['stub'] }}">Edit this {{ revision and 'revision' or page }}</a>
 </p>        
 
 {% if page.tags %}
