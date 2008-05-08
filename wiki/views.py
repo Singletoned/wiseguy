@@ -140,3 +140,13 @@ def login(request):
         return dict(form_data=form, errors=errors)
 
 
+@expose('/logout')
+def logout(request):
+    session = request.session
+    session['username'] = False
+    session['logged_in'] = False
+    session.save()
+    return redirect('/')
+
+
+

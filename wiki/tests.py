@@ -49,7 +49,7 @@ def test_wiki_create_pages():
     response = response.follow()
     print response
     assert 'This is the modified home page' in response.normal_body
-    assert "foo,bar baz" not in response.normal_body
+    assert not "foo,bar baz" in response.normal_body
     assert "foo" in response.normal_body
     assert "bar" in response.normal_body
     assert "baz" in response.normal_body
@@ -78,7 +78,7 @@ def test_wiki_edit_page():
     response = response.follow()
     print response.normal_body
     assert "Edit homepage" in response.normal_body
-    assert "foo,bar baz" not in response.normal_body
+    assert not "foo,bar baz" in response.normal_body
     assert "foo" in response.normal_body
     assert "bar" in response.normal_body
     assert "baz" in response.normal_body
@@ -102,15 +102,15 @@ def test_page_not_found():
     print response
     response = response.follow()
     assert random_stub in response.normal_body
+    response = app.post('/delete/' + random_stub)
+    response = response.follow()
+    response = app.get('/' + random_stub)
+    assert "404" in response.normal_body
 
 def test_delete_pages():
     response = app.post('/delete/test')
     response = response.follow()
     response = app.get('/test')
-    assert "404" in response.normal_body
-    response = app.post('/delete/' + random_stub)
-    response = response.follow()
-    response = app.get('/' + random_stub)
     assert "404" in response.normal_body
     response = app.post('/delete/homepage')
     response = response.follow()
@@ -135,3 +135,22 @@ def test_register():
     assert "Logged in as: mr_test" in response.normal_body
     wiki_suite()
 
+def test_logout():
+    test_wiki_create_pages()
+    response = app.get('/logout')
+    response = response.follow()
+    print response
+    assert not "Logged in as: mr_test" in response.normal_body
+    test_delete_pages()
+
+# def test_login():
+#     # response = app.post('/login', params=dict(username))
+#     test_wiki_create_pages()
+#     response = app.get('/')
+#     print response.body
+#     assert not "Logged in as: mr_test" in response.normal_body
+#     
+# 
+# 
+# 
+# 
