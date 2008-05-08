@@ -104,6 +104,24 @@ class PicardDocument(Document):
         for query_name, query in self._queries.items():
             query.db = self.meta.db
     
+    def __delitem__(self, name):
+        if hasattr(self, name):
+            del self.name
+        else:
+            del self._data[name]
+
+    def __getitem__(self, name):
+        if hasattr(self, name):
+            return getattr(self, name)
+        else:
+            return self._data[name]
+
+    def __setitem__(self, name, value):
+        if hasattr(self, name):
+            self.name = value
+        else:
+            self._data[name] = value
+    
     @classmethod
     def by_id(cls, id):
         item = cls.load(id)
