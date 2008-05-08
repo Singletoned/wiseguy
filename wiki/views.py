@@ -17,6 +17,7 @@ from models import ResourceNotFound
 @render('view')
 def view(request, stub):
     WikiPage = request.models.WikiPage
+    User = request.models.User
     if request.session.get('logged_in', False):
         user = User.get_by_username(request.session['username'])
     else:
