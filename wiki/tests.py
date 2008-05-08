@@ -143,14 +143,17 @@ def test_logout():
     assert not "Logged in as: mr_test" in response.normal_body
     test_delete_pages()
 
-# def test_login():
-#     # response = app.post('/login', params=dict(username))
-#     test_wiki_create_pages()
-#     response = app.get('/')
-#     print response.body
-#     assert not "Logged in as: mr_test" in response.normal_body
-#     
-# 
-# 
-# 
-# 
+def test_login():
+    test_wiki_create_pages()
+    response = app.get('/')
+    print response.body
+    assert not "Logged in as: mr_test" in response.normal_body
+    response = app.post('/login', params=dict(username="mr_test", password="test"))
+    response = response.follow()
+    assert "Logged in as: mr_test" in response.normal_body
+    test_delete_pages()
+    
+
+
+
+
