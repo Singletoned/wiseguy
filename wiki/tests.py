@@ -112,9 +112,31 @@ def test_delete_pages():
     response = response.follow()
     response = app.get('/' + random_stub)
     assert "404" in response.normal_body
+    response = app.post('/delete/homepage')
+    response = response.follow()
+    response = app.get('/')
+    assert "404" in response.normal_body
+
+def wiki_suite():
+    test_wiki_save_page()
+    test_list_pages()
+    test_wiki_homepage()
+    test_wiki_page()
+    test_wiki_edit_page()
+    test_wiki_tagging()
+    test_page_not_found()
+    test_delete_pages()
+
+def test_register():
+    test_wiki_save_page()
+    response = app.post('/register', params=dict(username="mr_test", email="mr_test@example.com", password="test"))
+    response = response.follow()
+    print response.body
+    assert "Logged in as: mr_test" in response.normal_body
+    wiki_suite()
 
 # def test_login():
-#     response = app.post()
+#     response = app.post('/login', params=dict(username))
     
 
 
