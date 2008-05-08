@@ -91,8 +91,10 @@ def test_delete_pages():
     response = response.follow()
     response = app.get('/' + random_stub)
     assert "404" in response.normal_body
-    
 
+def test_login():
+    response = app.post()
+    
 
 
 

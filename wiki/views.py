@@ -10,19 +10,20 @@ from werkzeug.utils import redirect
 
 from utils import expose, render
 
-from models import ResourceNotFound, WikiPage, User
+from models import ResourceNotFound
 
 @expose('/', defaults={'stub':'homepage'})
 @expose('/<string:stub>')
 @render('view')
 def view(request, stub):
+    print request.models.WikiPage.meta.db
     if request.session.get('logged_in', False):
         user = User.get_by_username(request.session['username'])
     else:
         user = None
         
     try:
-        page = WikiPage.by_id(stub)
+        page = request.models.WikiPage.by_id(stub)
     except ResourceNotFound:
         raise NotFound
     return dict(page=page, user=user)
@@ -31,6 +32,7 @@ def view(request, stub):
 @expose('/edit/<string:stub>')
 @render('edit')
 def edit(request, stub):
+    WikiPage = request.models.WikiPage
     # See if the page exists...
     try:
         page = WikiPage.by_id(stub)
@@ -41,6 +43,7 @@ def edit(request, stub):
 
 @expose('/save/<string:stub>', ['POST'])
 def save(request, stub=None):
+    WikiPage = request.models.WikiPage
     stub = stub or request.form['stub']
     try:
         page = WikiPage.by_id(stub)
@@ -60,6 +63,7 @@ def save(request, stub=None):
 @render('not_found')
 def not_found(request, response):
     "Displays an edit form and offers to let them create the page"
+    WikiPage = request.models.WikiPage
     page = WikiPage(
         stub = request.path.strip('/').split('/', 1)[0],
         body = None
@@ -68,6 +72,7 @@ def not_found(request, response):
 
 @expose('/delete/<string:stub>', ['POST'])
 def delete(request, stub=None):
+    WikiPage = request.models.WikiPage
     WikiPage.delete(stub)
     url = request.script_root + '/'
     return redirect(url)
@@ -76,12 +81,14 @@ def delete(request, stub=None):
 @render('list')
 def list(request):
     """Lists all the pages, as links"""
+    WikiPage = request.models.WikiPage
     pages = WikiPage.get_all()
     return dict(pages=pages)
 
 @expose('/register', ['GET', 'POST'])
 @render('register')
 def register(request):
+    User = request.models.User
     if request.method == 'GET':
         return dict()
     else:
@@ -110,6 +117,7 @@ def register(request):
 @expose('/login', ['GET', 'POST'])
 @render('login')
 def login(request):
+    User = request.models.User
     if request.method == 'GET':
         return dict()
     else:
@@ -124,7 +132,6 @@ def login(request):
                 errors['password'] == """That password is incorrect.  Do you need a <a href="/reminder">reminder</a>?"""
             else:
                 session = request.session
-                session.invalidate()
                 session['username'] = user.username
                 session['logged_in'] = True
                 session.save()
