@@ -58,10 +58,10 @@ class Wiki(object):
             response = e
         return ClosingIterator(response(environ, start_response))
 
+app = Wiki(db=db, user_db=user_db)
 
 if __name__ == '__main__':
     from werkzeug import DebuggedApplication, run_simple
-    app = Wiki(db=db, user_db=user_db)
     app = DebuggedApplication(app, evalex=True)
     app = SharedDataMiddleware(app, {'/static':  path.join(root_path, 'static')})
     app = SessionMiddleware(app, type="memory")

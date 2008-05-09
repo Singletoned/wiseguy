@@ -34,12 +34,18 @@ class WikiPage(PicardDocument):
     tags = ListField(TextField())
     comments = ListField(
         DictField(Schema.build(
-            author_name=TextField(),
-            author_email=TextField(),
+            name=TextField(),
+            email=TextField(),
             body=TextField(),
             date=DateTimeField(default=datetime.now)
         ))
     )
+    
+    def save_comment(self, name, email, body):
+        comment = dict(name=name, email=email, body=body)
+        self.comments.append(comment)
+        self.save()
+        return self.comments[-1]
     
 
 class User(PicardDocument):

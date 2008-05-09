@@ -8,7 +8,7 @@ from werkzeug.exceptions import NotFound
 
 from werkzeug.utils import redirect
 
-from utils import expose, render
+from utils import expose, render, expose_class, render_class
 
 from models import ResourceNotFound
 
@@ -31,21 +31,39 @@ def view(request, stub, rev=None):
     
     if rev:
         page = page.revisions[rev]
+        revision = True
+    else:
+        revision = False
     
-    return dict(page=page, user=user)
+    return dict(
+        page=page,
+        user=user,
+        revision=revision
+    )
 
 @expose('/edit/', defaults={'stub':'homepage'})
 @expose('/edit/<string:stub>')
+@expose('/edit/<string:stub>/r/<int:rev>')
 @render('edit')
-def edit(request, stub):
+def edit(request, stub, rev=None):
     WikiPage = request.models.WikiPage
     # See if the page exists...
     try:
         page = WikiPage.by_id(stub)
-    # If not, create a temporary page that doesn't get saved
+    # If not, redirect to the page so that the correct 404 is generated
     except ResourceNotFound:
-        page = WikiPage(stub=stub)
-    return dict(page=page)
+        return redirect('/%s' % stub)
+    
+    if rev:
+        page = page.revisions[rev]
+        revision = True
+    else:
+        revision = False
+    
+    return dict(
+        page=page,
+        revision=revision
+    )
 
 @expose('/save/<string:stub>', ['POST'])
 def save(request, stub=None):
@@ -144,7 +162,6 @@ def login(request):
                 return redirect(form.get('from_page', False) or '/')
         return dict(form_data=form, errors=errors)
 
-
 @expose('/logout')
 def logout(request):
     session = request.session
@@ -153,5 +170,15 @@ def logout(request):
     session.save()
     return redirect('/')
 
-
+class comment():
+    expose_class('/<string:stub>/comment', ['POST'])
+    render_class('comment')
+    
+    @classmethod
+    def POST(cls, request, stub):
+        WikiPage = request.models.WikiPage
+        page = WikiPage.by_id(stub)
+        form = request.form
+        comment = page.save_comment(form['name'], form['email'], form['body'])
+        return dict(comment=comment)
 
