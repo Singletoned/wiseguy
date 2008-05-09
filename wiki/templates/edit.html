@@ -3,7 +3,7 @@
 {% block title %}Edit {{ revision and 'Revision of ' }}{{ page['stub'] }}{% endblock %}
 
 {% block body %}
-<h1>Edit {{ revision and 'Revision of ' }}{{ page['stub'] }}</h1>
+<h1>Edit {{ revision and 'Revision of ' or '' }}{{ page['stub'] }}</h1>
 
 <div class="main">
     <form action="/save/{{ page.stub }}" id="edit-form" method="post">

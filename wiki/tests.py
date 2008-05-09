@@ -107,9 +107,6 @@ def test_wiki_edit_page():
     assert "foo" in response.normal_body
     assert "bar" in response.normal_body
     assert "baz" in response.normal_body
-    response = app.get('/edit/hello')
-    print response.normal_body
-    assert "Edit hello" in response.normal_body
 
 def test_wiki_tagging():
     response = app.post('/save/test', params={'body':'This is the modified test page', 'tags':random_tags})
