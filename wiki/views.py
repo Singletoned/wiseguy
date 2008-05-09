@@ -8,7 +8,7 @@ from werkzeug.exceptions import NotFound
 
 from werkzeug.utils import redirect
 
-from utils import expose, render
+from utils import expose, render, expose_class, render_class
 
 from models import ResourceNotFound
 
@@ -162,7 +162,6 @@ def login(request):
                 return redirect(form.get('from_page', False) or '/')
         return dict(form_data=form, errors=errors)
 
-
 @expose('/logout')
 def logout(request):
     session = request.session
@@ -171,5 +170,15 @@ def logout(request):
     session.save()
     return redirect('/')
 
-
+class comment():
+    expose_class('/<string:stub>/comment', ['POST'])
+    render_class('comment')
+    
+    @classmethod
+    def POST(cls, request, stub):
+        WikiPage = request.models.WikiPage
+        page = WikiPage.by_id(stub)
+        form = request.form
+        comment = page.save_comment(form['name'], form['email'], form['body'])
+        return dict(comment=comment)
 

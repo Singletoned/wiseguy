@@ -1,16 +1,16 @@
 {% extends "main.html" %}
 
-{% block title %}{{ revision and 'Revision of ' }}{{ page['stub'] }}{% endblock %}
+{% block title %}{{ revision and 'Revision of ' or '' }}{{ page['stub'] }}{% endblock %}
 
 {% block body %}
-<h1>{{ revision and 'Revision of ' }}{{ page['stub'] }}</h1>
+<h1>{{ revision and 'Revision of ' or '' }}{{ page['stub'] }}</h1>
 
 <div class="main">
     {{ page['body'] | markdown }}
 </div>
 
 <p>
-    <a href="/edit/{{ page['stub'] }}">Edit this {{ revision and 'revision' or page }}</a>
+    <a href="/edit/{{ page['stub'] }}">Edit this {{ revision and 'revision' or 'page' }}</a>
 </p>        
 
 {% if page.tags %}
@@ -26,20 +26,40 @@
 
 {% if page.comments %}
 <h2>Comments</h2>
-    {% for comment in comments %}
+    {% for comment in page.comments %}
 <div class="comment">
-    <a href="mailto:{{ comment['author_email'] }}">{{ comment['author_name'] }}</a> said:<br>
+    <a href="mailto:{{ comment['email'] }}">{{ comment['name'] }}</a> said:<br>
     {{ comment['body'] }}
 </div>
     {% endfor %}
+<div id="latest-comment-placeholder"></div>
 {% endif %}
 
 <h2>Leave a comment</h2>
-<form action="/comments/save" method="post" accept-charset="utf-8" id="comment-form">
+<form action="/{{ page.stub }}/comment" method="post" accept-charset="utf-8" id="comment-form">
     <label for="name">Name:</label><input type="text" name="name" value="">
     <label for="email">Email:</label><input type="text" name="email" value="">
-    <label for="comment">Comment:</label><textarea name="comment" rows="8" cols="40"></textarea>
+    <label for="body">Comment:</label><textarea name="body" rows="8" cols="40"></textarea>
     <p><input type="submit" value="Submit"></p>
 </form>
+<script type="text/javascript" charset="utf-8">
+$('comment-form').addEvent('submit', function(e) {
+	e = new Event(e).stop();
+ 
+	var url = "http://localhost:8080/{{ page.stub }}/comment";
+ 
+	new Ajax(url, {
+		method: 'post',
+		update: $('latest-comment-placeholder'),
+		data: $('comment-form'),
+	}).request();
+});
+</script>
+
+
+
+
+
+
 
 {% endblock %}
