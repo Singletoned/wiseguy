@@ -43,11 +43,9 @@ class WikiPage(PicardDocument):
     
     def save_comment(self, name, email, body):
         comment = dict(name=name, email=email, body=body)
-        print comment
         self.comments.append(comment)
         self.save()
-        print self.comments
-        return self.comments[0]
+        return self.comments[-1]
     
 
 class User(PicardDocument):
