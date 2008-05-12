@@ -170,15 +170,18 @@ def logout(request):
     session.save()
     return redirect('/')
 
-class comment():
-    expose_class('/<string:stub>/comment', ['POST'])
-    render_class('comment')
-    
-    @classmethod
-    def POST(cls, request, stub):
-        WikiPage = request.models.WikiPage
-        page = WikiPage.by_id(stub)
-        form = request.form
-        comment = page.save_comment(form['name'], form['email'], form['body'])
+
+@expose('/<string:stub>/comment', ['POST'])
+@render('comment')
+def comment(request, stub):
+    WikiPage = request.models.WikiPage
+    page = WikiPage.by_id(stub)
+    form = request.form
+    comment = page.save_comment(form['name'], form['email'], form['body'])
+    if request.is_xhr:
+        # Return a fragment
         return dict(comment=comment)
+    else:
+        # Clientside javascript mustn't be working.  Redirect back to the page
+        return redirect('/%s' % stub)
 
