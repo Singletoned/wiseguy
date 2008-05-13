@@ -31,7 +31,7 @@ app = Wiki(db=db, user_db=user_db)
 app = SessionMiddleware(app, type="memory")
 app = TestApp(app)
 
-    
+
 def start_response_func(status, content_type):
     assert status == '200 OK'
     # print content_type
@@ -103,6 +103,7 @@ def test_wiki_edit_page():
     response = response.follow()
     print response.normal_body
     assert "Edit homepage" in response.normal_body
+    assert "<title>Edit homepage</title>" in response.normal_body
     assert not "foo,bar baz" in response.normal_body
     assert "foo" in response.normal_body
     assert "bar" in response.normal_body
@@ -172,7 +173,21 @@ def test_login():
     response = response.follow()
     assert "Logged in as: mr_test" in response.normal_body
 
-
+@with_setup(create_pages, delete_pages)
+def test_comments():
+    response = app.get('/test')
+    form = response.forms['comment-form']
+    form['name'] = "Mr Test"
+    form['email'] = "mrtest@example.com"
+    form['body'] = "This is a test comment"
+    response = form.submit()
+    print response
+    response = response.follow()
+    print response
+    assert "This is a test comment" in response.normal_body
+    response = app.get('/edit/test')
+    print response
+    assert "Revisions" not in response.normal_body
 
 
 
