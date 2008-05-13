@@ -15,12 +15,18 @@ from utils import simple_decorator
 def revisioned_save(save_func):
     """Adds the current data (except revisions) into revisions before saving"""
     def revisioned_func(*args, **kwargs):
+        # If it's already been saved then create a revision
+        # (No need to revise)
+        save_revision = kwargs.pop("save_revision", False)
         self = args[0]
-        revisions = self._data.setdefault('revisions', [])
-        data = {'date_revised':datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'}
-        data.update(self._data)
-        del data['revisions']
-        revisions.append(data)
+        if self.rev and save_revision:
+            print "\n\n\n\nsaving revision\n\n\n\n"
+            print self.rev
+            revisions = self._data.setdefault('revisions', [])
+            data = {'date_revised':datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'}
+            data.update(self._orig_data)
+            del data['revisions']
+            revisions.append(data)
         return save_func(*args, **kwargs)
     return revisioned_func
 
@@ -68,7 +74,6 @@ class PicardDocumentMeta(SchemaMeta):
             d['save'] = revisioned_save(bases[0].save)
         pd_class = SchemaMeta.__new__(cls, name, bases, d)
         pd_class.meta = meta
-        
         
         queries = {}
         for attrname, field in pd_class._fields.items():
@@ -153,6 +158,13 @@ class PicardDocument(Document):
     def delete(cls, id, db=None):
         db = db or cls.meta.db
         del db[id]
+
+    @classmethod
+    def wrap(cls, data):
+        instance = cls()
+        instance._data.update(data)
+        instance._orig_data = data
+        return instance
     
     @classmethod
     def init_from_row(cls, row):
