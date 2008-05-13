@@ -44,7 +44,7 @@ class WikiPage(PicardDocument):
     def save_comment(self, name, email, body):
         comment = dict(name=name, email=email, body=body)
         self.comments.append(comment)
-        self.save()
+        self.save(save_revision=False)
         return self.comments[-1]
     
 
