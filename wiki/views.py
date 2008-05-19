@@ -185,3 +185,19 @@ def comment(request, stub):
         # Clientside javascript mustn't be working.  Redirect back to the page
         return redirect('/%s' % stub)
 
+@expose('/<string:stub>/rating', ['POST'])
+@render('rating')
+def rating(request, stub):
+    WikiPage = request.models.WikiPage
+    page = WikiPage.by_id(stub)
+    form = request.form
+    rating = page.save_rating(form['rating'])
+    if request.is_xhr:
+        # Return a fragment
+        return dict(rating=rating)
+    else:
+        # Clientside javascript mustn't be working.  Redirect back to the page
+        return redirect('/%s' % stub)
+    
+
+
