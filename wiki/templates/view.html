@@ -24,6 +24,35 @@
 </ul>
 {% endif %}
 
+<div id="rating">
+    <h2>Rating</h2>
+    {% for i in range(1,6) %}
+        {% if i <= page.rating.score %}
+            <a href="#"><img src="/static/icons/star.png" id="{{ i }}" class="rating"/></a>
+        {% else %}
+            <a href="#"><img src="/static/icons/bullet_star.png" id="{{ i }}" class="rating"/></a>            
+        {% endif %}
+    {% endfor %}
+</div>
+
+<script type="text/javascript" charset="utf-8">
+
+var url = "http://localhost:8080/{{ page.stub }}/rating";
+
+$each($$('.rating'), function(el){
+    el.addEvent('click', function(ev) {
+        ev = new Event(ev).stop();
+        
+        new Ajax(url, {
+            method: 'post',
+            update: $('rating'),
+            data: {'rating':el.id},
+        }).request();
+    })
+})
+
+</script>
+
 {% if page.comments %}
 <h2>Comments</h2>
     {% for comment in page.comments %}
@@ -44,15 +73,15 @@
 </form>
 <script type="text/javascript" charset="utf-8">
 $('comment-form').addEvent('submit', function(e) {
-	e = new Event(e).stop();
+    e = new Event(e).stop();
  
-	var url = "http://localhost:8080/{{ page.stub }}/comment";
+    var url = "http://localhost:8080/{{ page.stub }}/comment";
  
-	new Ajax(url, {
-		method: 'post',
-		update: $('latest-comment-placeholder'),
-		data: $('comment-form'),
-	}).request();
+    new Ajax(url, {
+        method: 'post',
+        update: $('latest-comment-placeholder'),
+        data: $('comment-form'),
+    }).request();
 });
 </script>
 
