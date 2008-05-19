@@ -7,7 +7,7 @@ from calendar import timegm
 import couchdb
 from couchdb.client import Server, ResourceNotFound
 
-from couchdb.schema import Document, TextField, IntegerField, DateTimeField, ListField, DictField, Schema, Field, SchemaMeta
+from couchdb.schema import Document, TextField, IntegerField, DateTimeField, ListField, FloatField, DictField, Schema, Field, SchemaMeta
 
 from utils import simple_decorator
 
