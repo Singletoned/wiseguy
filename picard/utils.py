@@ -1,4 +1,27 @@
+# -*- coding: utf-8 -*-
+
+from werkzeug import Response
 from werkzeug.routing import Rule
+
+from jinja import Environment, FileSystemLoader
+
+env = Environment(loader=FileSystemLoader('templates'))
+
+def render_template(template_name, *args, **kwargs):
+    """Gets a template and renders it"""
+    return env.get_template('%s.html' % template_name).render(kwargs)
+
+def render(template_name, mimetype='text/html'):
+    @simple_decorator
+    def decorate(f):
+        def func(*args, **kwargs):
+            values = f(*args, **kwargs)
+            try:
+                return Response(render_template(template_name, **values), mimetype=mimetype)
+            except TypeError:
+                return values
+        return func
+    return decorate
 
 def simple_decorator(decorator):
     """This decorator can be used to turn simple functions
@@ -32,6 +55,10 @@ def create_expose(url_map):
             return f
         return decorate
     return expose
+
+
+
+
 # 
 # def expose_class(rule, methods=['GET'], **kw):
 #     def decorate(f):
