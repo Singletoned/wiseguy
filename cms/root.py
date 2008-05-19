@@ -29,7 +29,7 @@ try:
    db = server.create('picard_cms')
    print 'database created'
 except:
-   db = server['picard_wiki']
+   db = server['picard_cms']
 
 try:
     user_db = server.create('picard_users')
