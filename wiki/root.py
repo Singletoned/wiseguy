@@ -6,10 +6,8 @@ import logging
 from werkzeug import Request, ClosingIterator, SharedDataMiddleware
 from werkzeug.exceptions import HTTPException, NotFound
 from beaker.middleware import SessionMiddleware
-
 from couchdb.client import Server
 
-# from utils import url_map
 import views
 import models
 
