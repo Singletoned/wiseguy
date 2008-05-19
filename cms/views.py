@@ -14,3 +14,15 @@ from models import ResourceNotFound
 url_map = Map()
 
 expose = create_expose(url_map)
+
+@expose('/', defaults={'address':''})
+@expose('/<path:address>')
+@render('view')
+def view(request, address):
+    page = request.models.Page.get_by_address(address)
+    if not page:
+        raise NotFound
+    return dict(
+        page=page
+    )
+
