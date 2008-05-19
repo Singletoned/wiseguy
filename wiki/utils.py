@@ -4,21 +4,10 @@ from peak.util.decorators import decorate_class
 
 from werkzeug import Response
 from werkzeug.wrappers import BaseResponse
-from werkzeug.routing import Rule
 
-from picard.utils import simple_decorator
+from picard.utils import simple_decorator, create_expose
 
 from templating import render_template
-
-def create_expose(url_map):
-    def expose(rule, methods=['GET'], **kw):
-        @simple_decorator
-        def decorate(f):
-            kw['endpoint'] = f.__name__
-            url_map.add(Rule(rule, methods=methods, **kw))
-            return f
-        return decorate
-    return expose
 
 def render(template_name, mimetype='text/html'):
     @simple_decorator

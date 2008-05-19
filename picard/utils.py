@@ -1,3 +1,5 @@
+from werkzeug.routing import Rule
+
 def simple_decorator(decorator):
     """This decorator can be used to turn simple functions
     into well-behaved decorators, so long as the decorators
@@ -20,3 +22,14 @@ def simple_decorator(decorator):
     new_decorator.__doc__ = decorator.__doc__
     new_decorator.__dict__.update(decorator.__dict__)
     return new_decorator
+
+def create_expose(url_map):
+    def expose(rule, methods=['GET'], **kw):
+        @simple_decorator
+        def decorate(f):
+            kw['endpoint'] = f.__name__
+            url_map.add(Rule(rule, methods=methods, **kw))
+            return f
+        return decorate
+    return expose
+
