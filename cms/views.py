@@ -7,7 +7,7 @@ from werkzeug.exceptions import NotFound
 from werkzeug.utils import redirect
 from werkzeug.routing import Map
 
-from picard.utils import create_expose, render
+from picard.utils import create_expose, render, with_page_from
 
 from models import ResourceNotFound
 
@@ -15,14 +15,22 @@ url_map = Map()
 
 expose = create_expose(url_map)
 
+
 @expose('/', defaults={'address':''})
 @expose('/<path:address>')
 @render('view')
-def view(request, address):
-    page = request.models.Page.get_by_address(address)
-    if not page:
-        raise NotFound
+@with_page_from('address')
+def view(request, page):
     return dict(
         page=page
     )
 
+@expose('/edit/', defaults={'address':''})
+@expose('/edit/<path:address>')
+@render('edit')
+@with_page_from('address')
+def edit(request, page):
+    return dict(
+        page=page
+    )
+    

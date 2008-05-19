@@ -57,7 +57,17 @@ def create_expose(url_map):
     return expose
 
 
-
+def with_page_from(var):
+    @simple_decorator
+    def decorate(f):
+        def func(*args, **kwargs):
+            page = getattr(args[0].models.Page, 'get_by_'+var)(kwargs.pop('address'))
+            if not page:
+                raise NotFound
+            kwargs['page'] = page
+            return f(*args, **kwargs)
+        return func
+    return decorate
 
 # 
 # def expose_class(rule, methods=['GET'], **kw):
