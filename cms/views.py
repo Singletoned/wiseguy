@@ -33,4 +33,28 @@ def edit(request, page):
     return dict(
         page=page
     )
+
+@expose('/save/', ['POST'], defaults={'address':''})
+@expose('/save/<path:address>', ['POST'])
+@render('save')
+@with_page_from('address')
+def save(request, page):
+    page.title = request.form['title']
+    print page.contents
+    if page.contents:
+        content = page.contents[0]
+        content.body = request.form['body']
+        content.save()
+    else:
+        content = request.models.Content(body=request.form['body'])
+        content.save()
+        page.contents.append(content)
+    # try:
+    #     page.tags = request.form['tags'].replace(',', ' ').split()
+    # except KeyError:
+    #     pass
+    page = page.save()
+    print page
+    url = request.script_root + '/' + page.address
+    return redirect(url, 303)
     
