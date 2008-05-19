@@ -10,7 +10,6 @@ from picard.schema import PicardDocument, TextField, IntegerField, DateTimeField
 
 class Page(PicardDocument):
     class meta:
-        id_default_column = "address"
         content_type = "page"
     
     address = TextField(keyable=True)
