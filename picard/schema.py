@@ -137,7 +137,9 @@ class PicardDocument(Document):
     def save(self, db=None):
         """Save the document to the given or default database.  Use `id_default_column` if set"""
         db = db or self.meta.db
-        id = self.id or getattr(self, self.meta.id_default_column) or None
+        id = self.id or None
+        if not id and self.meta.id_default_column:
+            id = getattr(self, self.meta.id_default_column, None)
         if id:
             db[id] = self._data
         else:
