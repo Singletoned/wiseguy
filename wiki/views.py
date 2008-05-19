@@ -89,7 +89,7 @@ def not_found(request, response):
     "Displays an edit form and offers to let them create the page"
     WikiPage = request.models.WikiPage
     page = WikiPage(
-        stub = request.path.strip('/').split('/', 1)[0],
+        stub = request.path.strip('/').split('/', 1)[0] or 'homepage',
         body = None
     )
     return dict(page=page)
