@@ -4,7 +4,7 @@ from datetime import datetime
 
 from couchdb.client import Server, ResourceNotFound
 
-from picard.schema import PicardDocument, TextField, IntegerField, DateTimeField, DictField, ListField, Schema
+from picard.schema import PicardDocument, TextField, IntegerField, DateTimeField, DictField, ListField, FloatField, Schema
 
 server = Server('http://localhost:5984/')
 
@@ -32,6 +32,16 @@ class WikiPage(PicardDocument):
     date_created = DateTimeField(default=datetime.now)
     date_modified = DateTimeField(default=datetime.now)
     tags = ListField(TextField())
+    rating = DictField(Schema.build(
+        score=FloatField(),
+        votes=IntegerField(),
+        total=IntegerField()
+    ),
+    default={
+        'score':0,
+        'votes':0,
+        'total':0
+    })
     comments = ListField(
         DictField(Schema.build(
             name=TextField(),
@@ -47,6 +57,19 @@ class WikiPage(PicardDocument):
         self.save(save_revision=False)
         return self.comments[-1]
     
+    def save_rating(self, rating):
+        votes = self.rating['votes'] + 1
+        total = self.rating['total'] + int(rating)
+        score = float(total) / float(votes)
+        self.rating = dict(
+            votes=votes,
+            total=total,
+            score=score
+        )
+        self.save(save_revision=False)
+        return self.rating
+    
+
 
 class User(PicardDocument):
     class meta:
