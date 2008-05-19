@@ -8,9 +8,14 @@ from werkzeug.exceptions import NotFound
 
 from werkzeug.utils import redirect
 
-from utils import expose, render, expose_class, render_class
+from utils import create_expose, render, expose_class, render_class
 
 from models import ResourceNotFound
+
+from werkzeug.routing import Map
+url_map = Map()
+
+expose = create_expose(url_map)
 
 @expose('/', defaults={'stub':'homepage'})
 @expose('/<string:stub>')
