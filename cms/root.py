@@ -39,6 +39,7 @@ except:
 class CMS(object):
     def __init__(self, db=None, user_db=None):
         self.models = models
+        models.Page.meta.db = db
         models.User.meta.db = user_db
     
     def __call__(self, environ, start_response):
