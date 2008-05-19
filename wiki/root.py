@@ -9,7 +9,7 @@ from beaker.middleware import SessionMiddleware
 
 from couchdb.client import Server
 
-from utils import url_map
+# from utils import url_map
 import views
 import models
 
@@ -47,7 +47,7 @@ class Wiki(object):
         request = Request(environ)
         request.session = request.environ['beaker.session']
         request.models = self.models
-        adapter = url_map.bind_to_environ(environ)
+        adapter = views.url_map.bind_to_environ(environ)
         try:
             endpoint, values = adapter.match()
             handler = getattr(views, endpoint)
