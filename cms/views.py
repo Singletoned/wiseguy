@@ -66,16 +66,29 @@ def create(request, address):
     if request.method == 'GET':
         return dict(address=address)
     
-    page = request.models.Page()
-    page.address = address + request.form['stub']
-    page.title = request.form['title']
-    content = request.models.Content()
-    content.body = request.form['body']
-    content.save()
-    page.contents.append(content)
-    page = page.save()
-    
-    url = request.script_root + '/' + page.address
-    return redirect(url, 303)
+    if request.method == 'POST':
+        page = request.models.Page()
+        page.address = address + request.form['stub']
+        page.title = request.form['title']
+        content = request.models.Content()
+        content.body = request.form['body']
+        content.save()
+        page.contents.append(content)
+        page = page.save()
+        url = request.script_root + '/' + page.address
+        return redirect(url, 303)
     
 
+@expose('/delete/', ['GET', 'POST'], defaults={'address':''})
+@expose('/delete/<path:address>', ['GET', 'POST'])
+@render('delete')
+@with_page_from('address')
+def delete(request, page):
+    if request.method == 'GET':
+        return dict(page=page)
+    
+    if request.method == 'POST':
+        url = '/' + '/'.join(page.address.split('/')[:-1])
+        request.models.Page.delete(page.id)
+        return redirect(url, 303)
+    
