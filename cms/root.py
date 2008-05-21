@@ -62,7 +62,8 @@ app = CMS(db=db, user_db=user_db)
 if __name__ == '__main__':
     from werkzeug import DebuggedApplication, run_simple
     app = DebuggedApplication(app, evalex=True)
-    app = SharedDataMiddleware(app, {'/static':  path.join(root_path, 'static')})
+    app = SharedDataMiddleware(app, 
+        {'/static':  path.join(root_path, 'static')})
     app = SessionMiddleware(app, type="memory")
     
     run_simple('localhost', 8080, app, use_reloader=True)

@@ -45,7 +45,8 @@ def create_pages():
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
-    assert "This is the homepage" in response.normal_body, "The body contains 'This is the homepage'"
+    assert "This is the homepage" in response.normal_body,\
+        "The body contains 'This is the homepage'"
     response = app.get('/create/')
     form = response.forms['create-form']
     form['stub'] = "test"
@@ -54,7 +55,8 @@ def create_pages():
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/test", "The address is '/test'"
-    assert "This is a test page" in response.normal_body, "The body contains 'This isa test page'"
+    assert "This is a test page" in response.normal_body,\
+        "The body contains 'This is a test page'"
 
 def delete_pages():
     response = app.get('/delete/test')

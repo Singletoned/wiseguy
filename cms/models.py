@@ -4,7 +4,8 @@ from datetime import datetime
 
 from couchdb.client import Server, ResourceNotFound
 
-from picard.schema import PicardDocument, TextField, IntegerField, DateTimeField, DictField, ListField, FloatField, Schema
+from picard.schema import PicardDocument, TextField, IntegerField, \
+DateTimeField, DictField, ListField, FloatField, Schema
 
 
 class Page(PicardDocument):
@@ -35,6 +36,10 @@ class User(PicardDocument):
     @classmethod
     def create_from_form(cls, form):
         """Ignores extra fields"""
-        return cls(username=form['username'], email=form['email'], password=form['password'])
+        return cls(
+            username=form['username'],
+            email=form['email'],
+            password=form['password']
+        )
 
 
