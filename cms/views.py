@@ -58,3 +58,24 @@ def save(request, page):
     url = request.script_root + '/' + page.address
     return redirect(url, 303)
     
+
+@expose('/create/', ['GET', 'POST'], defaults={'address':''})
+@expose('/create/<path:address>', ['GET', 'POST'])
+@render('create')
+def create(request, address):
+    if request.method == 'GET':
+        return dict(address=address)
+    
+    page = request.models.Page()
+    page.address = address + request.form['stub']
+    page.title = request.form['title']
+    content = request.models.Content()
+    content.body = request.form['body']
+    content.save()
+    page.contents.append(content)
+    page = page.save()
+    
+    url = request.script_root + '/' + page.address
+    return redirect(url, 303)
+    
+
