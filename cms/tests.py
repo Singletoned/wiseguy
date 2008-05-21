@@ -62,7 +62,15 @@ def delete_pages():
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
-    # Todo: assert '/test' = page not found
+    response = app.get('/test')
+    assert "Page Not Found" in response.normal_body
+    response = app.get('/delete/')
+    form = response.forms['delete-form']
+    response = form.submit()
+    response = response.follow()
+    assert response.request.url == "/", "The address is '/'"
+    assert "Page Not Found" in response.normal_body
+    
     
 
 def test_create_pages():
