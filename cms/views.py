@@ -46,12 +46,11 @@ def save(request, page):
     else:
         content = dict(body=request.form['body'])
         page.contents.append(content)
-    # try:
-    #     page.tags = request.form['tags'].replace(',', ' ').split()
-    # except KeyError:
-    #     pass
+    try:
+        page.tags = request.form['tags'].replace(',', ' ').split()
+    except KeyError:
+        pass
     page = page.save()
-    print page
     url = request.script_root + '/' + page.address
     return redirect(url, 303)
     
@@ -70,6 +69,10 @@ def create(request, address):
         content = {}
         content['body'] = request.form['body']
         page.contents.append(content)
+        try:
+            page.tags = request.form['tags'].replace(',', ' ').split()
+        except KeyError:
+            pass
         page = page.save()
         url = request.script_root + '/' + page.address
         return redirect(url, 303)

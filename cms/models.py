@@ -21,7 +21,7 @@ class Page(PicardDocument):
         )),
         default=[]
     )
-    
+    tags = ListField(TextField())
 
 
 class User(PicardDocument):

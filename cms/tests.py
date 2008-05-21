@@ -42,11 +42,17 @@ def create_pages():
     form = response.forms['create-form']
     form['title'] = "Homepage"
     form['body'] = "This is the homepage"
+    form['tags'] = "foo,bar baz"
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
     assert "This is the homepage" in response.normal_body,\
         "The body contains 'This is the homepage'"
+    assert not "foo,bar baz" in response.normal_body, \
+        "Tags are fixed"
+    assert "foo" in response.normal_body, "Tag 'foo' is present"
+    assert "bar" in response.normal_body, "Tag 'bar' is present"
+    assert "baz" in response.normal_body, "Tag 'baz' is present"
     response = app.get('/create/')
     form = response.forms['create-form']
     form['stub'] = "test"
@@ -72,11 +78,20 @@ def delete_pages():
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
     assert "Page Not Found" in response.normal_body
-    
-    
+
 
 def test_create_pages():
     create_pages()
 
 def test_delete_pages():
     delete_pages()
+
+@with_setup(create_pages, delete_pages)
+def test_page_tagging():
+    response = app.get('/edit/test')
+    form = response.forms['edit-form']
+    form['tags'] = random_tags
+    response = form.submit()
+    response = response.follow()
+    for tag in random_tags.split():
+        assert tag in response.normal_body
