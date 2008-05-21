@@ -92,3 +92,11 @@ def delete(request, page):
         request.models.Page.delete(page.id)
         return redirect(url, 303)
     
+
+@render('not_found')
+def not_found(request, response):
+    return dict(request=request)
+
+
+
+

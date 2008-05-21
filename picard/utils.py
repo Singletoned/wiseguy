@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from werkzeug import Response
+from werkzeug.exceptions import NotFound
 from werkzeug.routing import Rule
 
 from jinja import Environment, FileSystemLoader
