@@ -40,14 +40,11 @@ def edit(request, page):
 @with_page_from('address')
 def save(request, page):
     page.title = request.form['title']
-    print page.contents
     if page.contents:
         content = page.contents[0]
         content.body = request.form['body']
-        content.save()
     else:
-        content = request.models.Content(body=request.form['body'])
-        content.save()
+        content = dict(body=request.form['body'])
         page.contents.append(content)
     # try:
     #     page.tags = request.form['tags'].replace(',', ' ').split()
@@ -70,9 +67,8 @@ def create(request, address):
         page = request.models.Page()
         page.address = address + request.form['stub']
         page.title = request.form['title']
-        content = request.models.Content()
-        content.body = request.form['body']
-        content.save()
+        content = {}
+        content['body'] = request.form['body']
         page.contents.append(content)
         page = page.save()
         url = request.script_root + '/' + page.address
