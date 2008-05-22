@@ -7,17 +7,18 @@ from werkzeug.exceptions import NotFound
 from werkzeug.utils import redirect
 from werkzeug.routing import Map, Rule
 
-from picard.utils import create_expose, render, with_page_from
+from picard.utils import create_expose, create_render, with_page_from, render_template
 
 from models import ResourceNotFound
 
 url_map = Map()
 
 expose = create_expose(url_map)
+render = create_render(render_template)
 
 from picard.crud_controller import CrudController
 
-stories = CrudController('Story', 'story', path='stories')
+stories = CrudController('Story', 'story', path='stories', controller_name='stories')
 
 url_map.add(Rule(
     '/stories/<slug>', 
