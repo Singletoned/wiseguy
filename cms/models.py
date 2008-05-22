@@ -87,3 +87,12 @@ class User(PicardDocument):
         )
 
 
+class Story(PicardDocument):
+    class meta:
+        content_type = "story"
+    
+    title = TextField(keyable=True)
+    body = TextField()
+
+
+
