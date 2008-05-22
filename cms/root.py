@@ -47,9 +47,11 @@ class CMS(object):
         request.session = request.environ['beaker.session']
         request.models = self.models
         adapter = views.url_map.bind_to_environ(environ)
+        request.adapter = adapter
         try:
             endpoint, values = adapter.match()
             handler = getattr(views, endpoint)
+            print handler
             response = handler(request, **values)
         except NotFound, e:
             response = views.not_found(request, e.get_response(environ))

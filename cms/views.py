@@ -5,7 +5,7 @@ import logging
 from werkzeug import Response
 from werkzeug.exceptions import NotFound
 from werkzeug.utils import redirect
-from werkzeug.routing import Map
+from werkzeug.routing import Map, Rule
 
 from picard.utils import create_expose, render, with_page_from
 
@@ -15,6 +15,15 @@ url_map = Map()
 
 expose = create_expose(url_map)
 
+from picard.crud_controller import CrudController
+
+stories = CrudController('Story', 'story', path='stories')
+
+url_map.add(Rule(
+    '/stories/<slug>', 
+    methods=['GET', 'POST'], 
+    endpoint='stories'
+))
 
 @expose('/', defaults={'address':''})
 @expose('/<path:address>')
