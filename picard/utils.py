@@ -70,6 +70,12 @@ def with_page_from(var):
         return func
     return decorate
 
+
+def flatten_multidict(multidict):
+    """ Flattens a Werkzeug Multidict into simple key/value pairs, taking only
+    the first item from the value list. """
+    return dict([(key, value) for key, value in multidict.items()])
+
 # 
 # def expose_class(rule, methods=['GET'], **kw):
 #     def decorate(f):
