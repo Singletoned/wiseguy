@@ -12,17 +12,19 @@ def render_template(template_name, *args, **kwargs):
     """Gets a template and renders it"""
     return env.get_template('%s.html' % template_name).render(kwargs)
 
-def render(template_name, mimetype='text/html'):
-    @simple_decorator
-    def decorate(f):
-        def func(*args, **kwargs):
-            values = f(*args, **kwargs)
-            try:
-                return Response(render_template(template_name, **values), mimetype=mimetype)
-            except TypeError:
-                return values
-        return func
-    return decorate
+def create_render(renderer=render_template):
+    def render(template_name, mimetype='text/html'):
+        @simple_decorator
+        def decorate(f):
+            def func(*args, **kwargs):
+                values = f(*args, **kwargs)
+                try:
+                    return Response(renderer(template_name, **values), mimetype=mimetype)
+                except TypeError:
+                    return values
+            return func
+        return decorate
+    return render
 
 def simple_decorator(decorator):
     """This decorator can be used to turn simple functions
