@@ -99,6 +99,18 @@ def test_page_tagging():
 
 @with_setup(create_pages, delete_pages)
 def test_comments():
+    response = app.get('/')
+    form = response.forms['comment-form']
+    form['name'] = "Mr Home"
+    form['email'] = "mrhome@example.com"
+    form['body'] = "This is a comment"
+    response = form.submit()
+    response = response.follow()
+    assert "This is a comment" in response.normal_body, \
+        "Body contains comment"
+    response = app.get('/edit/test')
+    assert "Revisions" not in response.normal_body, \
+        "No revisions made"
     response = app.get('/test')
     form = response.forms['comment-form']
     form['name'] = "Mr Test"
