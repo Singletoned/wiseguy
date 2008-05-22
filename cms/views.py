@@ -112,3 +112,23 @@ def comment(request, page):
         return redirect('/%s' % page.address)
 
 
+@expose('/rating/', ['POST'], defaults={'address':''})
+@expose('/rating/<path:address>', ['POST'])
+@render('rating')
+@with_page_from('address')
+def rating(request, page):
+    if request.is_xhr:
+        rating = page.save_rating(request.form['rating'])
+        print rating
+        # Return a fragment
+        return dict(page=page)
+    else:
+        rating = page.save_rating(request.args['rating'])
+        # Clientside javascript mustn't be working.  Redirect back to the page
+        return redirect('/%s' % stub)
+
+
+
+
+
+

@@ -34,6 +34,19 @@ class Page(PicardDocument):
         ),
         default=list
     )
+    rating = DictField(
+        Schema.build(
+            score=FloatField(),
+            votes=IntegerField(),
+            total=IntegerField()
+        ),
+        default={
+            'score':0,
+            'votes':0,
+            'total':0
+        }
+    )
+    
     
     def save_comment(self, name, email, body):
         comment = dict(name=name, email=email, body=body)
@@ -41,6 +54,18 @@ class Page(PicardDocument):
         self.save()
         return self.comments[-1]
     
+    def save_rating(self, rating):
+        votes = self.rating['votes'] + 1
+        total = self.rating['total'] + int(rating)
+        score = float(total) / float(votes)
+        self.rating = dict(
+            votes=votes,
+            total=total,
+            score=score
+        )
+        self.save()
+        return self.rating
+
 
 
 class User(PicardDocument):
