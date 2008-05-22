@@ -1,0 +1,13 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+  <p class="breadcrumbs"><a href="{{ url_for('index') }}">{{ objects_name|e }}</a></p>
+
+  <h1>Add a {{ object_name|e }}</h1>
+  
+  <form action="{{ url_for('create', method='POST') }}" method="post">
+    {{ rendertemplate('%s/_form.html' % template_root) }}
+    <p class="form-submit"><input type="submit" value="Save" /> or <a href="{{ url_for('index') }}">Cancel</a></p></p>
+  </form>
+  
+{% endblock %}

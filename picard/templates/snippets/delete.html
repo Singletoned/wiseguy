@@ -1,0 +1,13 @@
+{% extends 'layouts/default.html' %}
+
+{% block content %}
+  <p class="breadcrumbs"><a href="{{ url_for('index') }}">{{ objects_name|e }}</a> » <a href="{{ url_for('show', id=object.id) }}">{{ object.title|e }}</a></p>
+
+  <h1>Delete {{ object_name|e }}</h1>
+  
+  <form action="{{ url_for('delete', id=object.id, method='POST') }}" method="post">
+    <p>Are you sure you wish to delete “{{ object.title|e }}”?</p>
+    <p class="form-submit"><input type="submit" value="Delete" /> or <a href="{{ url_for('show', id=object.id) }}">Cancel</a></p>
+  </form>
+  
+{% endblock %}
