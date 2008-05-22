@@ -7,13 +7,14 @@ from werkzeug.exceptions import NotFound
 from werkzeug.utils import redirect
 from werkzeug.routing import Map
 
-from picard.utils import create_expose, render
+from picard.utils import create_expose, create_render
 
 from models import ResourceNotFound
 
 url_map = Map()
 
 expose = create_expose(url_map)
+render = create_render()
 
 @expose('/', defaults={'stub':'homepage'})
 @expose('/<string:stub>')
