@@ -51,7 +51,6 @@ class CMS(object):
         try:
             endpoint, values = adapter.match()
             handler = getattr(views, endpoint)
-            print handler
             response = handler(request, **values)
         except NotFound, e:
             response = views.not_found(request, e.get_response(environ))

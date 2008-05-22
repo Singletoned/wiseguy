@@ -46,7 +46,6 @@ class CrudController(Controller):
         pass
     
     def __init__(self, model_name, object_name, objects_name=None, path=None, template_root=None, controller_name=None):
-        print self.__class__.__name__
         self.model_name = model_name
         self.object_name = object_name
         self.objects_name = objects_name or object_name + "s"
@@ -56,13 +55,10 @@ class CrudController(Controller):
         self.controller_name = controller_name or object_name
                             
     def __call__(self, request, **values):
-        print self.url_map._rules
         adapter = self.url_map.bind_to_environ(request.environ)
         request.adapter = adapter
     # try:
         endpoint, values = adapter.match()
-        print "Endpoint", endpoint
-        print "Vlaues", values
         handler = getattr(self, endpoint)
         response = handler(request, **values)
     # except HTTPException, e:

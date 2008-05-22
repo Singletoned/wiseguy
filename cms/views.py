@@ -129,7 +129,6 @@ def comment(request, page):
 def rating(request, page):
     if request.is_xhr:
         rating = page.save_rating(request.form['rating'])
-        print rating
         # Return a fragment
         return dict(page=page)
     else:

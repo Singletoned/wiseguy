@@ -8,7 +8,6 @@ from helpers import do_date, do_highlight, html_attrs
 from jinja import Environment, FileSystemLoader
 
 root_path = path.abspath(path.dirname(__file__))
-print root_path
 
 jinja_env = Environment(loader=FileSystemLoader(root_path + '/templates'))
 jinja_env.filters['date']       = do_date
