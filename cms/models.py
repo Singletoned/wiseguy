@@ -19,9 +19,22 @@ class Page(PicardDocument):
             title = TextField(),
             body = TextField()
         )),
-        default=[]
+        default=list
     )
     tags = ListField(TextField())
+    comments = ListField(
+        DictField(
+            Schema.build(
+                name=TextField(),
+                email=TextField(),
+                body=TextField(),
+                date=DateTimeField(default=datetime.now)
+            ),
+        default=dict
+        ),
+        default=list
+    )
+    
 
 
 class User(PicardDocument):
