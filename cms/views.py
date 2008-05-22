@@ -97,5 +97,18 @@ def not_found(request, response):
     return dict(request=request)
 
 
+@expose('/comment/', ['POST'], defaults={'address':''})
+@expose('/comment/<path:address>', ['POST'])
+@render('comment')
+@with_page_from('address')
+def comment(request, page):
+    form = request.form
+    comment = page.save_comment(form['name'], form['email'], form['body'])
+    if request.is_xhr:
+        # Return a fragment
+        return dict(comment=comment)
+    else:
+        # Clientside javascript mustn't be working.  Redirect back to the page
+        return redirect('/%s' % page.address)
 
 

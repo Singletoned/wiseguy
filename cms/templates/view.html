@@ -65,7 +65,7 @@ $each($$('.rating'), function(el){
 {% endif %}
 
 <h2>Leave a comment</h2>
-<form action="/{{ page.stub }}/comment" method="post" accept-charset="utf-8" id="comment-form">
+<form action="/comment/{{ page.address }}" method="post" accept-charset="utf-8" id="comment-form">
     <label for="name">Name:</label><input type="text" name="name" value="">
     <label for="email">Email:</label><input type="text" name="email" value="">
     <label for="body">Comment:</label><textarea name="body" rows="8" cols="40"></textarea>
@@ -75,7 +75,7 @@ $each($$('.rating'), function(el){
 $('comment-form').addEvent('submit', function(e) {
     e = new Event(e).stop();
  
-    var url = "http://localhost:8080/{{ page.stub }}/comment";
+    var url = "http://localhost:8080/comment/{{ page.address }}";
  
     new Ajax(url, {
         method: 'post',

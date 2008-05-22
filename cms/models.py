@@ -35,6 +35,12 @@ class Page(PicardDocument):
         default=list
     )
     
+    def save_comment(self, name, email, body):
+        comment = dict(name=name, email=email, body=body)
+        self.comments.append(comment)
+        self.save()
+        return self.comments[-1]
+    
 
 
 class User(PicardDocument):

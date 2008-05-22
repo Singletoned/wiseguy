@@ -95,3 +95,22 @@ def test_page_tagging():
     response = response.follow()
     for tag in random_tags.split():
         assert tag in response.normal_body
+
+
+@with_setup(create_pages, delete_pages)
+def test_comments():
+    response = app.get('/test')
+    form = response.forms['comment-form']
+    form['name'] = "Mr Test"
+    form['email'] = "mrtest@example.com"
+    form['body'] = "This is a test comment"
+    response = form.submit()
+    response = response.follow()
+    assert "This is a test comment" in response.normal_body, \
+        "Body contains comment"
+    response = app.get('/edit/test')
+    assert "Revisions" not in response.normal_body, \
+        "No revisions made"
+
+
+
