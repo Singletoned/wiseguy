@@ -93,6 +93,13 @@ class Story(PicardDocument):
     
     title = TextField(keyable=True)
     body = TextField()
+    
+    @classmethod
+    def create_from_form(cls, **kwargs):
+        item = cls()
+        item.title = kwargs['title']
+        item.body = kwargs['body']
+        return item.save()
 
 
 
