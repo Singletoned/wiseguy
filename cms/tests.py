@@ -125,4 +125,44 @@ def test_comments():
         "No revisions made"
 
 
+def test_crud():
+    response = app.get('/stories/')
+    assert "Not Found" not in response.normal_body
+    response = app.get('/stories/new')
+    assert "Not Found" not in response.normal_body
+    form = response.forms[0]
+    form['title'] = "Mr Test's Story"
+    form['body'] = "A story about Mr Test"
+    response = form.submit()
+    response = response.follow()
+    assert "Mr Test's Story" in response.normal_body
+    response = response.click(description="Mr Test's Story")
+    assert "Mr Test's Story" in response.normal_body
+    response = response.click(description="Edit")
+    assert "Edit story" in response.normal_body
+
+
+
+    # response = app.get('/stories/create')
+    # assert "Not Found" not in response.normal_body
+    # response = app.get('/stories/edit')
+    # assert "Not Found" not in response.normal_body
+    # response = app.get('/stories/')
+    # assert "Not Found" not in response.normal_body
+    # response = app.get('/stories/')
+    # assert "Not Found" not in response.normal_body
+    # response = app.get('/stories/')
+    # assert "Not Found" not in response.normal_body
+
+
+
+
+
+
+
+
+
+
+
+
 
