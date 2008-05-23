@@ -101,5 +101,10 @@ class Story(PicardDocument):
         item.body = kwargs['body']
         return item.save()
 
+    def update_from_form(self, **kwargs):
+        self.title = kwargs['title']
+        self.body = kwargs['body']
+        return self.save()
+
 
 
