@@ -17,12 +17,12 @@ root_path = path.abspath(path.dirname(__file__))
 
 crud_map = RuleTemplate([
     Rule('/$name/',                 endpoint='index',  methods=['GET']),
-    Rule('/$name/<int:id>',        endpoint='show',   methods=['GET']),
-    Rule('/$name/new',             endpoint='new',    methods=['GET']),
-    Rule('/$name',                 endpoint='create', methods=['POST']),
-    Rule('/$name/<int:id>/edit',   endpoint='edit',   methods=['GET']),
-    Rule('/$name/<int:id>',        endpoint='update', methods=['POST']),
-    Rule('/$name/<int:id>/delete', endpoint='delete', methods=['POST'])
+    Rule('/$name/<string:id>',         endpoint='show',   methods=['GET']),
+    Rule('/$name/new',              endpoint='new',    methods=['GET']),
+    Rule('/$name/create',           endpoint='create', methods=['POST']),
+    Rule('/$name/edit/<string:id>',    endpoint='edit',   methods=['GET']),
+    Rule('/$name/<string:id>',         endpoint='update', methods=['POST']),
+    Rule('/$name/delete/<string:id>',  endpoint='delete', methods=['POST'])
 ])
 
 def make_url_for(request):
@@ -55,7 +55,6 @@ class CrudController(Controller):
         self.controller_name = controller_name or object_name
                             
     def __call__(self, request, **values):
-        print request
         adapter = self.url_map.bind_to_environ(request.environ)
         request.adapter = adapter
     # try:
@@ -71,7 +70,7 @@ class CrudController(Controller):
         
     def current_object(self, request, id):
         """ TODO: Allow variable args/kwargs. """
-        return getattr(request.models, self.model_name).get(id)
+        return getattr(request.models, self.model_name).by_id(id)
         
     def template_path(self, template_name):
         return os.path.join(self.template_root, template_name)
@@ -100,7 +99,7 @@ class CrudController(Controller):
         return self.render('index.html', **dict(self.default_context(request), objects=current_objects))
 
     def show(self, request, id):
-        current_object = self.current_object(id)
+        current_object = self.current_object(request, id)
         if not current_object:
             raise NotFound()
 
@@ -112,17 +111,17 @@ class CrudController(Controller):
         return self.render('new.html', **dict(self.default_context(request), object=current_object))
 
     def create(self, request):
-        current_object = getattr(request.models, self.model_name)(**flatten_multidict(request.form))
+        current_object = getattr(request.models, self.model_name).create_from_form(**flatten_multidict(request.form))
         
         self.before_create(current_object)
         
         self.after_create(current_object)
-        return redirect(make_url_for(request)('%s.index' % self.Meta.controller))
+        return redirect(make_url_for(request)('index'))
         
         
 
     def edit(self, request, id):
-        current_object = self.current_object(id)
+        current_object = self.current_object(request, id)
         if not current_object:
             raise NotFound()
 
@@ -147,7 +146,7 @@ class CrudController(Controller):
         #                errors=e.error_dict))
                        
         self.after_update(current_object)
-        return redirect(make_url_for(request)('%s.show' % self.Meta.controller, id=current_object.id))
+        return redirect(make_url_for(request)('show', id=current_object.id))
         
 
     def delete(self, request, id):
@@ -155,7 +154,7 @@ class CrudController(Controller):
         self.before_delete(current_object)
         current_object.delete()
         self.after_delete()
-        return redirect(make_url_for(request)('%s.index' % self.Meta.controller))
+        return redirect(make_url_for(request)('index'))
         
 
 
