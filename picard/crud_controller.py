@@ -22,7 +22,7 @@ crud_map = RuleTemplate([
     Rule('/$name/create',           endpoint='create', methods=['POST']),
     Rule('/$name/edit/<string:id>',    endpoint='edit',   methods=['GET']),
     Rule('/$name/<string:id>',         endpoint='update', methods=['POST']),
-    Rule('/$name/delete/<string:id>',  endpoint='delete', methods=['POST'])
+    Rule('/$name/delete/<string:id>',  endpoint='delete', methods=['GET', 'POST'])
 ])
 
 def make_url_for(request):
@@ -132,10 +132,6 @@ class CrudController(Controller):
 
         self.before_update(current_object)
 
-        # Show a delete confirmation form.
-        if request.form.get('op') == 'Delete':
-            return self.render('delete.html', **dict(self.default_context(request), object=current_object))
-
         current_object.update_from_form(**flatten_multidict(request.form))
 
         # try:
@@ -150,11 +146,17 @@ class CrudController(Controller):
         
 
     def delete(self, request, id):
-        current_object = self.current_object(id)
-        self.before_delete(current_object)
-        current_object.delete()
-        self.after_delete()
-        return redirect(make_url_for(request)('index'))
+        current_object = self.current_object(request, id)
+        # Show a delete confirmation form.
+        if request.method == 'GET':
+            return self.render('delete.html', \
+                **dict(self.default_context(request), object=current_object))
+        
+        if request.method == 'POST':
+            self.before_delete(current_object)
+            getattr(request.models, self.model_name).delete(current_object.id)
+            self.after_delete()
+            return redirect(make_url_for(request)('index'))
         
 
 
