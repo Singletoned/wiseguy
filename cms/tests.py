@@ -146,6 +146,13 @@ def test_crud():
     response = form.submit()
     response = response.follow()
     assert "A modified story about Mr Test" in response
+    response = response.click(description="Edit")
+    assert "Edit story" in response
+    response = response.click(description="Delete")
+    form = response.forms[0]
+    response = form.submit("Delete")
+    response = response.follow()
+    assert "Mr Test's Story" not in response
 
 
     # response = app.get('/stories/create')
