@@ -46,13 +46,13 @@ def create_pages():
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
-    assert "This is the homepage" in response.normal_body,\
+    assert "This is the homepage" in response,\
         "The body contains 'This is the homepage'"
-    assert not "foo,bar baz" in response.normal_body, \
+    assert not "foo,bar baz" in response, \
         "Tags are fixed"
-    assert "foo" in response.normal_body, "Tag 'foo' is present"
-    assert "bar" in response.normal_body, "Tag 'bar' is present"
-    assert "baz" in response.normal_body, "Tag 'baz' is present"
+    assert "foo" in response, "Tag 'foo' is present"
+    assert "bar" in response, "Tag 'bar' is present"
+    assert "baz" in response, "Tag 'baz' is present"
     response = app.get('/create/')
     form = response.forms['create-form']
     form['stub'] = "test"
@@ -61,7 +61,7 @@ def create_pages():
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/test", "The address is '/test'"
-    assert "This is a test page" in response.normal_body,\
+    assert "This is a test page" in response,\
         "The body contains 'This is a test page'"
 
 def delete_pages():
@@ -71,13 +71,13 @@ def delete_pages():
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
     response = app.get('/test')
-    assert "Page Not Found" in response.normal_body
+    assert "Page Not Found" in response
     response = app.get('/delete/')
     form = response.forms['delete-form']
     response = form.submit()
     response = response.follow()
     assert response.request.url == "/", "The address is '/'"
-    assert "Page Not Found" in response.normal_body
+    assert "Page Not Found" in response
 
 
 def test_create_pages():
@@ -94,7 +94,7 @@ def test_page_tagging():
     response = form.submit()
     response = response.follow()
     for tag in random_tags.split():
-        assert tag in response.normal_body
+        assert tag in response
 
 
 @with_setup(create_pages, delete_pages)
@@ -106,10 +106,10 @@ def test_comments():
     form['body'] = "This is a comment"
     response = form.submit()
     response = response.follow()
-    assert "This is a comment" in response.normal_body, \
+    assert "This is a comment" in response, \
         "Body contains comment"
     response = app.get('/edit/test')
-    assert "Revisions" not in response.normal_body, \
+    assert "Revisions" not in response, \
         "No revisions made"
     response = app.get('/test')
     form = response.forms['comment-form']
@@ -118,41 +118,41 @@ def test_comments():
     form['body'] = "This is a test comment"
     response = form.submit()
     response = response.follow()
-    assert "This is a test comment" in response.normal_body, \
+    assert "This is a test comment" in response, \
         "Body contains comment"
     response = app.get('/edit/test')
-    assert "Revisions" not in response.normal_body, \
+    assert "Revisions" not in response, \
         "No revisions made"
 
 
 def test_crud():
     response = app.get('/stories/')
-    assert "Not Found" not in response.normal_body
+    assert "Not Found" not in response
     response = app.get('/stories/new')
-    assert "Not Found" not in response.normal_body
+    assert "Not Found" not in response
     form = response.forms[0]
     form['title'] = "Mr Test's Story"
     form['body'] = "A story about Mr Test"
     response = form.submit()
     response = response.follow()
-    assert "Mr Test's Story" in response.normal_body
+    assert "Mr Test's Story" in response
     response = response.click(description="Mr Test's Story")
-    assert "Mr Test's Story" in response.normal_body
+    assert "Mr Test's Story" in response
     response = response.click(description="Edit")
     assert "Edit story" in response.normal_body
 
 
 
     # response = app.get('/stories/create')
-    # assert "Not Found" not in response.normal_body
+    # assert "Not Found" not in response
     # response = app.get('/stories/edit')
-    # assert "Not Found" not in response.normal_body
+    # assert "Not Found" not in response
     # response = app.get('/stories/')
-    # assert "Not Found" not in response.normal_body
+    # assert "Not Found" not in response
     # response = app.get('/stories/')
-    # assert "Not Found" not in response.normal_body
+    # assert "Not Found" not in response
     # response = app.get('/stories/')
-    # assert "Not Found" not in response.normal_body
+    # assert "Not Found" not in response
 
 
 
