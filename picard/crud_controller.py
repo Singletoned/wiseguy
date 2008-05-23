@@ -16,7 +16,7 @@ from utils import flatten_multidict, create_render
 root_path = path.abspath(path.dirname(__file__))
 
 crud_map = RuleTemplate([
-    Rule('/$name',                 endpoint='index',  methods=['GET']),
+    Rule('/$name/',                 endpoint='index',  methods=['GET']),
     Rule('/$name/<int:id>',        endpoint='show',   methods=['GET']),
     Rule('/$name/new',             endpoint='new',    methods=['GET']),
     Rule('/$name',                 endpoint='create', methods=['POST']),
@@ -55,6 +55,7 @@ class CrudController(Controller):
         self.controller_name = controller_name or object_name
                             
     def __call__(self, request, **values):
+        print request
         adapter = self.url_map.bind_to_environ(request.environ)
         request.adapter = adapter
     # try:
@@ -94,7 +95,7 @@ class CrudController(Controller):
 
     def index(self, request):
         # TODO: Pagination.
-        current_objects = self.current_objects()
+        current_objects = self.current_objects(request)
         
         return self.render('index.html', **dict(self.default_context(request), objects=current_objects))
 

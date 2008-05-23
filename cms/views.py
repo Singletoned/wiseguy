@@ -21,7 +21,12 @@ from picard.crud_controller import CrudController
 stories = CrudController('Story', 'story', path='stories', controller_name='stories')
 
 url_map.add(Rule(
-    '/stories/<slug>', 
+    '/stories/<path:address>', 
+    methods=['GET', 'POST'], 
+    endpoint='stories'
+))
+url_map.add(Rule(
+    '/stories/', 
     methods=['GET', 'POST'], 
     endpoint='stories'
 ))
