@@ -139,8 +139,13 @@ def test_crud():
     response = response.click(description="Mr Test's Story")
     assert "Mr Test's Story" in response
     response = response.click(description="Edit")
-    assert "Edit story" in response.normal_body
-
+    assert "Edit story" in response
+    form = response.forms[0]
+    form['title'] = "Mr Test's Story"
+    form['body'] = "A modified story about Mr Test"
+    response = form.submit()
+    response = response.follow()
+    assert "A modified story about Mr Test" in response
 
 
     # response = app.get('/stories/create')
