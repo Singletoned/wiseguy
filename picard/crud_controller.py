@@ -128,7 +128,7 @@ class CrudController(Controller):
         return self.render('edit.html', **dict(self.default_context(request), object=current_object))
 
     def update(self, request, id):
-        current_object = self.current_object(id)
+        current_object = self.current_object(request, id)
 
         self.before_update(current_object)
 
@@ -136,7 +136,7 @@ class CrudController(Controller):
         if request.form.get('op') == 'Delete':
             return self.render('delete.html', **dict(self.default_context(request), object=current_object))
 
-        current_object.set(**flatten_multidict(request.form))
+        current_object.update_from_form(**flatten_multidict(request.form))
 
         # try:
         #     session.flush()
