@@ -46,6 +46,23 @@ def create_expose(url_map):
     return expose
 
 
+def create_render(env):
+    def render(template_name, mimetype='text/html'):
+        @simple_decorator
+        def decorate(f):
+            def func(*args, **kwargs):
+                values = f(*args, **kwargs)
+                try:
+                    values.update({u'req':args[0]})
+                except (TypeError, AttributeError):
+                    return values
+                body = env.get_template(template_name).render(values)
+                return werkzeug.Response(body, mimetype=mimetype)
+            return func
+        return decorate
+    return render
+
+
 ### Utils for Tests
 
 def MockEnv(path, method):

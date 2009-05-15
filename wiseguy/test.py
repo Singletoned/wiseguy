@@ -1,7 +1,8 @@
-from werkzeug import EnvironBuilder
+from werkzeug import Request, Response, redirect, EnvironBuilder
 from werkzeug.routing import Map
+from jinja2 import Environment, DictLoader
 
-from utils import create_expose, MockEnv
+from utils import create_render, create_expose, MockEnv
 
 
 def test_create_expose():
@@ -46,4 +47,39 @@ def test_create_expose():
     check_url(u"/test", u"POST", u"post", u"POST p1")
     check_url(u"/test_both", u"GET", u"post_and_get", u"GET POST p1")
     check_url(u"/test_both", u"POST", u"post_and_get", u"GET POST p1")
+
+
+def test_create_render():
+    templates = {
+        u'index': u"This is the index page.  Path: {{ req.path }}.  Greeting: {{ greeting }}",
+        u'about': u"This is the about page.  Path: {{ req.path }}"
+    }
+
+    env = Environment(loader=DictLoader(templates))
+
+    render = create_render(env)
+
+    @render(u"index")
+    def index_page(req):
+        return {u'greeting': "Hello"}
+
+    @render(u"about")
+    def about_page(req):
+        return {}
+
+    @render(u"contact")
+    def contact(req):
+        return redirect(u"/other_page")
+
+    req = Request(MockEnv(u"/", u"GET"))
+
+    res = index_page(req)
+    assert res.response[0] == "This is the index page.  Path: /.  Greeting: Hello"
+
+    res = about_page(req)
+    assert res.response[0] == "This is the about page.  Path: /"
+
+    res = contact(req)
+    assert u"Redirecting..." in res.response[0]
+    assert u"/other_page" in res.response[0]
 

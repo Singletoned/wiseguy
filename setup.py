@@ -20,6 +20,7 @@ setup(
     zip_safe=False,
     install_requires=[
         "Werkzeug==0.5",
+        "Jinja2==2.1.1"
     ],
     entry_points="""
       # -*- Entry points: -*-
