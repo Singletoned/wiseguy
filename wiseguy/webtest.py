@@ -11,8 +11,9 @@ from lxml.html import fromstring, tostring
 from lxml.cssselect import CSSSelector
 from lxml.etree import XPath
 
+from werkzeug import Request
+
 from pesto.testing import MockResponse
-from pesto.request import Request
 from pesto.wsgiutils import uri_join, make_query
 from pesto.httputils import parse_querystring
 from pesto.utils import MultiDict
@@ -394,8 +395,8 @@ class ElementWrapper(object):
         method = self.element.attrib.get('method', 'GET').upper()
         data = self.submit_data(button)
         path = uri_join_same_server(
-            self.agent.request.request_uri,
-            self.element.attrib.get('action', self.agent.request.request_path)
+            self.agent.request.url,
+            self.element.attrib.get('action', self.agent.request.path)
         )
         return {
             ('GET', None): self.agent.get,
@@ -660,10 +661,10 @@ class TestAgent(object):
         Make a GET request to the application and return the response.
         """
         if data is not None:
-            kwargs.setdefault('QUERY_STRING', make_query(data, charset=charset))
+            kwargs.setdefault('QUERY_STRING', make_query(data, charset=charset, separator='&'))
 
         if self.request:
-            PATH_INFO = uri_join_same_server(self.request.request_uri, PATH_INFO)
+            PATH_INFO = uri_join_same_server(self.request.url, PATH_INFO)
 
         return self._request(
             self.make_environ('GET', PATH_INFO=PATH_INFO, **kwargs),
@@ -679,9 +680,9 @@ class TestAgent(object):
             data = []
 
         if self.request:
-            PATH_INFO = uri_join_same_server(self.request.request_uri, PATH_INFO)
+            PATH_INFO = uri_join_same_server(self.request.url, PATH_INFO)
 
-        data = make_query(data, charset=charset)
+        data = make_query(data, charset=charset, separator='&')
         wsgi_input = StringIO(data)
         wsgi_input.seek(0)
 
@@ -717,7 +718,7 @@ class TestAgent(object):
             files = []
 
         if self.request:
-            PATH_INFO = uri_join_same_server(self.request.request_uri, PATH_INFO)
+            PATH_INFO = uri_join_same_server(self.request.url, PATH_INFO)
 
         boundary = '----------------------------------------BoUnDaRyVaLuE'
 
@@ -873,8 +874,8 @@ class TestAgent(object):
             raise AssertionError(
                 "Can't follow non-redirect response (got %s for %s %s)" % (
                     self.response.status,
-                    self.request.request_method,
-                    self.request.request_path
+                    self.request.method,
+                    self.request.path,
                 )
             )
 

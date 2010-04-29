@@ -2,10 +2,12 @@ from StringIO import StringIO
 
 from nose.tools import assert_equal
 
+from werkzeug import Request
+
 from wiseguy.webtest import TestAgent
 
 from pesto import dispatcher_app, Response
-from pesto.request import Request
+# from pesto.request import Request
 from pesto.wsgiutils import with_request_args
 dispatcher = dispatcher_app()
 match = dispatcher.match
@@ -48,10 +50,12 @@ class FormApp(object):
         )(environ, start_response)
 
     def POST(self, environ, start_response):
+        items = sorted(Request(environ).form.items(multi=True))
+        print items
         return Response([
                 '; '.join(
                     "%s:<%s>" % (name, value)
-                    for (name, value) in sorted(Request(environ).form.allitems())
+                    for (name, value) in items
                 )
         ])(environ, start_response)
 
@@ -131,11 +135,11 @@ class testapp(object):
 def test_click():
     page = TestAgent(dispatcher).get('/page1')
     assert_equal(
-        page["//a[1]"].click().request.path_info,
+        page["//a[1]"].click().request.path,
         '/page1'
     )
     assert_equal(
-        page["//a[2]"].click().request.path_info,
+        page["//a[2]"].click().request.path,
         '/page2'
     )
 
@@ -153,10 +157,10 @@ def test_get_with_query_is_correctly_handled():
 def test_click_follows_redirect():
 
     response = TestAgent(dispatcher).get('/page1')["//a[text()='redirect']"].click(follow=False)
-    assert_equal(response.request.path_info, '/redirect1')
+    assert_equal(response.request.path, '/redirect1')
 
     response = TestAgent(dispatcher).get('/page1')["//a[text()='redirect']"].click(follow=True)
-    assert_equal(response.request.path_info, '/page1')
+    assert_equal(response.request.path, '/page1')
 
 def test_form_text():
     form_page = TestAgent(dispatcher).get('/form-text')
@@ -302,11 +306,11 @@ def test_form_file_input_submits_file_data():
 
     class TestApp(FormApp):
         def POST(self, environ, start_response):
-            from pesto.httputils import FileUpload
+            from werkzeug import FileStorage
             req = Request(environ)
-            fu = req.form['upload']
-            assert isinstance(fu, FileUpload)
-            assert fu.file.read() == '123123'
+            fu = req.files['upload']
+            assert isinstance(fu, FileStorage)
+            assert fu.read() == '123123'
             return Response(['ok'])(environ, start_response)
 
     r = TestAgent(TestApp('<input name="upload" type="file" />', enctype="multipart/form-data")).get('/')
@@ -369,7 +373,7 @@ def test_form_submit_follows_redirect():
     form_page['//form'].attrib['method'] = 'get'
     form_page['//form'].attrib['action'] = '/redirect1'
     assert_equal(
-        form_page['//form'].submit(follow=True).request.path_info,
+        form_page['//form'].submit(follow=True).request.path,
         '/page1'
     )
 
@@ -400,17 +404,17 @@ def test_cookie_paths_are_observed():
 def test_back_method_returns_agent_to_previous_state():
     saved = agent = TestAgent(dispatcher).get('/page1')
     agent = agent["//a[.='page 2']"].click()
-    assert agent.request.path_info == '/page2'
+    assert agent.request.path == '/page2'
     agent = agent.back()
-    assert agent.request.path_info == '/page1'
+    assert agent.request.path == '/page1'
     assert agent is saved
 
 def test_back_method_skips_redirects():
     saved = agent = TestAgent(dispatcher).get('/page2')
     agent = agent.get('/redirect1', follow=True)
-    assert agent.request.path_info == '/page1'
+    assert agent.request.path == '/page1'
     agent = agent.back()
-    assert agent.request.path_info == '/page2'
+    assert agent.request.path == '/page2'
     assert agent is saved
 
 def test_context_manager_allows_checkpointing_history():
@@ -418,9 +422,9 @@ def test_context_manager_allows_checkpointing_history():
 
     with agent as a2:
         a2 = a2["//a[.='page 2']"].click()
-        assert a2.request.path_info == '/page2'
+        assert a2.request.path == '/page2'
 
-    assert agent.request.path_info == '/page1'
+    assert agent.request.path == '/page1'
     assert agent is saved
 
 def test_html_method_returns_string_representation():
@@ -460,5 +464,5 @@ def test_get_allows_relative_uri():
         raise AssertionError("Didn't expect relative GET request to work")
     agent = agent.get('/rhubarb/custard/')
     agent = agent.get('../')
-    assert_equal(agent.request.request_uri, 'http://localhost/rhubarb')
+    assert_equal(agent.request.url, 'http://localhost/rhubarb')
 
