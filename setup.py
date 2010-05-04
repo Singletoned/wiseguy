@@ -19,8 +19,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "Werkzeug==0.5",
-        "Jinja2==2.1.1"
+        "Werkzeug>=0.6",
+        "Jinja2>=2.4",
+        "pesto>=16",
+        "lxml",
     ],
     entry_points="""
       # -*- Entry points: -*-
