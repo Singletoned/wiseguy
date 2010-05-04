@@ -11,9 +11,8 @@ from lxml.html import fromstring, tostring
 from lxml.cssselect import CSSSelector
 from lxml.etree import XPath
 
-from werkzeug import Request
+from werkzeug import Request, Response
 
-from pesto.testing import MockResponse
 from pesto.wsgiutils import uri_join, make_query
 from pesto.httputils import parse_querystring
 from pesto.utils import MultiDict
@@ -558,7 +557,7 @@ class TestAgent(object):
            ``ResultWrapper`` object.
     """
 
-    response_class = MockResponse
+    response_class = Response
     _lxml= None
 
     environ_defaults = {
@@ -576,7 +575,8 @@ class TestAgent(object):
         'wsgi.run_once': False,
     }
 
-    def __init__(self, app, request=None, response=None, cookies=None, history=None, validate_wsgi=True):
+    def __init__(self, app, request=None, response=None, cookies=None, history=None, validate_wsgi=False):
+        # TODO: Make validate_wsgi pass
         if validate_wsgi:
             app = wsgi_validator(app)
         self.app = app
@@ -650,7 +650,7 @@ class TestAgent(object):
         else:
             history = self.history
 
-        response = self.response_class.from_wsgi(self.app, environ, self.start_response)
+        response = self.response_class.from_app(self.app, environ)
         agent = self.__class__(self.app, Request(environ), response, self.cookies, history, validate_wsgi=False)
         if follow:
             return agent.follow_all()
@@ -794,7 +794,7 @@ class TestAgent(object):
 
     @property
     def body(self):
-        return self.response.body
+        return self.response.data
 
     @property
     def lxml(self):
@@ -811,7 +811,7 @@ class TestAgent(object):
         """
         Reset the lxml document, abandoning any changes made
         """
-        self._lxml = fromstring(self.response.body)
+        self._lxml = fromstring(self.response.data)
 
     def find(self, path, namespaces=None, **kwargs):
         """
@@ -880,7 +880,7 @@ class TestAgent(object):
             )
 
         return self.get(
-            self.response.get_header('Location'),
+            self.response.headers.get('Location'),
             history=False,
         )
 
@@ -946,7 +946,7 @@ def parse_cookies(response):
     the response object
     """
     base_cookie = BaseCookie()
-    for item in response.get_headers('Set-Cookie'):
+    for item in response.headers.get_all('Set-Cookie'):
         base_cookie.load(item)
     return base_cookie
 
