@@ -14,8 +14,6 @@ from lxml.etree import XPath
 import werkzeug
 from werkzeug import Request, Response
 
-from pesto.utils import MultiDict
-
 # Registry for xpath multimethods
 xpath_registry = {}
 
