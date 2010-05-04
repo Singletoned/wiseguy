@@ -1,6 +1,6 @@
 from wsgiref.validate import validator as wsgi_validator
 from cStringIO import StringIO
-from urlparse import urlparse, urlunparse
+from urlparse import urlparse, urlunparse, urljoin
 from Cookie import BaseCookie
 from functools import wraps
 from itertools import chain
@@ -13,7 +13,7 @@ from lxml.etree import XPath
 
 from werkzeug import Request, Response
 
-from pesto.wsgiutils import uri_join, make_query
+from pesto.wsgiutils import make_query
 from pesto.httputils import parse_querystring
 from pesto.utils import MultiDict
 
@@ -934,7 +934,7 @@ def uri_join_same_server(baseuri, uri):
         ValueError: URI links to another server: http://example.org/bar
 
     """
-    uri = uri_join(baseuri, uri)
+    uri = urljoin(baseuri, uri)
     uri = urlparse(uri)
     if urlparse(baseuri)[:2] != uri[:2]:
         raise ValueError("URI links to another server: %s" % (urlunparse(uri),))
