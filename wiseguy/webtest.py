@@ -11,9 +11,9 @@ from lxml.html import fromstring, tostring
 from lxml.cssselect import CSSSelector
 from lxml.etree import XPath
 
+import werkzeug
 from werkzeug import Request, Response
 
-from pesto.wsgiutils import make_query
 from pesto.httputils import parse_querystring
 from pesto.utils import MultiDict
 
@@ -661,7 +661,7 @@ class TestAgent(object):
         Make a GET request to the application and return the response.
         """
         if data is not None:
-            kwargs.setdefault('QUERY_STRING', make_query(data, charset=charset, separator='&'))
+            kwargs.setdefault('QUERY_STRING', werkzeug.url_encode(data, charset=charset, separator='&'))
 
         if self.request:
             PATH_INFO = uri_join_same_server(self.request.url, PATH_INFO)
@@ -682,7 +682,7 @@ class TestAgent(object):
         if self.request:
             PATH_INFO = uri_join_same_server(self.request.url, PATH_INFO)
 
-        data = make_query(data, charset=charset, separator='&')
+        data = werkzeug.url_encode(data, charset=charset, separator='&')
         wsgi_input = StringIO(data)
         wsgi_input.seek(0)
 
