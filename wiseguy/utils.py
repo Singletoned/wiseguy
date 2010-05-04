@@ -30,6 +30,30 @@ def create_render(env):
     return render
 
 
+def create_require(predicate, template=None, response_builder=None, mimetype=u'text/html'):
+    u"""
+    Create a decorator that requires ``predicate(request)`` to evaluate
+    ``True`` before calling the decorated function. If the predicate evalutates
+    ``False`` then either ``response_builder`` is called with the request and returned, or ``template`` is rendered and returned.
+    """
+    assert template or response_builder, u"Must specify either a template or response_builder"
+    assert not (template and response_builder), u"Must only specify one of template or response_builder"
+    def require(func):
+        @wraps(func)
+        def decorated(request, *args, **kwargs):
+            if predicate(request):
+                return func(request, *args, **kwargs)
+            elif response_builder:
+                return response_builder(request)
+            else:
+                return Response(
+                    template.render({u'request': request}),
+                    mimetype=mimetype
+                )
+        return decorated
+    return require
+
+
 ### Utils for Tests
 
 def MockEnv(path, method):
