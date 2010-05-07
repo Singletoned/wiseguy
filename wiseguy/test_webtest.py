@@ -1,10 +1,11 @@
 from StringIO import StringIO
 
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 
 import werkzeug
 from werkzeug import Request, Response, redirect
 
+import wiseguy
 from wiseguy.webtest import TestAgent
 
 def page(html):
@@ -153,19 +154,28 @@ class TestApp(object):
 def test_click():
     page = TestAgent(TestApp()).get('/page1')
     assert_equal(
-        page["//a[1]"].click().request.path,
+        page.one("//a[1]").click().request.path,
         '/page1'
     )
     assert_equal(
-        page["//a[2]"].click().request.path,
+        page.one("//a[2]").click().request.path,
         '/page2'
+    )
+    assert_equal(
+        len(page.all("//a")),
+        3
+    )
+    assert_raises(
+        wiseguy.webtest.MultipleMatchesException,
+        page.one,
+        "//a"
     )
 
 def test_css_selectors_are_equivalent_to_xpath():
     page = TestAgent(TestApp()).get('/page1')
     assert_equal(
-        list(page.find('//a')),
-        list(page.findcss('a'))
+        list(page.all('//a')),
+        list(page.all('a', css=True))
     )
 
 def test_get_with_query_is_correctly_handled():
@@ -173,16 +183,19 @@ def test_get_with_query_is_correctly_handled():
     assert_equal(page.body, "x:<1>")
 
 def test_click_follows_redirect():
-
-    response = TestAgent(TestApp()).get('/page1')["//a[text()='redirect']"].click(follow=False)
+    page = TestAgent(TestApp()).get('/page1')
+    link = page.one("//a[text()='redirect']")
+    response = link.click(follow=False)
     assert_equal(response.request.path, '/redirect1')
 
-    response = TestAgent(TestApp()).get('/page1')["//a[text()='redirect']"].click(follow=True)
+    page = TestAgent(TestApp()).get('/page1')
+    link = page.one("//a[text()='redirect']")
+    response = link.click(follow=True)
     assert_equal(response.request.path, '/page1')
 
 def test_form_text():
     form_page = TestAgent(TestApp()).get('/form-text')
-    form = form_page['//form']
+    form = form_page.one('//form')
     # Check defaults are submitted
     assert_equal(
         form.submit().body,
@@ -190,9 +203,9 @@ def test_form_text():
     )
 
     # Now set field values
-    form['//input[@name="a"][1]'].value = 'do'
-    form['//input[@name="a"][2]'].value = 're'
-    form['//input[@name="b"][1]'].value = 'mi'
+    form.one('//input[@name="a"][1]').value = 'do'
+    form.one('//input[@name="a"][2]').value = 're'
+    form.one('//input[@name="b"][1]').value = 'mi'
     assert_equal(
         form.submit().body,
         "a:<do>; a:<re>; b:<mi>"
@@ -200,7 +213,7 @@ def test_form_text():
 
 def test_form_checkbox():
     form_page = TestAgent(TestApp()).get('/form-checkbox')
-    form = form_page['//form']
+    form = form_page.one('//form')
     # Check defaults are submitted
     assert_equal(
         form.submit().body,
@@ -208,10 +221,10 @@ def test_form_checkbox():
     )
 
     # Now set field values
-    form['//input[@name="a"][1]'].checked = True
-    form['//input[@name="a"][2]'].checked = True
-    form['//input[@name="b"][1]'].checked = False
-    form['//input[@name="b"][2]'].checked = True
+    form.one('//input[@name="a"][1]').checked = True
+    form.one('//input[@name="a"][2]').checked = True
+    form.one('//input[@name="b"][1]').checked = False
+    form.one('//input[@name="b"][2]').checked = True
     assert_equal(
         form.submit().body,
         "a:<1>; a:<2>; b:<B>"
@@ -219,10 +232,10 @@ def test_form_checkbox():
 
 def test_form_textarea():
     form_page = TestAgent(FormApp('<textarea name="t"></textarea>')).get('/')
-    el = form_page['//textarea']
+    el = form_page.one('//textarea')
     el.value = 'test'
     assert_equal(
-        form_page['//textarea'].form.submit().body,
+        form_page.one('//textarea').form.submit().body,
         't:<test>'
     )
 
@@ -234,13 +247,13 @@ def test_form_select():
         </select>
     """)
     r = TestAgent(app).get('/')
-    r['//select'].value = 'o2'
-    assert_equal(r['//form'].submit().body, 's:<o2>')
+    r.one('//select').value = 'o2'
+    assert_equal(r.one('//form').submit().body, 's:<o2>')
 
     r = TestAgent(app).get('/')
-    r['//select/option[2]'].selected = True
-    r['//select/option[1]'].selected = True
-    assert_equal(r['//form'].submit().body, 's:<o1>')
+    r.one('//select/option[2]').selected = True
+    r.one('//select/option[1]').selected = True
+    assert_equal(r.one('//form').submit().body, 's:<o1>')
 
 def test_form_select_multiple():
     app = FormApp("""
@@ -251,13 +264,13 @@ def test_form_select_multiple():
         </select>
     """)
     r = TestAgent(app).get('/')
-    r['//select'].value = ['o1', 'o3']
-    assert_equal(r['//form'].submit().body, 's:<o1>; s:<o3>')
+    r.one('//select').value = ['o1', 'o3']
+    assert_equal(r.one('//form').submit().body, 's:<o1>; s:<o3>')
 
     r = TestAgent(app).get('/')
-    r['//select/option[3]'].selected = True
-    r['//select/option[2]'].selected = True
-    assert_equal(r['//form'].submit().body, 's:<o2>; s:<o3>')
+    r.one('//select/option[3]').selected = True
+    r.one('//select/option[2]').selected = True
+    assert_equal(r.one('//form').submit().body, 's:<o2>; s:<o3>')
 
 def test_form_radio():
     app = FormApp("""
@@ -267,19 +280,19 @@ def test_form_radio():
         <input name="b" value="4" type="radio"/>
     """)
     r = TestAgent(app).get('/')
-    r['//*[@name="a"]'].value = '1'
-    r['//*[@name="b"]'].value = '3'
-    assert_equal(r['//form'].submit().body, 'a:<1>; b:<3>')
+    r.all('//*[@name="a"]')[0].checked = True
+    r.all('//*[@name="b"]')[0].checked = True
+    assert_equal(r.one('//form').submit().body, 'a:<1>; b:<3>')
 
     r = TestAgent(app).get('/')
-    r['//*[@name="a"][1]'].checked = True
-    r['//*[@name="a"][2]'].checked = True
-    assert_equal(r['//form'].submit().body, 'a:<2>')
+    r.one('//*[@name="a"][1]').checked = True
+    r.one('//*[@name="a"][2]').checked = True
+    assert_equal(r.one('//form').submit().body, 'a:<2>')
 
 def test_form_hidden():
     form_page = TestAgent(FormApp('<input name="t" value="1" type="hidden"/>')).get('/')
     assert_equal(
-        form_page['//form'].form.submit().body,
+        form_page.one('//form').form.submit().body,
         't:<1>'
     )
 
@@ -287,19 +300,19 @@ def test_form_hidden():
 def test_form_disabled():
     form_page = TestAgent(FormApp('<input name="t" value="1" type="text" disabled="" />')).get('/')
     assert_equal(
-        form_page['//form'].form.submit().body,
+        form_page.one('//form').form.submit().body,
         ''
     )
 
 
 def test_form_input_no_type():
     form_page = TestAgent(FormApp('<input name="t" value="1" />')).get('/')
-    assert_equal(form_page['//form'].form.submit().body, 't:<1>')
+    assert_equal(form_page.one('//form').form.submit().body, 't:<1>')
 
 def test_form_file_input_value_requires_3tuple():
     r = TestAgent(FormApp('<input name="upload" type="file" />')).get('/')
     try:
-        r['//input'].value = 'photo.jpg'
+        r.one('//input').value = 'photo.jpg'
     except ValueError:
         pass
     else:
@@ -307,18 +320,18 @@ def test_form_file_input_value_requires_3tuple():
 
     r = TestAgent(FormApp('<input name="upload" type="file" />')).get('/')
     try:
-        r['//input'].value = ('photo.jpg', '123123')
+        r.one('//input').value = ('photo.jpg', '123123')
     except ValueError:
         pass
     else:
         raise AssertionError("Expecting a ValueError")
 
-    r['//input'].value = ('photo.jpg', 'text/jpeg', '123123')
+    r.one('//input').value = ('photo.jpg', 'text/jpeg', '123123')
 
 def test_form_file_input_requires_stores_values():
     r = TestAgent(FormApp('<input name="upload" type="file" />')).get('/')
-    r['//input'].value = ('photo.jpg', 'text/jpeg', '123123')
-    assert_equal(r['//input'].value, ('photo.jpg', 'text/jpeg', '123123'))
+    r.one('//input').value = ('photo.jpg', 'text/jpeg', '123123')
+    assert_equal(r.one('//input').value, ('photo.jpg', 'text/jpeg', '123123'))
 
 def test_form_file_input_submits_file_data():
 
@@ -332,12 +345,12 @@ def test_form_file_input_submits_file_data():
             return Response(['ok'])(environ, start_response)
 
     r = TestAgent(TestApp('<input name="upload" type="file" />', enctype="multipart/form-data")).get('/')
-    r['//input'].value = ('photo.jpg', 'text/jpeg', '123123')
-    r['//form'].submit()
+    r.one('//input').value = ('photo.jpg', 'text/jpeg', '123123')
+    r.one('//form').submit()
 
     r = TestAgent(TestApp('<input name="upload" type="file" />', enctype="multipart/form-data")).get('/')
-    r['//input'].value = ('photo.jpg', 'text/jpeg', StringIO('123123'))
-    r['//form'].submit()
+    r.one('//input').value = ('photo.jpg', 'text/jpeg', StringIO('123123'))
+    r.one('//form').submit()
 
 
 def test_form_submit_button():
@@ -352,30 +365,30 @@ def test_form_submit_button():
     ''')
     form_page = TestAgent(app).get('/')
 
-    assert_equal(form_page['//form'].submit().body, '')
-    assert_equal(form_page['//form'].submit_data(), [])
+    assert_equal(form_page.one('//form').submit().body, '')
+    assert_equal(form_page.one('//form').submit_data(), [])
 
-    assert_equal(form_page.findcss('#1').submit().body, 's:<1>')
-    assert_equal(form_page.findcss('#1').submit_data(), [('s', '1')])
-    assert_equal(form_page.findcss('#2').submit().body, 's:<2>')
-    assert_equal(form_page.findcss('#2').submit_data(), [('s', '2')])
-    assert_equal(form_page.findcss('#3').submit().body, 't:<3>')
-    assert_equal(form_page.findcss('#3').submit_data(), [('t', '3')])
-    assert_equal(form_page.findcss('#4').submit().body, 'u:<4>; u.x:<1>; u.y:<1>')
-    assert_equal(form_page.findcss('#4').submit_data(), [('u', '4'), ('u.x', '1'), ('u.y', '1')])
-    assert_equal(form_page.findcss('#5').submit().body, 'v:<5>')
-    assert_equal(form_page.findcss('#5').submit_data(), [('v', '5')])
-    assert_equal(form_page.findcss('#6').submit().body, 'w:<6>')
-    assert_equal(form_page.findcss('#6').submit_data(), [('w', '6')])
+    assert_equal(form_page.one('#1', css=True).submit().body, 's:<1>')
+    assert_equal(form_page.one('#1', css=True).submit_data(), [('s', '1')])
+    assert_equal(form_page.one('#2', css=True).submit().body, 's:<2>')
+    assert_equal(form_page.one('#2', css=True).submit_data(), [('s', '2')])
+    assert_equal(form_page.one('#3', css=True).submit().body, 't:<3>')
+    assert_equal(form_page.one('#3', css=True).submit_data(), [('t', '3')])
+    assert_equal(form_page.one('#4', css=True).submit().body, 'u:<4>; u.x:<1>; u.y:<1>')
+    assert_equal(form_page.one('#4', css=True).submit_data(), [('u', '4'), ('u.x', '1'), ('u.y', '1')])
+    assert_equal(form_page.one('#5', css=True).submit().body, 'v:<5>')
+    assert_equal(form_page.one('#5', css=True).submit_data(), [('v', '5')])
+    assert_equal(form_page.one('#6', css=True).submit().body, 'w:<6>')
+    assert_equal(form_page.one('#6', css=True).submit_data(), [('w', '6')])
     try:
-        form_page.findcss('#7').submit()
+        form_page.one('#7', css=True).submit()
     except NotImplementedError:
         pass
     else:
         raise AssertionError("Shouldn't be able to submit a non-submit button")
 
     try:
-        form_page.findcss('#7').submit_data()
+        form_page.one('#7', css=True).submit_data()
     except NotImplementedError:
         pass
     else:
@@ -384,20 +397,20 @@ def test_form_submit_button():
 def test_form_action_fully_qualified_uri_doesnt_error():
     app = FormApp("", action='http://localhost/')
     r = TestAgent(app).get('/')
-    assert_equal(r['//form'].submit().body, '')
+    assert_equal(r.one('//form').submit().body, '')
 
 def test_form_submit_follows_redirect():
     form_page = TestAgent(TestApp()).get('/form-text')
-    form_page['//form'].attrib['method'] = 'get'
-    form_page['//form'].attrib['action'] = '/redirect1'
+    form_page.one('//form').attrib['method'] = 'get'
+    form_page.one('//form').attrib['action'] = '/redirect1'
     assert_equal(
-        form_page['//form'].submit(follow=True).request.path,
+        form_page.one('//form').submit(follow=True).request.path,
         '/page1'
     )
 
 def test_form_attribute_returns_parent_form():
     form_page = TestAgent(TestApp()).get('/form-text')
-    assert_equal(form_page['//input[@name="a"]'].form, form_page['//form'][0])
+    assert_equal(form_page.all('//input[@name="a"]')[0].form, form_page.one('//form'))
 
 def test_cookies_are_received():
     response = TestAgent(TestApp()).get('/setcookie?name=foo&value=bar&path=/')
@@ -421,7 +434,7 @@ def test_cookie_paths_are_observed():
 
 def test_back_method_returns_agent_to_previous_state():
     saved = agent = TestAgent(TestApp()).get('/page1')
-    agent = agent["//a[.='page 2']"].click()
+    agent = agent.one("//a[.='page 2']").click()
     assert agent.request.path == '/page2'
     agent = agent.back()
     assert agent.request.path == '/page1'
@@ -439,7 +452,7 @@ def test_context_manager_allows_checkpointing_history():
     saved = agent = TestAgent(TestApp()).get('/page1')
 
     with agent as a2:
-        a2 = a2["//a[.='page 2']"].click()
+        a2 = a2.one("//a[.='page 2']").click()
         assert a2.request.path == '/page2'
 
     assert agent.request.path == '/page1'
@@ -461,13 +474,15 @@ def test_striptags_method_returns_string_representation():
 
 def test_in_operator_works_on_elementwrapper():
     agent = TestAgent(Response(['<p>Tea tray tea tray tea tray tea tray</p>'])).get('/')
-    assert 'tea tray' in agent['//p']
-    assert 'tea tray' in agent['//p'][0]
+    assert 'tea tray' in agent.one('//p')
+    assert 'tea tray' in agent.all('//p')[0]
+    assert 'teat ray' not in agent.one('//p')
+    assert 'teat ray' not in agent.all('//p')[0]
 
 def test_regexes_enabled_in_xpath():
     agent = TestAgent(Response(['<html><p>salt</p><p>pepper</p><p>pickle</p>'])).get('/')
-    assert [tag.text for tag in agent.find("//*[re:test(text(), '^p')]")] == ['pepper', 'pickle']
-    assert [tag.text for tag in agent.find("//*[re:test(text(), '.*l')]")] == ['salt', 'pickle']
+    assert [tag.text for tag in agent._find("//*[re:test(text(), '^p')]")] == ['pepper', 'pickle']
+    assert [tag.text for tag in agent._find("//*[re:test(text(), '.*l')]")] == ['salt', 'pickle']
 
 # def test_get_allows_relative_uri():
 #     agent = TestAgent(Response(['<html><p>salt</p><p>pepper</p><p>pickle</p>']))

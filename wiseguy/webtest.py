@@ -20,6 +20,14 @@ xpath_registry = {}
 # EXSLT regular expression namespace URI
 REGEXP_NAMESPACE = "http://exslt.org/regular-expressions"
 
+class MultipleMatchesException(Exception):
+    def __init__(self, path, elements):
+        self.path = path
+        self.elements = elements
+
+    def __str__(self):
+        return "%s return multiple elements, %s" % (self.path, self.elements)
+
 class XPathMultiMethod(object):
     """
     A callable object that has different implementations selected by XPath
@@ -79,13 +87,13 @@ class ElementWrapper(object):
     """
     Wrapper for an ``lxml.etree`` element, providing additional methods useful
     for driving/testing WSGI applications. ``ElementWrapper`` objects are
-    normally created through the ``find``/``findcss`` methods of ``TestAgent``
+    normally created through the ``one``/``all`` methods of ``TestAgent``
     instance::
 
-        >>> from pesto.response import Response
+        >>> from werkzeug import Response
         >>> myapp = Response(['<html><body><a href="/">link 1</a><a href="/">link 2</a></body></html>'])
         >>> agent = TestAgent(myapp).get('/')
-        >>> elementwrapper = agent.find('//a')[0]
+        >>> elementwrapper = agent.all('//a')
 
     ``ElementWrapper`` objects have many methods and properties implemented as
     ``XPathMultiMethod`` objects, meaning their behaviour varies depending on
@@ -107,14 +115,23 @@ class ElementWrapper(object):
     def __getattr__(self, attr):
         return getattr(self.element, attr)
 
-    def __getitem__(self, xpath):
+    def one(self, xpath):
+        """
+        Return only one wrapped sub-element.  Raise
+        MultipleMatchesException if more than one result
+        """
+        elements = self.element.xpath(xpath)
+        if len(elements) > 1:
+            raise MultipleMatchesException(xpath, elements)
+        else:
+            return self.__class__(self.agent, elements[0])
 
-        try:
-            element = self.element.xpath(xpath)[0]
-        except IndexError:
-            raise KeyError("xpath %r could not be located in %s" % (xpath, self))
-
-        return self.__class__(self.agent, element)
+    def all(self, xpath):
+        """
+        Return all matching wrapped sub-elements.
+        """
+        elements = self.element.xpath(xpath)
+        return [self.__class__(self.agent, el) for el in elements]
 
     @when("a[@href]")
     def click(self, follow=False):
@@ -129,25 +146,6 @@ class ElementWrapper(object):
         Return the value of the selected checkbox attribute (defaults to ``On``)
         """
         return self.element.attrib.get('value', 'On')
-
-    @when("input[@type='radio']")
-    def _set_value(self, value):
-        """
-        Set the value of the radio button, by searching for the radio
-        button in the group with the given value and checking it.
-        """
-        found = False
-        for el in self.element.xpath(
-            "./ancestor-or-self::form[1]//input[@type='radio' and @name=$name]",
-            name=self.element.attrib.get('name', '')
-        ):
-            if (el.attrib['value'] == value):
-                el.attrib['checked'] = ""
-                found = True
-            elif 'checked' in el.attrib:
-                del el.attrib['checked']
-        if not found:
-            raise AssertionError("Value %r not present in radio button group %r" % (value, self.element.attrib.get('name')))
 
     @when("input[@type='file']")
     def _set_value(self, value):
@@ -456,10 +454,10 @@ class ElementWrapper(object):
 
         Example::
 
-            >>> from pesto.response import Response
+            >>> from werkzeug import Response
             >>> myapp = Response(['<p>the <span>foo</span> is completely <strong>b</strong>azzed</p>'])
             >>> agent = TestAgent(myapp).get('/')
-            >>> agent['//p'].striptags()
+            >>> agent.one('//p').striptags()
             'the foo is completely bazzed'
 
         """
@@ -476,57 +474,6 @@ class ElementWrapper(object):
     def __contains__(self, what):
         return what in self.html()
 
-class ResultWrapper(list):
-    """
-    Wrap a list of elements (``ElementWrapper`` objects) returned from an xpath
-    query, providing reasonable default behaviour for testing.
-
-    ``ResultWrapper`` objects usually wrap ``ElementWrapper`` objects, which in
-    turn wrap an lxml element and are normally created through the find/findcss
-    methods of ``TestAgent``::
-
-        >>> from pesto.response import Response
-        >>> myapp = Response(['<html><body><p>item 1</p><p>item 2</p></body></html>'])
-        >>> agent = TestAgent(myapp).get('/')
-        >>> resultwrapper = agent.find('//p')
-
-    ``ResultWrapper`` objects have list like behaviour::
-
-        >>> len(resultwrapper)
-        2
-        >>> resultwrapper[0] #doctest: +ELLIPSIS
-        <ElementWrapper <Element p at ...>>
-
-    Attributes that are not part of the list interface are proxied to the first
-    item in the result list for convenience. These two uses are equivalent::
-
-        >>> resultwrapper[0].text
-        'item 1'
-        >>> resultwrapper.text
-        'item 1'
-
-    Items in the ``ResultWrapper`` are ``ElementWrapper`` instances, which
-    provide methods in addition to the normal lxml.element methods (eg
-    ``click()``, setting/getting form field values etc).
-
-    """
-    def __init__(self, elements):
-        super(ResultWrapper, self).__init__(elements)
-
-    def __getattr__(self, attr):
-        return getattr(self[0], attr)
-
-    def __setattr__(self, attr, value):
-        return setattr(self[0], attr, value)
-
-    def __getitem__(self, item):
-        if isinstance(item, int):
-            return super(ResultWrapper, self).__getitem__(item)
-        else:
-            return self[0][item]
-
-    def __contains__(self, what):
-        return self[0].__contains__(what)
 
 class TestAgent(object):
     """
@@ -538,20 +485,19 @@ class TestAgent(object):
         - ``get(path)``, ``post(path)``, ``post_multipart`` - create get/post
           requests for the WSGI application and return a new ``TestAgent`` object
 
-        - ``request``, ``response`` - the `Pesto <http://pesto.redgecko.org/>`_
-          request and response objects associated with the last WSGI request.
+        - ``request``, ``response`` - the `werkzeug` request and
+          response objects associated with the last WSGI request.
 
         - ``body`` - the body response as a string
 
         - ``lxml`` - the lxml representation of the response body (only
            applicable for HTML responses)
 
-        - ``reset()`` - reset the TestAgent object to its initial state, discarding any form
-           field values
+        - ``reset()`` - reset the TestAgent object to its initial
+           state, discarding any form field values
 
         - ``find()`` (or dictionary-style attribute access) - evalute the given
-           xpath expression against the current response body and return a
-           ``ResultWrapper`` object.
+           xpath expression against the current response body and return a list.
     """
 
     response_class = Response
@@ -810,48 +756,44 @@ class TestAgent(object):
         """
         self._lxml = fromstring(self.response.data)
 
-    def find(self, path, namespaces=None, **kwargs):
+    def _find(self, path, namespaces=None, css=False, **kwargs):
         """
         Return elements matching the given xpath expression.
-
-        If the xpath selects a list of elements a ``ResultWrapper`` object is
-        returned.
-
-        If the xpath selects any other type (eg a string attribute value), the
-        result of the query is returned directly.
 
         For convenience that the EXSLT regular expression namespace
         (``http://exslt.org/regular-expressions``) is prebound to
         the prefix ``re``.
         """
+        if css:
+            selector = CSSSelector(path)
+            return selector(self.lxml)
+
         ns = {'re': REGEXP_NAMESPACE}
         if namespaces is not None:
             ns.update(namespaces)
         namespaces = ns
 
         result = self.lxml.xpath(path, namespaces=namespaces, **kwargs)
-
-        if not isinstance(result, list):
-            return result
-
         if len(result) == 0:
             raise ValueError("%r matched no elements" % path)
+        return result
 
-        return ResultWrapper(
-            ElementWrapper(self, el) for el in result
-        )
-
-    __getitem__ = find
-
-    def findcss(self, selector):
+    def one(self, path, css=False):
         """
-        Return elements matching the given CSS Selector (see
-        ``lxml.cssselect`` for documentation on the ``CSSSelector`` class.
+        Returns the first result from Agent.all.  Raises an error if
+        more than one result is found.
         """
-        selector = CSSSelector(selector)
-        return ResultWrapper(
-            ElementWrapper(self, el) for el in selector(self.lxml)
-        )
+        elements = self.all(path, css=css)
+        if len(elements) > 1:
+            raise MultipleMatchesException(path, elements)
+        return elements[0]
+
+    def all(self, path, css=False):
+        """
+        Returns the results of Agent.find, or Agent._findcss if css is True
+        """
+        elements = self._find(path, css=css)
+        return [ElementWrapper(self, el) for el in elements]
 
     def click(self, path, follow=False, **kwargs):
         return self.find(path, **kwargs).click(follow=follow)
@@ -918,19 +860,19 @@ def uri_join_same_server(baseuri, uri):
     protocol and netloc portions removed. If the resulting URI has a different
     protocol/netloc then a ``ValueError`` will be raised.
 
-        >>> from flea import uri_join_same_server
         >>> uri_join_same_server('http://localhost/foo', 'bar')
         '/bar'
         >>> uri_join_same_server('http://localhost/foo', 'http://localhost/bar')
         '/bar'
         >>> uri_join_same_server('http://localhost/rhubarb/custard/', '../')
-        '/rhubarb'
+        '/rhubarb/'
         >>> uri_join_same_server('http://localhost/foo', 'http://example.org/bar')
         Traceback (most recent call last):
           ...
         ValueError: URI links to another server: http://example.org/bar
 
     """
+    # TODO: Maybe rhubarb should have a trailing slash
     uri = urljoin(baseuri, uri)
     uri = urlparse(uri)
     if urlparse(baseuri)[:2] != uri[:2]:
