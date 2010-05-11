@@ -100,7 +100,7 @@ class ElementWrapper(object):
         >>> from werkzeug import Response
         >>> myapp = Response(['<html><body><a href="/">link 1</a><a href="/">link 2</a></body></html>'])
         >>> agent = TestAgent(myapp).get('/')
-        >>> elementwrapper = agent.all('//a')
+        >>> elementwrappers = agent.all('//a')
 
     ``ElementWrapper`` objects have many methods and properties implemented as
     ``XPathMultiMethod`` objects, meaning their behaviour varies depending on
