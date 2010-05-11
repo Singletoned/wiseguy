@@ -28,6 +28,13 @@ class MultipleMatchesError(Exception):
     def __str__(self):
         return "%s returns multiple elements, %s" % (self.path, self.elements)
 
+class NoMatchesError(Exception):
+    def __init__(self, path):
+        self.path = path
+
+    def __str__(self):
+        return "%s returns no elements" % (self.path,)
+
 class XPathMultiMethod(object):
     """
     A callable object that has different implementations selected by XPath
@@ -121,7 +128,9 @@ class ElementWrapper(object):
         MultipleMatchesError if more than one result
         """
         elements = self.element.xpath(xpath)
-        if len(elements) > 1:
+        if len(elements) == 0:
+            raise NoMatchesError(xpath)
+        elif len(elements) > 1:
             raise MultipleMatchesError(xpath, elements)
         else:
             return self.__class__(self.agent, elements[0])
@@ -774,8 +783,6 @@ class TestAgent(object):
         namespaces = ns
 
         result = self.lxml.xpath(path, namespaces=namespaces, **kwargs)
-        if len(result) == 0:
-            raise ValueError("%r matched no elements" % path)
         return result
 
     def one(self, path, css=False):
@@ -786,7 +793,10 @@ class TestAgent(object):
         elements = self.all(path, css=css)
         if len(elements) > 1:
             raise MultipleMatchesError(path, elements)
-        return elements[0]
+        elif len(elements) == 0:
+            raise NoMatchesError(path)
+        else:
+            return elements[0]
 
     def all(self, path, css=False):
         """

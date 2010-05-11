@@ -151,6 +151,19 @@ class TestApp(object):
                 '; '.join("%s:<%s>" % (name, value) for (name, value) in sorted(request.cookies.items()))
         ])
 
+def test_one():
+    page = TestAgent(TestApp()).get('/page1')
+    assert_raises(
+        wiseguy.webtest.MultipleMatchesError,
+        page.one,
+        "//a"
+    )
+    assert_raises(
+        wiseguy.webtest.NoMatchesError,
+        page.one,
+        "//h1"
+    )
+
 def test_click():
     page = TestAgent(TestApp()).get('/page1')
     assert_equal(
