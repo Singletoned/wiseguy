@@ -165,21 +165,28 @@ class ElementWrapper(object):
         headers = [el.text for el in self.all(u"tr/th")]
         return headers
 
+    @when("tr")
+    def headers(self):
+        """
+        Return a list of the row headers
+        """
+        headers = [el.text for el in self.all(u"../tr/th")]
+        return headers
+
     @when("table")
     def rows(self):
         """
-        Return a list of the rows in the table.  Each row is a werkzeug.ImmutableOrderedMultiDict
+        Return a list of the rows in the table.
         """
-        row_dicts = []
-        rows = self.all(u"tr")
-        headers = self.headers()
-        for row in rows:
-            cells = [el.text for el in row.all(u"td")]
-            if cells:
-                row_dicts.append(
-                    werkzeug.ImmutableOrderedMultiDict(
-                        zip(headers, cells)))
-        return row_dicts
+        return self.all(u"tr[td]")
+
+    @when("tr")
+    def to_dict(self):
+        cells = [el.text for el in self.all(u"td")]
+        if cells:
+            return werkzeug.ImmutableOrderedMultiDict(zip(self.headers(), cells))
+        else:
+            return None
 
     @when("input[@type='checkbox']")
     def _get_value(self):

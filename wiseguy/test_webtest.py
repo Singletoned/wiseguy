@@ -215,7 +215,7 @@ def test_tables():
             *[html.td(i) for i in [4, 5, 6]]))
     agent = TestAgent(Response([table_text])).get(u'/')
     table = agent.one(u"//table")
-    rows = table.rows()
+    rows = [row.to_dict() for row in table.rows()]
     headers = table.headers()
     assert len(headers) == 3
     assert headers == header_values
