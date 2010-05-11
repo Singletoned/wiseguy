@@ -440,14 +440,14 @@ class ElementWrapper(object):
         """
         Returns the value of the element that has the same name as the given key.  It is an error if there is more than one matching element.
         """
-        return self.one("*[@name='%s']" % (key,)).value
+        return self.one(".//*[@name='%s']" % (key,)).value
 
     @when("form")
     def __setitem__(self, key, value):
         """
         Sets the value of the element that has the same name as the given key.  It is an error if there is more than one matching element.
         """
-        self.one("*[@name='%s']" % (key,)).value = value
+        self.one(".//*[@name='%s']" % (key,)).value = value
 
     @when("form")
     def submit(self, button=None, follow=False):
