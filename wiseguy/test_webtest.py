@@ -164,6 +164,13 @@ def test_one():
         "//h1"
     )
 
+def test_reset():
+    agent = TestAgent(TestApp())
+    assert_raises(
+        wiseguy.webtest.NoRequestMadeError,
+        agent.reset
+    )
+
 def test_click():
     page = TestAgent(TestApp()).get('/page1')
     assert_equal(

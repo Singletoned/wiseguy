@@ -35,6 +35,9 @@ class NoMatchesError(Exception):
     def __str__(self):
         return "%s returns no elements" % (self.path,)
 
+class NoRequestMadeError(Exception):
+    pass
+
 class XPathMultiMethod(object):
     """
     A callable object that has different implementations selected by XPath
@@ -763,6 +766,8 @@ class TestAgent(object):
         """
         Reset the lxml document, abandoning any changes made
         """
+        if not self.response:
+            raise NoRequestMadeError
         self._lxml = lxml.html.fromstring(self.response.data)
 
     def _find(self, path, namespaces=None, css=False, **kwargs):
