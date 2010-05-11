@@ -7,7 +7,7 @@ from itertools import chain
 from shutil import copyfileobj
 import re
 
-from lxml.html import fromstring, tostring
+import lxml.html
 from lxml.cssselect import CSSSelector
 from lxml.etree import XPath
 
@@ -446,13 +446,13 @@ class ElementWrapper(object):
         """
         Return an HTML representation of the element
         """
-        return tostring(self.element)
+        return lxml.html.tostring(self.element)
 
     def pretty(self):
         """
         Return an pretty-printed string representation of the element
         """
-        return tostring(self.element, pretty_print=True)
+        return lxml.html.tostring(self.element, pretty_print=True)
 
     def striptags(self):
         """
@@ -763,7 +763,7 @@ class TestAgent(object):
         """
         Reset the lxml document, abandoning any changes made
         """
-        self._lxml = fromstring(self.response.data)
+        self._lxml = lxml.html.fromstring(self.response.data)
 
     def _find(self, path, namespaces=None, css=False, **kwargs):
         """
