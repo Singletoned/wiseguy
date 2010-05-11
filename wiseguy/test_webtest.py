@@ -205,9 +205,10 @@ def test_click():
     )
 
 def test_tables():
+    header_values = ["foo", "bar", "baz"]
     table_text = html.table(
         html.tr(
-            *[html.th(i) for i in ["foo", "bar", "baz"]]),
+            *[html.th(i) for i in header_values]),
         html.tr(
             *[html.td(i) for i in [1, 2, 3]]),
         html.tr(
@@ -217,7 +218,7 @@ def test_tables():
     rows = table.rows()
     assert len(rows) == 2
     for i, row in enumerate(rows):
-        for j, header in enumerate(["foo", "bar", "baz"]):
+        for j, header in enumerate(header_values):
             index = (i * 3) + (j + 1)
             assert row[header] == str(index)
             assert row[header] == type(row[header])(index)
