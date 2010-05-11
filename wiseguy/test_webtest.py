@@ -313,6 +313,16 @@ def test_form_getitem():
     assert form.one(u'//input').value == u'flibble'
     assert form.one(u'//select').value == u'a'
 
+def test_form_getitem_doesnt_match():
+    form_text = html.body(
+        html.form(
+            html.input(name="foo", value="a")),
+        html.input(name="foo", value="b"))
+    agent = TestAgent(Response([form_text]))
+    form_page = agent.get(u'/')
+    form = form_page.one(u"//form")
+    assert form[u"foo"] == u"a"
+
 def test_form_textarea():
     form_page = TestAgent(FormApp('<textarea name="t"></textarea>')).get('/')
     el = form_page.one('//textarea')
