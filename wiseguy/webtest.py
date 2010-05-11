@@ -26,7 +26,7 @@ class MultipleMatchesError(Exception):
         self.elements = elements
 
     def __str__(self):
-        return "%s return multiple elements, %s" % (self.path, self.elements)
+        return "%s returns multiple elements, %s" % (self.path, self.elements)
 
 class XPathMultiMethod(object):
     """
