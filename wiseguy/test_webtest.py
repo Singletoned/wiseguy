@@ -1,3 +1,4 @@
+import collections
 from StringIO import StringIO
 
 from nose.tools import assert_equal, assert_raises
@@ -228,6 +229,11 @@ def test_tables():
         for j, cell in enumerate(row.values()):
             index = (i * 3) + (j + 1)
             assert cell == str(index)
+    TestObject = collections.namedtuple('TestObject', header_values)
+    obj_1 = TestObject(1, 2, 3)
+    obj_2 = TestObject(4, 5, 6)
+    for row, obj in zip(table.rows(), [obj_1, obj_2]):
+        row.assert_has_object(obj)
 
 def test_css_selectors_are_equivalent_to_xpath():
     page = TestAgent(TestApp()).get('/page1')

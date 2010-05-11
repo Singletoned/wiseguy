@@ -188,6 +188,12 @@ class ElementWrapper(object):
         else:
             return None
 
+    @when("tr")
+    def assert_has_object(self, object):
+        for key, value in self.to_dict().items():
+            attr = getattr(object, key)
+            assert attr == type(attr)(value)
+
     @when("input[@type='checkbox']")
     def _get_value(self):
         """
