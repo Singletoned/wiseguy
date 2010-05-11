@@ -436,6 +436,20 @@ class ElementWrapper(object):
         return self.form.submit_data(self)
 
     @when("form")
+    def __getitem__(self, key):
+        """
+        Returns the value of the element that has the same name as the given key.  It is an error if there is more than one matching element.
+        """
+        return self.one("*[@name='%s']" % (key,)).value
+
+    @when("form")
+    def __setitem__(self, key, value):
+        """
+        Sets the value of the element that has the same name as the given key.  It is an error if there is more than one matching element.
+        """
+        self.one("*[@name='%s']" % (key,)).value = value
+
+    @when("form")
     def submit(self, button=None, follow=False):
         """
         Submit the form, returning a new ``TestAgent`` object

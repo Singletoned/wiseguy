@@ -294,6 +294,23 @@ def test_form_checkbox():
         "a:<1>; a:<2>; b:<B>"
     )
 
+def test_form_getitem():
+    form_text = "\n".join([
+        html.input(type="text", name="foo", value="flam"),
+        html.select(
+            html.option(value="a", selected=True),
+            html.option(value="b"),
+            name="bar")
+    ])
+    form_page = TestAgent(FormApp(form_text)).get(u'/')
+    form = form_page.one(u'//form')
+    assert form['foo'] == "flam"
+    assert form['bar'] == "a"
+    form["foo"] = u"flibble"
+    form["bar"] = u"a"
+    assert form.one(u'input').value == u'flibble'
+    assert form.one(u'select').value == u'a'
+
 def test_form_textarea():
     form_page = TestAgent(FormApp('<textarea name="t"></textarea>')).get('/')
     el = form_page.one('//textarea')
