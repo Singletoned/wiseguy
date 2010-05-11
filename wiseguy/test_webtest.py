@@ -170,6 +170,19 @@ def test_reset():
         wiseguy.webtest.NoRequestMadeError,
         agent.reset
     )
+    page = agent.get(u'/form-text')
+    assert page.one(u"//input[@name='a'][1]").value == u'a'
+    page.one(u"//input[@name='a'][1]").value = u'foobar'
+    assert page.one(u"//input[@name='a'][1]").value == u'foobar'
+    page.reset()
+    assert page.one(u"//input[@name='a'][1]").value == u'a'
+    input_b = page.one(u"//input[@name='b']")
+    assert input_b.value == u''
+    input_b.value = u'flibble'
+    assert input_b.value == u'flibble'
+    page.reset()
+    print input_b.value
+    assert input_b.value == u''
 
 def test_click():
     page = TestAgent(TestApp()).get('/page1')

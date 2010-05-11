@@ -114,7 +114,9 @@ class ElementWrapper(object):
 
     def __init__(self, agent, element):
         self.agent = agent
+        self.agent._elements.append(self)
         self.element = element
+        self._lxml = lxml.html.tostring(self.element)
 
     def __str__(self):
         return str(self.element)
@@ -144,6 +146,9 @@ class ElementWrapper(object):
         """
         elements = self.element.xpath(xpath)
         return [self.__class__(self.agent, el) for el in elements]
+
+    def reset(self):
+        self.element = lxml.html.fromstring(self._lxml)
 
     @when("a[@href]")
     def click(self, follow=False):
@@ -537,6 +542,7 @@ class TestAgent(object):
         self.app = app
         self.request = request
         self.response = response
+        self._elements = []
 
         # Stores file upload field values in forms
         self.file_uploads = {}
@@ -768,6 +774,8 @@ class TestAgent(object):
         """
         if not self.response:
             raise NoRequestMadeError
+        for element in self._elements:
+            element.reset()
         self._lxml = lxml.html.fromstring(self.response.data)
 
     def _find(self, path, namespaces=None, css=False, **kwargs):
