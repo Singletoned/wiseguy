@@ -216,6 +216,9 @@ def test_tables():
     agent = TestAgent(Response([table_text])).get(u'/')
     table = agent.one(u"//table")
     rows = table.rows()
+    headers = table.headers()
+    assert len(headers) == 3
+    assert headers == header_values
     assert len(rows) == 2
     for i, row in enumerate(rows):
         for j, header in enumerate(header_values):

@@ -158,13 +158,21 @@ class ElementWrapper(object):
         return self.agent._click(self, follow=follow)
 
     @when("table")
+    def headers(self):
+        """
+        Return a list of the row headers
+        """
+        headers = [el.text for el in self.all(u"tr/th")]
+        return headers
+
+    @when("table")
     def rows(self):
         """
         Return a list of the rows in the table.  Each row is a werkzeug.ImmutableOrderedMultiDict
         """
         row_dicts = []
         rows = self.all(u"tr")
-        headers = [el.text for el in self.all(u"tr/th")]
+        headers = self.headers()
         for row in rows:
             cells = [el.text for el in row.all(u"td")]
             if cells:
