@@ -157,6 +157,22 @@ class ElementWrapper(object):
         """
         return self.agent._click(self, follow=follow)
 
+    @when("table")
+    def rows(self):
+        """
+        Return a list of the rows in the table.  Each row is a werkzeug.ImmutableOrderedMultiDict
+        """
+        row_dicts = []
+        rows = self.all(u"tr")
+        headers = [el.text for el in self.all(u"tr/th")]
+        for row in rows:
+            cells = [el.text for el in row.all(u"td")]
+            if cells:
+                row_dicts.append(
+                    werkzeug.ImmutableOrderedMultiDict(
+                        zip(headers, cells)))
+        return row_dicts
+
     @when("input[@type='checkbox']")
     def _get_value(self):
         """

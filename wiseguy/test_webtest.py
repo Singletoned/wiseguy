@@ -3,7 +3,7 @@ from StringIO import StringIO
 from nose.tools import assert_equal, assert_raises
 
 import werkzeug
-from werkzeug import Request, Response, redirect
+from werkzeug import Request, Response, redirect, html
 
 import wiseguy
 from wiseguy.webtest import TestAgent
@@ -203,6 +203,27 @@ def test_click():
         page.one,
         "//a"
     )
+
+def test_tables():
+    table_text = html.table(
+        html.tr(
+            *[html.th(i) for i in ["foo", "bar", "baz"]]),
+        html.tr(
+            *[html.td(i) for i in [1, 2, 3]]),
+        html.tr(
+            *[html.td(i) for i in [4, 5, 6]]))
+    agent = TestAgent(Response([table_text])).get(u'/')
+    table = agent.one(u"//table")
+    rows = table.rows()
+    assert len(rows) == 2
+    for i, row in enumerate(rows):
+        for j, header in enumerate(["foo", "bar", "baz"]):
+            index = (i * 3) + (j + 1)
+            assert row[header] == str(index)
+            assert row[header] == type(row[header])(index)
+        for j, cell in enumerate(row.values()):
+            index = (i * 3) + (j + 1)
+            assert cell == str(index)
 
 def test_css_selectors_are_equivalent_to_xpath():
     page = TestAgent(TestApp()).get('/page1')
