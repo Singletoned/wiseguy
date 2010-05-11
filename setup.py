@@ -21,7 +21,6 @@ setup(
     install_requires=[
         "Werkzeug>=0.6",
         "Jinja2>=2.4",
-        "pesto>=16",
         "lxml",
     ],
     entry_points="""
