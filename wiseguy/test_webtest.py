@@ -166,7 +166,7 @@ def test_click():
         3
     )
     assert_raises(
-        wiseguy.webtest.MultipleMatchesException,
+        wiseguy.webtest.MultipleMatchesError,
         page.one,
         "//a"
     )

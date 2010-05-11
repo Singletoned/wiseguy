@@ -20,7 +20,7 @@ xpath_registry = {}
 # EXSLT regular expression namespace URI
 REGEXP_NAMESPACE = "http://exslt.org/regular-expressions"
 
-class MultipleMatchesException(Exception):
+class MultipleMatchesError(Exception):
     def __init__(self, path, elements):
         self.path = path
         self.elements = elements
@@ -118,11 +118,11 @@ class ElementWrapper(object):
     def one(self, xpath):
         """
         Return only one wrapped sub-element.  Raise
-        MultipleMatchesException if more than one result
+        MultipleMatchesError if more than one result
         """
         elements = self.element.xpath(xpath)
         if len(elements) > 1:
-            raise MultipleMatchesException(xpath, elements)
+            raise MultipleMatchesError(xpath, elements)
         else:
             return self.__class__(self.agent, elements[0])
 
@@ -785,7 +785,7 @@ class TestAgent(object):
         """
         elements = self.all(path, css=css)
         if len(elements) > 1:
-            raise MultipleMatchesException(path, elements)
+            raise MultipleMatchesError(path, elements)
         return elements[0]
 
     def all(self, path, css=False):
