@@ -118,7 +118,7 @@ class ElementWrapper(object):
         self.agent = agent
         self.agent._elements.append(self)
         self.element = element
-        self._lxml = lxml.html.tostring(self.element)
+        self._lxml = lxml.html.tostring(self.element, encoding="UTF-8")
 
     def __str__(self):
         return str(self.element)
@@ -507,7 +507,7 @@ class ElementWrapper(object):
         """
         Return an HTML representation of the element
         """
-        return lxml.html.tostring(self.element)
+        return lxml.html.tostring(self.element, encoding="utf-8")
 
     def pretty(self):
         """
@@ -817,6 +817,12 @@ class TestAgent(object):
         self.reset()
         return self._lxml
 
+    def html(self):
+        """
+        Return an HTML representation of the element
+        """
+        return lxml.html.tostring(self.lxml, encoding="utf-8")
+
     @property
     def root_element(self):
         return ElementWrapper(self, self.lxml)
@@ -829,7 +835,7 @@ class TestAgent(object):
             raise NoRequestMadeError
         for element in self._elements:
             element.reset()
-        self._lxml = lxml.html.fromstring(self.response.data)
+        self._lxml = lxml.html.fromstring(self.response.data.decode('utf-8'))
 
     def _find(self, path, namespaces=None, css=False, **kwargs):
         """

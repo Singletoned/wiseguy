@@ -237,6 +237,17 @@ def test_tables():
     for row, obj in zip(table.rows(), [obj_1, obj_2]):
         row.assert_has_object(obj)
 
+def test_unicode_chars():
+    body_text = html.div(
+        html.p(u"£")).encode('utf-8')
+    agent = TestAgent(Response([body_text]))
+    page = agent.get(u'/')
+    assert page.body == body_text
+    assert page.html() == body_text
+    div_element = page.one('//div')
+    assert div_element.html() == body_text
+    assert div_element._lxml == body_text
+
 def test_css_selectors_are_equivalent_to_xpath():
     page = TestAgent(TestApp()).get('/page1')
     assert_equal(
