@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from wsgiref.validate import validator as wsgi_validator
 from cStringIO import StringIO
 from urlparse import urlparse, urlunparse, urljoin
