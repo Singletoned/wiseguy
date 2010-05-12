@@ -129,6 +129,10 @@ class ElementWrapper(object):
     def __getattr__(self, attr):
         return getattr(self.element, attr)
 
+    @property
+    def lxml(self):
+        return self.element
+
     def one(self, xpath):
         """
         Return only one wrapped sub-element.  Raise

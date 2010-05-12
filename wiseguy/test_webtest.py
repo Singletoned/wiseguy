@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import collections
+import functools
 from StringIO import StringIO
 
 from nose.tools import assert_equal, assert_raises
@@ -8,8 +9,12 @@ from nose.tools import assert_equal, assert_raises
 import werkzeug
 from werkzeug import Request, Response, redirect, html
 
+from lxml.html import tostring
+
 import wiseguy
 from wiseguy.webtest import TestAgent
+
+tostring = functools.partial(tostring, encoding="utf-8")
 
 def page(html):
     def page(func):
@@ -243,10 +248,33 @@ def test_unicode_chars():
     agent = TestAgent(Response([body_text]))
     page = agent.get(u'/')
     assert page.body == body_text
+    assert tostring(page.lxml) == body_text
     assert page.html() == body_text
     div_element = page.one('//div')
     assert div_element.html() == body_text
-    assert div_element._lxml == body_text
+    assert tostring(div_element.lxml) == body_text
+
+def test_lxml_attr_is_consistent():
+    body_text = html.div(
+        html.p(u"foo")).encode('utf-8')
+    agent = TestAgent(Response([body_text]))
+    page = agent.get(u'/')
+    div_element = page.one('//div')
+    assert page.lxml == div_element.lxml
+
+def test_lxml_attr_doesnt_reset_forms():
+    form_page = TestAgent(TestApp()).get('/form-text')
+    form = form_page.one('//form')
+    # Set field values
+    form.one('//input[@name="a"][1]').value = 'do'
+    form.one('//input[@name="a"][2]').value = 're'
+    form.one('//input[@name="b"][1]').value = 'mi'
+    # Check page body
+    assert "form" in tostring(form_page.lxml)
+    # Check form values
+    assert form.one('//input[@name="a"][1]').value == 'do'
+    assert form.one('//input[@name="a"][2]').value == 're'
+    assert form.one('//input[@name="b"][1]').value == 'mi'
 
 def test_css_selectors_are_equivalent_to_xpath():
     page = TestAgent(TestApp()).get('/page1')
