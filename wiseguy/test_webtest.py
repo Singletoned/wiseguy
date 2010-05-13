@@ -103,6 +103,11 @@ class TestApp(object):
     def page1(request):
         return {}
 
+    @match('/page2', 'GET')
+    @page('''<html><html>''')
+    def page2(request):
+        return {}
+
     @match('/form-text', 'GET')
     @page('''
           <html><body>
@@ -114,6 +119,15 @@ class TestApp(object):
           </body></html>
     ''')
     def form_text(request):
+        return {}
+
+    @match('/bad-link', 'GET')
+    @page('''
+        <html><body>
+        <a href="page_that_does_not_exist">A Bad Link</a>
+        </body></html>
+    ''')
+    def bad_link(request):
         return {}
 
     @match('/form-checkbox', 'GET')
@@ -297,6 +311,14 @@ def test_click_follows_redirect():
     link = page.one("//a[text()='redirect']")
     response = link.click(follow=True)
     assert_equal(response.request.path, '/page1')
+
+def test_click_404_raises_error():
+    page = TestAgent(TestApp()).get('/bad-link')
+    link = page.one("//a[text()='A Bad Link']")
+    assert_raises(
+        wiseguy.webtest.PageNotFound,
+        link.click
+    )
 
 def test_form_text():
     form_page = TestAgent(TestApp()).get('/form-text')

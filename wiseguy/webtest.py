@@ -40,6 +40,13 @@ class NoMatchesError(Exception):
 class NoRequestMadeError(Exception):
     pass
 
+class PageNotFound(Exception):
+    def __init__(self, path):
+        self.path = path
+
+    def __str__(self):
+        return "No page was found at %s" % (self.path,)
+
 class XPathMultiMethod(object):
     """
     A callable object that has different implementations selected by XPath
@@ -670,6 +677,8 @@ class TestAgent(object):
 
         response = self.response_class.from_app(self.app, environ)
         agent = self.__class__(self.app, Request(environ), response, self.cookies, history, validate_wsgi=False)
+        if response.status == "404 NOT FOUND":
+            raise PageNotFound(path)
         if follow:
             return agent.follow_all()
         return agent
