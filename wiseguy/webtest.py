@@ -16,6 +16,9 @@ from lxml.etree import XPath
 import werkzeug
 from werkzeug import Request, Response
 
+def assert_equal(foo, bar, msg=None):
+    assert foo == bar, msg or "%r != %r" % (foo, bar)
+
 # Registry for xpath multimethods
 xpath_registry = {}
 
@@ -209,7 +212,7 @@ class ElementWrapper(object):
             # I hate that str(None) == 'None'
             if attr == None and cast_attr == "None":
                 cast_attr = ""
-            assert value == cast_attr, "%r != %r" % (value, cast_attr)
+            assert_equal(value, cast_attr)
 
     @when("input[@type='checkbox']")
     def _get_value(self):
