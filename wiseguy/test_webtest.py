@@ -648,6 +648,26 @@ def test_striptags_method_returns_string_representation():
         'And a nice cup of tea!'
     )
 
+def test_striptags_handles_nesting():
+    body = """
+    <tr>
+        <td>line 1</td>
+        <td>line 2</td>
+    </tr>
+    """
+    agent = TestAgent(Response([body])).get('/')
+    assert_equal(
+        agent.root_element.striptags(),
+        "line 1 line 2"
+    )
+
+def test_striptags_handles_trailing_newline():
+    agent = TestAgent(Response(['<tr><td>flimmel</td>\n</tr>'])).get('/')
+    assert_equal(
+        agent.one('//td').striptags(),
+        'flimmel'
+    )
+
 def test_in_operator_works_on_elementwrapper():
     agent = TestAgent(Response(['<p>Tea tray tea tray tea tray tea tray</p>'])).get('/')
     assert 'tea tray' in agent.one('//p')

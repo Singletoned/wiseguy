@@ -550,7 +550,7 @@ class ElementWrapper(object):
                     yield text
             if node.tail:
                 yield node.tail
-        return re.sub(r'\s\s*', ' ', ''.join(_striptags(self.element)))
+        return re.sub(r'\s\s*', ' ', ''.join(_striptags(self.element))).strip()
 
     def __contains__(self, what):
         return what in self.html()
