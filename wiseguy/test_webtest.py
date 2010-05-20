@@ -298,6 +298,23 @@ def test_tables():
     for row, obj in zip(table.rows(), [obj_1, obj_2]):
         row.assert_has_object(obj)
 
+def test_empty_rows():
+    body = """
+<table>
+  <tr>
+    <th>foo</th> <th>bar</th> <th>baz</th>
+  </tr>
+  <tr>
+    <td></td><td></td><td></td>
+  </tr>
+</table>
+    """
+    agent = TestAgent(Response(body)).get(u'/')
+    row = agent.one(u'//tr[td]')
+    TestObject = collections.namedtuple('TestObject', ['foo', 'bar', 'baz'])
+    obj = TestObject(None, None, None)
+    row.assert_has_object(obj)
+
 def test_unicode_chars():
     body_text = html.div(
         html.p(u"£")).encode('utf-8')

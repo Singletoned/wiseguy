@@ -205,7 +205,11 @@ class ElementWrapper(object):
     def assert_has_object(self, object):
         for key, value in self.to_dict().items():
             attr = getattr(object, key)
-            assert attr == type(attr)(value)
+            cast_attr = type(value)(attr)
+            # I hate that str(None) == 'None'
+            if attr == None and cast_attr == "None":
+                cast_attr = ""
+            assert value == cast_attr, "%r != %r" % (value, cast_attr)
 
     @when("input[@type='checkbox']")
     def _get_value(self):
