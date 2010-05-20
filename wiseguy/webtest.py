@@ -195,7 +195,7 @@ class ElementWrapper(object):
 
     @when("tr")
     def to_dict(self):
-        cells = [el.text for el in self.all(u"td")]
+        cells = [el.striptags() for el in self.all(u"td")]
         if cells:
             return werkzeug.ImmutableOrderedMultiDict(zip(self.headers(), cells))
         else:
