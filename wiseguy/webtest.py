@@ -198,7 +198,7 @@ class ElementWrapper(object):
 
     @when("tr")
     def to_dict(self):
-        cells = [el.striptags() for el in self.all(u"td")]
+        cells = [el.striptags(convert_breaks=True) for el in self.all(u"td")]
         if cells:
             return werkzeug.ImmutableOrderedMultiDict(zip(self.headers(), cells))
         else:
@@ -533,7 +533,7 @@ class ElementWrapper(object):
         """
         return lxml.html.tostring(self.element, pretty_print=True)
 
-    def striptags(self):
+    def striptags(self, convert_breaks=False):
         """
         Strip tags out of ``lxml.html`` document ``node``, just leaving behind
         text. Normalize all sequences of whitespace to a single space.
@@ -550,6 +550,9 @@ class ElementWrapper(object):
 
         """
         def _striptags(node):
+            if convert_breaks:
+                if node.tag == 'br':
+                    yield '<br>'
             if node.text:
                 yield node.text
             for subnode in node:
@@ -557,7 +560,11 @@ class ElementWrapper(object):
                     yield text
             if node.tail:
                 yield node.tail
-        return re.sub(r'\s\s*', ' ', ''.join(_striptags(self.element))).strip()
+
+        raw = ''.join(_striptags(self.element))
+        normed = re.sub(r'\s\s*', ' ', raw).strip()
+        brs_removed = re.sub(r'\s?<br>\s?', '\n', normed)
+        return brs_removed
 
     def __contains__(self, what):
         return what in self.html()

@@ -687,6 +687,19 @@ def test_striptags_method_returns_string_representation():
         'And a nice cup of tea!'
     )
 
+def test_striptags_keep_breaks():
+    body = """
+    <p>10 Downing Street<br>
+    Westminster <br>
+    London </p>
+    """
+    expected = """10 Downing Street\nWestminster\nLondon"""
+    agent = TestAgent(Response(body)).get('/')
+    assert_equal(
+        expected,
+        agent.root_element.striptags(convert_breaks=True)
+        )
+
 def test_striptags_handles_nesting():
     body = """
     <tr>
