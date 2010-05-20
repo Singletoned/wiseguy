@@ -226,6 +226,26 @@ def test_click():
         "//a"
     )
 
+def test_rows_to_dict():
+    body = """
+<table>
+  <tr>
+    <th>foo</th> <th>bar</th> <th>baz</th>
+  </tr>
+  <tr>
+    <td>1</td> <td>2</td> <td>3</td>
+  </tr>
+  <tr>
+    <td>4</td> <td>5</td> <td>6</td>
+  </tr>
+</table>
+    """
+    agent = TestAgent(Response(body)).get('/')
+    row = agent.one(u'//tr[td][1]')
+    expected = dict(foo='1', bar='2', baz='3')
+    for key in expected:
+        assert_equal(expected[key], row.to_dict()[key])
+
 def test_tables():
     header_values = ["foo", "bar", "baz"]
     table_text = html.table(
