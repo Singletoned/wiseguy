@@ -915,6 +915,13 @@ class TestAgent(object):
         elements = self._find(path, css=css)
         return [ElementWrapper(self, el) for el in elements]
 
+    @property
+    def form(self):
+        """
+        Returns a form if there is only one on the page.  It is an error otherwise
+        """
+        return self.one(u'//form')
+
     def click(self, path=None, follow=False, **kwargs):
         if not path:
             path = _path_from_kwargs('a', **kwargs)
