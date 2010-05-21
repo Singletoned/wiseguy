@@ -105,6 +105,17 @@ def when(xpath_expr):
         return wrapped
     return when
 
+
+def _path_from_kwargs(tag, **kwargs):
+    text_arg = kwargs.pop('text', '')
+    path_args = ["@%s='%s'" % (k, v) for (k, v) in kwargs.items()]
+    if text_arg:
+        text = "text()='%s'" % text_arg
+        path_args = [text] + path_args
+    path = "//%s[%s]" % (tag, " and ".join(path_args))
+    return path
+
+
 class ElementWrapper(object):
     """
     Wrapper for an ``lxml.etree`` element, providing additional methods useful
@@ -904,8 +915,11 @@ class TestAgent(object):
         elements = self._find(path, css=css)
         return [ElementWrapper(self, el) for el in elements]
 
-    def click(self, path, follow=False, **kwargs):
-        return self.find(path, **kwargs).click(follow=follow)
+    def click(self, path=None, follow=False, **kwargs):
+        if not path:
+            path = _path_from_kwargs('a', **kwargs)
+        print path
+        return self.one(path).click(follow=follow)
 
     def _click(self, element, follow=False):
         return self.get(

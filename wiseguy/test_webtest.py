@@ -225,6 +225,22 @@ def test_click():
         page.one,
         "//a"
     )
+    assert_equal(
+        page.click('//a[1]').request.path,
+        page.one('//a[1]').click().request.path
+    )
+    assert_equal(
+        page.click(text=u'page 1').request.path,
+        page.one('//a[text()="page 1"]').click().request.path
+    )
+    assert_equal(
+        page.click(href=u'page1').request.path,
+        page.one('//a[@href="page1"]').click().request.path
+    )
+    assert_equal(
+        page.click(text=u'page 1', href=u'page1').request.path,
+        page.one('//a[text()="page 1" and @href="page1"]').click().request.path
+    )
 
 def test_rows_to_dict():
     body_1 = """
