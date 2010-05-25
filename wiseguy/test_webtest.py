@@ -338,10 +338,18 @@ def test_unicode_chars():
     page = agent.get(u'/')
     assert page.body == body_text
     assert tostring(page.lxml) == body_text
-    assert page.html() == body_text
+    assert page.html().encode('utf-8') == body_text
     div_element = page.one('//div')
-    assert div_element.html() == body_text
+    assert div_element.html().encode('utf-8') == body_text
     assert tostring(div_element.lxml) == body_text
+
+def test_html_returns_unicode():
+    body_text = html.div(
+        html.p(u"£")).encode('utf-8')
+    agent = TestAgent(Response([body_text]))
+    page = agent.get(u'/')
+    assert page.html() == body_text.decode('utf-8')
+    assert page.html('utf-8') == body_text
 
 def test_lxml_attr_is_consistent():
     body_text = html.div(

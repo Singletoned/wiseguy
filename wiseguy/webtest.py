@@ -139,7 +139,7 @@ class ElementWrapper(object):
         self.agent = agent
         self.agent._elements.append(self)
         self.element = element
-        self._lxml = lxml.html.tostring(self.element, encoding="UTF-8")
+        self._lxml = lxml.html.tostring(self.element, encoding=unicode)
 
     def __str__(self):
         return str(self.element)
@@ -223,7 +223,14 @@ class ElementWrapper(object):
             # I hate that str(None) == 'None'
             if attr == None and cast_attr == "None":
                 cast_attr = ""
-            assert_equal(value, cast_attr)
+            # If it has linebreaks, try converting them to <br> first
+            if "\n" in cast_attr:
+                try:
+                    assert_equal(value, cast_attr.replace(u'\n', u'<br>'))
+                except AssertionError:
+                    assert_equal(value, cast_attr)
+            else:
+                assert_equal(value, cast_attr)
 
     @when("input[@type='checkbox']")
     def _get_value(self):
@@ -532,17 +539,17 @@ class ElementWrapper(object):
 
         return data
 
-    def html(self):
+    def html(self, encoding=unicode):
         """
-        Return an HTML representation of the element
+        Return an HTML representation of the element.  Defaults to returning unicode
         """
-        return lxml.html.tostring(self.element, encoding="utf-8")
+        return lxml.html.tostring(self.element, encoding=unicode)
 
-    def pretty(self):
+    def pretty(self, encoding=unicode):
         """
-        Return an pretty-printed string representation of the element
+        Return an pretty-printed unicode representation of the element
         """
-        return lxml.html.tostring(self.element, pretty_print=True)
+        return lxml.html.tostring(self.element, pretty_print=True, encoding=encoding)
 
     def striptags(self, convert_breaks=False):
         """
@@ -855,11 +862,17 @@ class TestAgent(object):
         self.reset()
         return self._lxml
 
-    def html(self):
+    def html(self, encoding=unicode):
         """
-        Return an HTML representation of the element
+        Return a HTML representation of the element.  Defaults to returning unicode
         """
-        return lxml.html.tostring(self.lxml, encoding="utf-8")
+        return lxml.html.tostring(self.lxml, encoding=encoding)
+
+    def pretty(self, encoding=unicode):
+        """
+        Return an pretty-printed unicode representation of the element
+        """
+        return lxml.html.tostring(self.lxml, pretty_print=True, encoding=encoding)
 
     @property
     def root_element(self):
