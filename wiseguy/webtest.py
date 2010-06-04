@@ -50,6 +50,27 @@ class PageNotFound(Exception):
     def __str__(self):
         return "No page was found at %s" % (self.path,)
 
+def striptags_from_node(node, convert_breaks=False):
+    if convert_breaks:
+        if node.tag == 'br':
+            yield '<br>'
+    if node.text:
+        yield node.text
+    for subnode in node:
+        for text in striptags_from_node(subnode, convert_breaks=convert_breaks):
+            yield text
+    if node.tail:
+        yield node.tail
+
+def striptags(element_or_string, convert_breaks=False):
+    if not isinstance(element_or_string, lxml.html.HtmlElement):
+        element_or_string = lxml.html.fromstring(element_or_string)
+    raw = ''.join(striptags_from_node(
+        element_or_string, convert_breaks=convert_breaks))
+    normed = re.sub(r'\s\s*', ' ', raw).strip()
+    brs_removed = re.sub(r'\s?<br>\s?', '\n', normed)
+    return brs_removed
+
 class XPathMultiMethod(object):
     """
     A callable object that has different implementations selected by XPath
@@ -226,15 +247,11 @@ class ElementWrapper(object):
             # I hate that str(None) == 'None'
             if item  == None and cast_value == "None":
                 continue
-            # If it has linebreaks, try converting them to <br> first
+            # Try stripping tags from the item first
             try:
+                assert_equal(cast_value, striptags(item))
+            except:
                 assert_equal(cast_value, item)
-            except AssertionError:
-                try:
-                    assert_equal(cast_value, item.replace(u'\n', u'<br>'))
-                except:
-                    assert_equal(cast_value, item)
-
 
     @when("input[@type='checkbox']")
     def _get_value(self):
@@ -571,22 +588,7 @@ class ElementWrapper(object):
             'the foo is completely bazzed'
 
         """
-        def _striptags(node):
-            if convert_breaks:
-                if node.tag == 'br':
-                    yield '<br>'
-            if node.text:
-                yield node.text
-            for subnode in node:
-                for text in _striptags(subnode):
-                    yield text
-            if node.tail:
-                yield node.tail
-
-        raw = ''.join(_striptags(self.element))
-        normed = re.sub(r'\s\s*', ' ', raw).strip()
-        brs_removed = re.sub(r'\s?<br>\s?', '\n', normed)
-        return brs_removed
+        return striptags(self.element, convert_breaks=convert_breaks)
 
     def __contains__(self, what):
         return what in self.html()

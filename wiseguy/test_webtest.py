@@ -712,6 +712,12 @@ def test_striptags_method_returns_string_representation():
         'And a nice cup of tea!'
     )
 
+def test_striptags_on_string():
+    assert_equal(
+        wiseguy.webtest.striptags('<p>Hullo<p>'),
+        'Hullo'
+        )
+
 def test_striptags_keep_breaks():
     body = """
     <p>10 Downing Street<br>
