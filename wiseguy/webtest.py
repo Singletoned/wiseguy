@@ -216,21 +216,25 @@ class ElementWrapper(object):
             return None
 
     @when("tr")
-    def assert_has_object(self, object):
-        for key, value in self.to_dict().items():
-            attr = getattr(object, key)
-            cast_attr = type(value)(attr)
+    def assert_is(self, iterable):
+        """
+        Takes an iterable and asserts that each of the cells of the
+        row are equal when cast to the type of the item in the iterable.
+        """
+        for item, row_value in zip(iterable, self.to_dict().values()):
+            cast_value = type(item)(row_value)
             # I hate that str(None) == 'None'
-            if attr == None and cast_attr == "None":
-                cast_attr = ""
+            if item  == None and cast_value == "None":
+                continue
             # If it has linebreaks, try converting them to <br> first
-            if "\n" in cast_attr:
+            try:
+                assert_equal(cast_value, item)
+            except AssertionError:
                 try:
-                    assert_equal(value, cast_attr.replace(u'\n', u'<br>'))
-                except AssertionError:
-                    assert_equal(value, cast_attr)
-            else:
-                assert_equal(value, cast_attr)
+                    assert_equal(cast_value, item.replace(u'\n', u'<br>'))
+                except:
+                    assert_equal(cast_value, item)
+
 
     @when("input[@type='checkbox']")
     def _get_value(self):
