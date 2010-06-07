@@ -2,7 +2,7 @@ from werkzeug import Request, Response, redirect, EnvironBuilder
 from werkzeug.routing import Map
 from jinja2 import Environment, DictLoader
 
-from utils import create_render, create_expose, MockEnv
+from wiseguy.web_utils import create_render, create_expose, MockEnv
 
 
 def test_create_expose():
