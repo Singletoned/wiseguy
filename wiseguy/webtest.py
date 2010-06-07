@@ -693,7 +693,7 @@ class TestAgent(object):
 
         return environ
 
-    def _request(self, environ, follow=False, history=False):
+    def _request(self, environ, follow=False, history=False, status=None):
         path = environ['SCRIPT_NAME'] + environ['PATH_INFO']
         environ['HTTP_COOKIE'] = '; '.join(
             '%s=%s' % (key, morsel.value)
@@ -715,13 +715,17 @@ class TestAgent(object):
 
         response = self.response_class.from_app(self.app, environ)
         agent = self.__class__(self.app, Request(environ), response, self.cookies, history, validate_wsgi=False)
+        if status and (status != response.status):
+            raise BadResponse(response.status, status)
         if response.status == "404 NOT FOUND":
-            raise PageNotFound(path)
+            if not status == response.status:
+                raise PageNotFound(path)
         if follow:
             return agent.follow_all()
         return agent
 
-    def get(self, PATH_INFO='/', data=None, charset='UTF-8', follow=False, history=True, **kwargs):
+    def get(self, PATH_INFO='/', data=None, charset='UTF-8', follow=False,
+            history=True, status=None, **kwargs):
         """
         Make a GET request to the application and return the response.
         """
@@ -735,6 +739,7 @@ class TestAgent(object):
             self.make_environ('GET', PATH_INFO=PATH_INFO, **kwargs),
             follow,
             history,
+            status=status,
         )
 
     def post(self, PATH_INFO='/', data=None, charset='UTF-8', follow=False, history=True, **kwargs):
