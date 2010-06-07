@@ -182,9 +182,9 @@ class ElementWrapper(object):
         """
         elements = self.element.xpath(xpath)
         if len(elements) == 0:
-            raise NoMatchesError(xpath)
+            raise NoMatchesError(xpath.encode('utf8'))
         elif len(elements) > 1:
-            raise MultipleMatchesError(xpath, elements)
+            raise MultipleMatchesError(xpath.encode('utf8'), elements)
         else:
             return self.__class__(self.agent, elements[0])
 
@@ -925,9 +925,9 @@ class TestAgent(object):
         """
         elements = self.all(path, css=css)
         if len(elements) > 1:
-            raise MultipleMatchesError(path, elements)
+            raise MultipleMatchesError(path.encode('utf8'), elements)
         elif len(elements) == 0:
-            raise NoMatchesError(path)
+            raise NoMatchesError(path.encode('utf8'))
         else:
             return elements[0]
 
