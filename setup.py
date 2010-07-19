@@ -22,6 +22,7 @@ setup(
         "Werkzeug>=0.6",
         "Jinja2>=2.4",
         "lxml",
+        "sqlalchemy>0.6",
     ],
     entry_points="""
       # -*- Entry points: -*-
