@@ -2,6 +2,19 @@
 
 import re
 
+from werkzeug.routing import Rule
+
+
+def create_expose(url_map):
+    def expose(rule, methods=['GET'], **kw):
+        def decorate(f):
+            kw['endpoint'] = f
+            url_map.add(Rule(rule, methods=methods, **kw))
+            return f
+        return decorate
+    return expose
+
+
 def decamelise(s):
     """
     >>> decamelise("CamelCase")
