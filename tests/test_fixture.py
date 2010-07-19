@@ -3,14 +3,45 @@
 import itertools
 
 from nose.tools import assert_raises
+import sqlalchemy as sa
 
-from wiseguy import fixture, fixture_test_schema as schema
+from wiseguy import fixture, sa_utils
 
-Fixture = fixture.FixtureClassFactory(schema.Session, schema.classes)
+metadata = sa_utils.make_metadata("sqlite:///")
+Session = sa.orm.sessionmaker(bind=metadata.bind)
 
+with_empty_db = sa_utils.create_with_empty_db(Session, metadata)
+
+article_table = sa.Table("Article", metadata,
+    sa.Column('stub', sa.String(16), primary_key=True),
+    sa.Column('name', sa.String(64)),
+    sa.Column('body', sa.String),
+    sa.Column('score', sa.Integer),
+)
+
+comment_table = sa.Table("Comment", metadata,
+    sa.Column('id', sa.Integer, primary_key=True),
+    sa.Column('article_stub', sa.String(16), sa.ForeignKey('Article.stub')),
+    sa.Column('email', sa.String(128)),
+    sa.Column('name', sa.String(128)),
+    sa.Column('body', sa.String),
+)
+
+class Article(sa_utils.BaseTable):
+    pass
+
+class Comment(sa_utils.BaseTable):
+    pass
+
+sa.orm.mapper(Article, article_table)
+sa.orm.mapper(Comment, comment_table)
+
+metadata.create_all()
+
+Fixture = fixture.FixtureClassFactory(Session, [Article, Comment])
 
 class ArticleData(fixture.Data):
-    _entity = schema.Article
+    _entity = Article
 
     class _default:
         score = score = itertools.count(1).next
@@ -27,7 +58,7 @@ class ArticleData(fixture.Data):
 
 
 class CommentData(fixture.Data):
-    _entity = schema.Comment
+    _entity = Comment
 
     class comment1:
         id = 1
@@ -70,7 +101,7 @@ def test_get_data_from_class():
 def test_extra_value():
     def make_article3():
         class ArticleData2(fixture.Data):
-            _entity = schema.Article
+            _entity = Article
 
             class article3:
                 stub = "article3"
@@ -95,7 +126,7 @@ def test_callable_args():
             yield "Name %s" % count
 
     class ArticleData4(fixture.Data):
-        _entity = schema.Article
+        _entity = Article
 
         class _default:
             body = body_counter().next
@@ -120,7 +151,7 @@ def test_callable_args():
 
 def test_defaults():
     class ArticleData6(fixture.Data):
-        _entity = schema.Article
+        _entity = Article
 
         class _default:
             name = lambda: "An Article"
@@ -157,14 +188,14 @@ def test_comment_data():
     assert CommentData.comment1.id == 1
     assert CommentData.comment1.name == "Mr Smith"
 
-@schema.with_empty_db
+@with_empty_db
 def test_to_sa():
-    session = schema.Session()
+    session = Session()
     item = ArticleData.article1.to_sa(session)
     item_data = item.to_dict()
     session.commit()
     session.close()
-    assert session.query(schema.Article).one().to_dict() == item_data
+    assert session.query(Article).one().to_dict() == item_data
 
 def test_to_dict():
     d1 = ArticleData.article1.to_dict()
@@ -172,7 +203,7 @@ def test_to_dict():
     d2 = ArticleData.article1.to_dict(foo=u'bar')
     assert d2['foo'] == u'bar'
 
-@schema.with_empty_db
+@with_empty_db
 def test_data_inheritance():
     class new_article(ArticleData.article1):
         stub = "new_article"
@@ -181,7 +212,7 @@ def test_data_inheritance():
     assert new_article.body == ArticleData.article1.body
 
     class NewData(fixture.Data):
-        _entity = schema.Article
+        _entity = Article
         class new_article(ArticleData.article1):
             stub = "new_article"
 
@@ -207,7 +238,7 @@ def test_data_inheritance():
         assert article.name == "The First Article"
         assert tester._data.articles.new_article.stub == "new_article"
 
-@schema.with_empty_db
+@with_empty_db
 def test_fixture_inheritance():
     class NewFixture(Fixture):
         comments = CommentData
@@ -237,7 +268,7 @@ def test_fixture_inheritance():
         assert tester.Article.one()
         assert tester.Comment.length_is(2)
 
-@schema.with_empty_db
+@with_empty_db
 def test_override():
     class NewFixture(Fixture):
         class articles(ArticleData):
@@ -254,26 +285,26 @@ def test_override():
     for article in ArticleData:
         assert article.name != "overridden"
 
-@schema.with_empty_db
+@with_empty_db
 def test_first_fixture():
     with FirstFixture() as tester:
-        article1 = tester.session.query(schema.Article).one()
+        article1 = tester.session.query(Article).one()
         assert tester.Article.one() == article1
         assert article1.to_dict() == ArticleData.article1.to_dict()
         assert tester.Article.length_is(1)
         assert tester.Article.all() == [article1]
-        comment1 = tester.session.query(schema.Comment).one()
+        comment1 = tester.session.query(Comment).one()
         assert tester.Comment.one() == comment1
         assert comment1.to_dict() == CommentData.comment1.to_dict()
         assert tester.Comment.length_is(1)
         assert tester.Comment.all() == [comment1]
 
 
-@schema.with_empty_db
+@with_empty_db
 def test_multiple_inheritance():
     class FixtureOne(Fixture):
         class articles(fixture.Data):
-            _entity = schema.Article
+            _entity = Article
 
             class article_1:
                 stub = 'foo'
@@ -291,7 +322,7 @@ def test_multiple_inheritance():
 
     class FixtureThree(FixtureTwo):
         class comments(fixture.Data):
-            _entity = schema.Comment
+            _entity = Comment
 
             class comment_1:
                 id = 1
