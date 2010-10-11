@@ -420,6 +420,14 @@ def test_click_404_raises_error():
         link.click
     )
 
+def test_bad_response():
+    assert_raises(
+        wiseguy.webtest.BadResponse,
+        TestAgent(TestApp()).get,
+        '/',
+        status="666 A Bad Status",
+    )
+
 def test_form_field_container():
     form_page = TestAgent(TestApp()).get('/form-mixed')
     form = form_page.one('//form')

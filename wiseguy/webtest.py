@@ -50,6 +50,16 @@ class PageNotFound(Exception):
     def __str__(self):
         return "No page was found at %s" % (self.path,)
 
+class BadResponse(Exception):
+    def __init__(self, response_status, expected_status):
+        self.response_status = response_status
+        self.expected_status = expected_status
+
+    def __str__(self):
+        return "The status %s did not match %s" % (
+            self.response_status, self.expected_status)
+
+
 def striptags_from_node(node, convert_breaks=False):
     if convert_breaks:
         if node.tag == 'br':
