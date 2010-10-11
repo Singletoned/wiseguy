@@ -28,3 +28,12 @@ def test_create_expose():
     assert len(url_map._rules) == 1
     r = url_map._rules[0]
     assert r.endpoint == index
+
+
+def test_mock_object():
+    m1 = utils.MockObject(foo=1, bar='flam')
+    assert m1.foo == 1
+    assert m1.bar == 'flam'
+    m2 = utils.MockObject(foo=1, bar='flam')
+    assert m1 == m2
+    assert repr(m1) == "<MockObject foo=1, bar='flam'>"
