@@ -144,6 +144,22 @@ class TestApp(object):
     def form_checkbox(request):
         return {}
 
+    @match('/form-mixed', 'GET')
+    def form_mixed(request):
+        return Response('''
+        <html><body>
+        <form method="POST" action="/postform">
+          <fieldset>
+            <select name="s">
+              <option value="O1" selected="selected">Option 1</option>
+              <option value="O2">Option 2</option>
+            </select>
+          </fieldset>
+          <input name="a" value="A" type="text">
+          <input name="b" value="B" type="text">
+        </form>
+        </body></html>
+        ''')
 
     @match('/postform', 'POST')
     def form_submit(request):
@@ -403,6 +419,11 @@ def test_click_404_raises_error():
         wiseguy.webtest.PageNotFound,
         link.click
     )
+
+def test_form_field_container():
+    form_page = TestAgent(TestApp()).get('/form-mixed')
+    form = form_page.one('//form')
+    assert form.fields[u's'] == "O1"
 
 def test_form_text():
     form_page = TestAgent(TestApp()).get('/form-text')
