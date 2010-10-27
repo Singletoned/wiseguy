@@ -963,7 +963,6 @@ class TestAgent(object):
     def click(self, path=None, follow=False, **kwargs):
         if not path:
             path = _path_from_kwargs('a', **kwargs)
-        print path
         return self.one(path).click(follow=follow)
 
     def _click(self, element, follow=False):
