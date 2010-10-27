@@ -2,47 +2,61 @@
 
 import itertools
 
-from nose.tools import assert_raises
+import py
 import sqlalchemy as sa
 
-from wiseguy import fixture, sa_utils
+from tests import fixture_test_schema as schema
+from wiseguy import fixture, utils
 
-metadata = sa_utils.make_metadata("sqlite:///")
-Session = sa.orm.sessionmaker(bind=metadata.bind)
 
-with_empty_db = sa_utils.create_with_empty_db(Session, metadata)
+def test_storage():
+    def do_test(data):
+        s = fixture.EnvWrapper(data)
+        assert s.FooData == 'Bar'
+        assert s['FooData'] == 'Bar'
+        with py.test.raises(fixture.KeyAndAttributeError):
+            s.plop
+        with py.test.raises(fixture.KeyAndAttributeError):
+            s['plop']
 
-article_table = sa.Table("Article", metadata,
-    sa.Column('stub', sa.String(16), primary_key=True),
-    sa.Column('name', sa.String(64)),
-    sa.Column('body', sa.String),
-    sa.Column('score', sa.Integer),
-)
+    datas = [
+        dict(FooData='Bar'),
+        utils.MockObject(Foo='Bar')
+        ]
 
-comment_table = sa.Table("Comment", metadata,
-    sa.Column('id', sa.Integer, primary_key=True),
-    sa.Column('article_stub', sa.String(16), sa.ForeignKey('Article.stub')),
-    sa.Column('email', sa.String(128)),
-    sa.Column('name', sa.String(128)),
-    sa.Column('body', sa.String),
-)
+    for data in datas:
+        yield do_test, data
 
-class Article(sa_utils.BaseTable):
-    pass
 
-class Comment(sa_utils.BaseTable):
-    pass
+def test_Fixture_env():
+    def do_test(data):
+        Fixture = fixture.FixtureClassFactory(
+            uri=schema.uri,
+            metadata=schema.metadata,
+            sa_classes=[],
+            env=data)
+        assert Fixture._env.ArticleData == schema.Article
+        assert Fixture._env.CommentData == schema.Comment
+        assert Fixture._env['ArticleData'] == schema.Article
+        assert Fixture._env['CommentData'] == schema.Comment
 
-sa.orm.mapper(Article, article_table)
-sa.orm.mapper(Comment, comment_table)
+    datas = [
+        dict(ArticleData=schema.Article, CommentData=schema.Comment),
+        schema
+        ]
 
-metadata.create_all()
+    for data in datas:
+        yield do_test, data
 
-Fixture = fixture.FixtureClassFactory(Session, [Article, Comment])
+
+Fixture = fixture.FixtureClassFactory(
+    uri=schema.uri,
+    metadata=schema.metadata,
+    sa_classes=schema.classes,
+    env=schema)
+
 
 class ArticleData(fixture.Data):
-    _entity = Article
-
     class _default:
         score = score = itertools.count(1).next
 
@@ -58,8 +72,6 @@ class ArticleData(fixture.Data):
 
 
 class CommentData(fixture.Data):
-    _entity = Comment
-
     class comment1:
         id = 1
         article_stub = ArticleData.article1.stub
@@ -76,12 +88,17 @@ class CommentData(fixture.Data):
 
 
 class FirstFixture(Fixture):
-    articles = [ArticleData.article1]
-    comments = [CommentData.comment1]
+    class ArticleData:
+        article1 = ArticleData.article1
+    class CommentData:
+        comment1 = CommentData.comment1
+
 
 class SecondFixture(Fixture):
-    articles = [ArticleData.article2]
-    comments = [CommentData.comment2]
+    class ArticleData:
+        article2 = ArticleData.article2
+    class CommentData:
+        comment2 = CommentData.comment2
 
 
 def test_get_data_from_class():
@@ -98,19 +115,6 @@ def test_get_data_from_class():
     assert not test_data.has_key('_foo')
     assert test_data['bar'] == 'bar'
 
-def test_extra_value():
-    def make_article3():
-        class ArticleData2(fixture.Data):
-            _entity = Article
-
-            class article3:
-                stub = "article3"
-                flibble = "foo"
-
-    assert_raises(
-        AttributeError,
-        make_article3
-    )
 
 def test_callable_args():
     def body_counter():
@@ -125,9 +129,7 @@ def test_callable_args():
             count = count + 1
             yield "Name %s" % count
 
-    class ArticleData4(fixture.Data):
-        _entity = Article
-
+    class ArticleData(fixture.Data):
         class _default:
             body = body_counter().next
 
@@ -139,19 +141,19 @@ def test_callable_args():
             stub = "article5"
             name = "The Fifth Article"
 
-    assert ArticleData4.article4.name == "Name 1"
+    assert ArticleData.article4.name == "Name 1"
     # Check that accessing the attribute again doesn't change it
-    assert ArticleData4.article4.name == "Name 1"
-    assert ArticleData4.article4.body == "Body 1"
-    assert ArticleData4.article5.name == "The Fifth Article"
-    assert ArticleData4.article5.body == "Body 2"
+    assert ArticleData.article4.name == "Name 1"
+    assert ArticleData.article4.body == "Body 1"
+    assert ArticleData.article5.name == "The Fifth Article"
+    assert ArticleData.article5.body == "Body 2"
     # Check that accessing the attribute again doesn't change it
-    assert ArticleData4.article5.body == "Body 2"
+    assert ArticleData.article5.body == "Body 2"
 
 
 def test_defaults():
-    class ArticleData6(fixture.Data):
-        _entity = Article
+    class ArticleData(fixture.Data):
+        _entity = schema.Article
 
         class _default:
             name = lambda: "An Article"
@@ -161,8 +163,8 @@ def test_defaults():
             stub = "article6"
             name = "The Sixth Article"
 
-    assert ArticleData6.article6.name == "The Sixth Article"
-    assert ArticleData6.article6.body == "foo"
+    assert ArticleData.article6.name == "The Sixth Article"
+    assert ArticleData.article6.body == "foo"
 
 
 def test_data_acts_as_set():
@@ -184,18 +186,11 @@ def test_article_data():
     assert ArticleData.article2.stub == "article2"
     assert ArticleData.article2.name == "The Second Article"
 
+
 def test_comment_data():
     assert CommentData.comment1.id == 1
     assert CommentData.comment1.name == "Mr Smith"
 
-@with_empty_db
-def test_to_sa():
-    session = Session()
-    item = ArticleData.article1.to_sa(session)
-    item_data = item.to_dict()
-    session.commit()
-    session.close()
-    assert session.query(Article).one().to_dict() == item_data
 
 def test_to_dict():
     d1 = ArticleData.article1.to_dict()
@@ -203,8 +198,10 @@ def test_to_dict():
     d2 = ArticleData.article1.to_dict(foo=u'bar')
     assert d2['foo'] == u'bar'
 
-@with_empty_db
+
 def test_data_inheritance():
+    schema.with_empty_db()
+
     class new_article(ArticleData.article1):
         stub = "new_article"
 
@@ -212,7 +209,7 @@ def test_data_inheritance():
     assert new_article.body == ArticleData.article1.body
 
     class NewData(fixture.Data):
-        _entity = Article
+        _entity = schema.Article
         class new_article(ArticleData.article1):
             stub = "new_article"
 
@@ -221,14 +218,14 @@ def test_data_inheritance():
     assert NewData._items
 
     class NewFixture(Fixture):
-        comments = CommentData
+        CommentData = CommentData
 
-        class articles(fixture.Data):
+        class ArticleData(fixture.Data):
             # _entity = schema.Article
             class new_article(ArticleData.article1):
                 stub = "new_article"
 
-    article = NewFixture.articles.new_article
+    article = NewFixture.ArticleData.new_article
     assert article.stub == "new_article"
     assert article.name == "The First Article"
 
@@ -236,14 +233,16 @@ def test_data_inheritance():
         article = tester.Article.one()
         assert article.stub == "new_article"
         assert article.name == "The First Article"
-        assert tester._data.articles.new_article.stub == "new_article"
+        assert tester._data.ArticleData.new_article.stub == "new_article"
 
-@with_empty_db
+
 def test_fixture_inheritance():
-    class NewFixture(Fixture):
-        comments = CommentData
+    schema.with_empty_db()
 
-        class articles(fixture.Data):
+    class NewFixture(Fixture):
+        CommentData = CommentData
+
+        class ArticleData(fixture.Data):
             # _entity = schema.Article
             class new_article(ArticleData.article1):
                 stub = "new_article"
@@ -251,32 +250,34 @@ def test_fixture_inheritance():
             class new_article2(ArticleData.article2):
                 stub = "new_article2"
 
-        class comments(CommentData):
+        class CommentData(CommentData):
             pass
 
     class NewFixture2(NewFixture):
-        class articles(fixture.Data):
+        class ArticleData(fixture.Data):
             class new_article(ArticleData.article1):
                 stub = "new_article3"
 
-    assert NewFixture2.articles.new_article.stub == "new_article3"
-    assert len(NewFixture2.articles) == 1
-    assert NewFixture2.comments.comment1.name == "Mr Smith"
-    assert len(NewFixture2.comments) == 2
+    assert NewFixture2.ArticleData.new_article.stub == "new_article3"
+    assert len(NewFixture2.ArticleData) == 1
+    assert NewFixture2.CommentData.comment1.name == "Mr Smith"
+    assert len(NewFixture2.CommentData) == 2
 
     with NewFixture2() as tester:
         assert tester.Article.one()
         assert tester.Comment.length_is(2)
 
-@with_empty_db
+
 def test_override():
+    schema.with_empty_db()
+
     class NewFixture(Fixture):
-        class articles(ArticleData):
+        class ArticleData(ArticleData):
             class _override:
                 name = "overridden"
 
-    assert NewFixture.articles._items != ArticleData._items
-    assert not (NewFixture.articles._items is ArticleData._items)
+    assert NewFixture.ArticleData._items != ArticleData._items
+    assert not (NewFixture.ArticleData._items is ArticleData._items)
 
     with NewFixture() as tester:
         for article in tester.Article.all():
@@ -285,26 +286,33 @@ def test_override():
     for article in ArticleData:
         assert article.name != "overridden"
 
-@with_empty_db
+def to_dict(item):
+    return dict(
+        (k, getattr(item, k)) for k in item.__dict__.keys()
+                if not k.startswith("_"))
+
 def test_first_fixture():
+    schema.with_empty_db()
+
     with FirstFixture() as tester:
-        article1 = tester.session.query(Article).one()
+        article1 = tester.session.query(schema.Article).one()
         assert tester.Article.one() == article1
-        assert article1.to_dict() == ArticleData.article1.to_dict()
+        assert to_dict(article1) == ArticleData.article1.to_dict()
         assert tester.Article.length_is(1)
         assert tester.Article.all() == [article1]
-        comment1 = tester.session.query(Comment).one()
+        comment1 = tester.session.query(schema.Comment).one()
         assert tester.Comment.one() == comment1
-        assert comment1.to_dict() == CommentData.comment1.to_dict()
+        assert to_dict(comment1) == CommentData.comment1.to_dict()
         assert tester.Comment.length_is(1)
         assert tester.Comment.all() == [comment1]
 
 
-@with_empty_db
 def test_multiple_inheritance():
+    schema.with_empty_db()
+
     class FixtureOne(Fixture):
-        class articles(fixture.Data):
-            _entity = Article
+        class ArticleData(fixture.Data):
+            _entity = schema.Article
 
             class article_1:
                 stub = 'foo'
@@ -313,7 +321,7 @@ def test_multiple_inheritance():
                 score = 1
 
     class FixtureTwo(FixtureOne):
-        class articles(FixtureOne.articles):
+        class ArticleData(FixtureOne.ArticleData):
             class article_2:
                 stub = 'bar'
                 name = 'Bar'
@@ -321,8 +329,8 @@ def test_multiple_inheritance():
                 score = 2
 
     class FixtureThree(FixtureTwo):
-        class comments(fixture.Data):
-            _entity = Comment
+        class CommentData(fixture.Data):
+            _entity = schema.Comment
 
             class comment_1:
                 id = 1
@@ -333,3 +341,54 @@ def test_multiple_inheritance():
 
     with FixtureThree() as tester:
         assert tester.Article.length_is(2)
+
+
+def test_fixture_teardown():
+    class TeardownFixture(Fixture):
+        class ArticleData:
+            article1 = ArticleData.article1
+            article2 = ArticleData.article2
+        class CommentData:
+            comment1 = CommentData.comment1
+            comment2 = CommentData.comment2
+
+    with TeardownFixture() as tester:
+        expected = [
+            TeardownFixture.ArticleData.article1,
+            TeardownFixture.ArticleData.article2]
+        assert set(tester._data_added[schema.Article]) == set(expected)
+
+    session = schema.Session()
+
+    assert session.query(schema.Article).count() == 0
+
+
+def test_make_whereclause():
+    clause = fixture.make_whereclause(schema.article_table, dict(stub='foo', name='bar'))
+    expected = sa.and_(
+        schema.article_table.c.stub=='foo',
+        schema.article_table.c.name=='bar')
+    assert str(expected) == str(clause)
+
+
+def test_tracking_inserts():
+    class TrackingFixture(Fixture):
+        class ArticleData:
+            article1 = ArticleData.article1
+            article2 = ArticleData.article2
+        class CommentData:
+            comment1 = CommentData.comment1
+            comment2 = CommentData.comment2
+
+    with TrackingFixture() as tester:
+        article3 = schema.Article()
+        article3.stub = "article3"
+        article3.name = "The Third Article"
+        article3.body = "An article which is third\nblah, blah"
+        tester.session.add(article3)
+        tester.session.commit()
+        expected = [{'stub': 'article2'}, {'stub': 'article1'}, {'stub': 'article3'}]
+        assert tester._tracked_data[schema.article_table] == expected
+        assert tester.session.query(schema.Article).count() == 3
+
+    assert tester.session.query(schema.Article).count() == 0
