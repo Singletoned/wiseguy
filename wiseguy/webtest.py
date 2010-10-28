@@ -375,7 +375,7 @@ class ElementWrapper(object):
         """Set the value of the select to be the value with the given text.
 
         It's an error if more than one option has the same text"""
-        option = self.one(".//option[text()=%s]" % repr(text))
+        option = self.one(".//option[text()=%s]" % repr(str(text)))
         option.selected = True
 
     def __eq__(self, other):

@@ -538,8 +538,8 @@ def test_form_select_select():
     assert_equal(r.one('//form').submit().body, 's:<o1>')
 
     r = TestAgent(app).get('/')
-    r.one('//select').select('O1: Text with \'')
-    r.one('//select').select('O2: Text with \"')
+    r.one('//select').select(u'O1: Text with \'')
+    r.one('//select').select(u'O2: Text with \"')
     assert r.one('//select/option[1]').selected == False
     assert r.one('//select/option[2]').selected == True
     assert_equal(r.one('//form').submit().body, 's:<o2>')
