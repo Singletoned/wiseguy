@@ -370,6 +370,13 @@ class ElementWrapper(object):
         if not found:
             raise AssertionError("Value %r not present in select %r" % (value, self.element.attrib.get('name')))
 
+    @when("select")
+    def select(self, text):
+        """Set the value of the select to be the value with the given text.
+
+        It's an error if more than one option has the same text"""
+        option = self.one(".//option[text()=%s]" % repr(text))
+        option.selected = True
 
     def __eq__(self, other):
         if self.__class__ is not other.__class__:

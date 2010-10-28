@@ -525,6 +525,37 @@ def test_form_select():
     r.one('//select/option[1]').selected = True
     assert_equal(r.one('//form').submit().body, 's:<o1>')
 
+def test_form_select_select():
+    app = FormApp("""
+        <select name="s">
+        <option value="o1">O1: Text with '</option>
+        <option value="o2">O2: Text with \"</option>
+        </select>
+    """)
+    r = TestAgent(app).get('/')
+    r.one('//select').select('O1: Text with \'')
+    assert r.one('//select/option[1]').selected == True
+    assert_equal(r.one('//form').submit().body, 's:<o1>')
+
+    r = TestAgent(app).get('/')
+    r.one('//select').select('O1: Text with \'')
+    r.one('//select').select('O2: Text with \"')
+    assert r.one('//select/option[1]').selected == False
+    assert r.one('//select/option[2]').selected == True
+    assert_equal(r.one('//form').submit().body, 's:<o2>')
+
+    app = FormApp("""
+        <select name="s">
+        <option value="o1">Same text</option>
+        <option value="o2">Same text</option>
+        </select>
+    """)
+    r = TestAgent(app).get('/')
+    assert_raises(
+        wiseguy.webtest.MultipleMatchesError,
+        r.one('//select').select,
+        'Same text')
+
 def test_form_select_multiple():
     app = FormApp("""
         <select name="s" multiple="">
