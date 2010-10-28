@@ -452,7 +452,7 @@ class ElementWrapper(object):
     checked = property(_get_checked, _set_checked)
 
     @when("option")
-    def _get_selected(self, value):
+    def _get_selected(self):
         """
         Return True if the given select option is selected
         """
