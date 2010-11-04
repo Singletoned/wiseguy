@@ -1,13 +1,13 @@
-from werkzeug import Request, Response, redirect, EnvironBuilder
-from werkzeug.routing import Map
-from jinja2 import Environment, DictLoader
+import werkzeug as wz
+import jinja2 as j2
+import validino as v
 
-from wiseguy.web_utils import create_render, create_expose, MockEnv
+from wiseguy import web_utils as wu, utils
 
 
 def test_create_expose():
-    url_map = Map()
-    expose = create_expose(url_map)
+    url_map = wz.routing.Map()
+    expose = wu.create_expose(url_map)
 
     @expose(u"/test")
     def get(param1):
@@ -36,7 +36,7 @@ def test_create_expose():
     _locals = locals()
 
     def check_url(_url, _method, _endpoint, _response):
-        urls = url_map.bind_to_environ(MockEnv(_url, _method))
+        urls = url_map.bind_to_environ(wu.MockEnv(_url, _method))
         endpoint, kwargs = urls.match()
         assert endpoint == _endpoint, u"Should have chosen the correct function"
         res = _locals[endpoint]("p1", **kwargs)
@@ -55,9 +55,9 @@ def test_create_render():
         u'about': u"This is the about page.  Path: {{ req.path }}"
     }
 
-    env = Environment(loader=DictLoader(templates))
+    env = j2.Environment(loader=j2.DictLoader(templates))
 
-    render = create_render(env)
+    render = wu.create_render(env)
 
     @render(u"index")
     def index_page(req):
@@ -69,9 +69,9 @@ def test_create_render():
 
     @render(u"contact")
     def contact(req):
-        return redirect(u"/other_page")
+        return wz.redirect(u"/other_page")
 
-    req = Request(MockEnv(u"/", u"GET"))
+    req = wz.Request(wu.MockEnv(u"/", u"GET"))
 
     res = index_page(req)
     assert res.response[0] == "This is the index page.  Path: /.  Greeting: Hello"
