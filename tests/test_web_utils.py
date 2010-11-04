@@ -83,3 +83,34 @@ def test_create_render():
     assert u"Redirecting..." in res.response[0]
     assert u"/other_page" in res.response[0]
 
+
+def test_FormHandler():
+    class FooForm(wu.FormHandler):
+        @staticmethod
+        def GET(request, data=None, errors=None):
+            return ("GET", data)
+
+        @staticmethod
+        def POST(request, data=None):
+            s = v.Schema(
+                dict(foo=v.integer())
+                )
+            data = s(data)
+            return ("POST", data)
+
+    request = utils.MockObject(method='GET')
+    result = FooForm(request)
+    expected = ("GET", None)
+    assert result == expected
+
+    form = utils.MockObject(to_dict=lambda: dict(foo=1))
+    request = utils.MockObject(method='POST', form=form)
+    result = FooForm(request)
+    expected = ("POST", dict(foo=1))
+    assert result == expected
+
+    form = utils.MockObject(to_dict=lambda: dict(foo="abc"))
+    request = utils.MockObject(method='POST', form=form)
+    result = FooForm(request)
+    expected = ("GET", dict(foo="abc"))
+    assert result == expected

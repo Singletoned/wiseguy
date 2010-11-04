@@ -1,6 +1,7 @@
 from functools import wraps
 
 import werkzeug
+import validino
 
 
 def create_expose(url_map):
@@ -52,6 +53,20 @@ def create_require(predicate, template=None, response_builder=None, mimetype=u't
                 )
         return decorated
     return require
+
+
+class FormHandler(object):
+    _validator_error = validino.Invalid
+    def __new__(cls, request, **kwargs):
+        if request.method == 'GET':
+            return cls.GET(request, **kwargs)
+        elif request.method == 'POST':
+            data = request.form.to_dict()
+            try:
+                return cls.POST(request, data=data, **kwargs)
+            except cls._validator_error, e:
+                errors = e.unpack_errors()
+                return cls.GET(request, data=data, errors=errors, **kwargs)
 
 
 ### Utils for Tests
