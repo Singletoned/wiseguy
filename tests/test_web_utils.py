@@ -40,7 +40,6 @@ def test_create_expose():
         endpoint, kwargs = urls.match()
         assert endpoint == _endpoint, u"Should have chosen the correct function"
         res = _locals[endpoint]("p1", **kwargs)
-        print res, _response
         assert res == _response
 
     check_url(u"/test", u"GET", u"get", u"GET p1")
