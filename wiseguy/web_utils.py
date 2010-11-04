@@ -1,6 +1,6 @@
 from functools import wraps
 
-import werkzeug
+import werkzeug as wz
 import validino
 
 
@@ -8,7 +8,7 @@ def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):
         def decorate(f):
             kw['endpoint'] = f.__name__
-            url_map.add(werkzeug.routing.Rule(rule, methods=methods, **kw))
+            url_map.add(wz.routing.Rule(rule, methods=methods, **kw))
             return f
         return decorate
     return expose
@@ -25,7 +25,7 @@ def create_render(env):
                 except (TypeError, AttributeError):
                     return values
                 body = env.get_template(template_name).render(values)
-                return werkzeug.Response(body, mimetype=mimetype)
+                return wz.Response(body, mimetype=mimetype)
             return func
         return decorate
     return render
@@ -81,5 +81,5 @@ def MockEnv(path, method):
     >>> env[u"REQUEST_METHOD"]
     'POST'
     """
-    return werkzeug.EnvironBuilder(path=path, method=method).get_environ()
+    return wz.EnvironBuilder(path=path, method=method).get_environ()
 
