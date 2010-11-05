@@ -33,19 +33,17 @@ def test_create_expose():
     assert post_and_get.__doc__ == u"This is the post_and_get function"
     assert post_and_get.__name__ == "post_and_get"
 
-    _locals = locals()
-
     def check_url(_url, _method, _endpoint, _response):
         urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
         endpoint, kwargs = urls.match()
         assert endpoint == _endpoint, u"Should have chosen the correct function"
-        res = _locals[endpoint]("p1", **kwargs)
+        res = endpoint("p1", **kwargs)
         assert res == _response
 
-    check_url(u"/test", u"GET", u"get", u"GET p1")
-    check_url(u"/test", u"POST", u"post", u"POST p1")
-    check_url(u"/test_both", u"GET", u"post_and_get", u"GET POST p1")
-    check_url(u"/test_both", u"POST", u"post_and_get", u"GET POST p1")
+    check_url(u"/test", u"GET", get, u"GET p1")
+    check_url(u"/test", u"POST", post, u"POST p1")
+    check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
+    check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
 
 
 def test_create_render():

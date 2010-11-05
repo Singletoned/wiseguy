@@ -7,7 +7,7 @@ import validino
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):
         def decorate(f):
-            kw['endpoint'] = f.__name__
+            kw['endpoint'] = f
             url_map.add(wz.routing.Rule(rule, methods=methods, **kw))
             return f
         return decorate
