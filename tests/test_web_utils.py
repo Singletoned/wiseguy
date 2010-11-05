@@ -36,7 +36,7 @@ def test_create_expose():
     _locals = locals()
 
     def check_url(_url, _method, _endpoint, _response):
-        urls = url_map.bind_to_environ(wu.MockEnv(_url, _method))
+        urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
         endpoint, kwargs = urls.match()
         assert endpoint == _endpoint, u"Should have chosen the correct function"
         res = _locals[endpoint]("p1", **kwargs)
@@ -70,7 +70,7 @@ def test_create_render():
     def contact(req):
         return wz.redirect(u"/other_page")
 
-    req = wz.Request(wu.MockEnv(u"/", u"GET"))
+    req = wz.Request(utils.MockEnv(u"/", u"GET"))
 
     res = index_page(req)
     assert res.response[0] == "This is the index page.  Path: /.  Greeting: Hello"

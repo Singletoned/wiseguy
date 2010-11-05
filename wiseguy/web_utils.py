@@ -67,19 +67,3 @@ class FormHandler(object):
             except cls._validator_error, e:
                 errors = e.unpack_errors()
                 return cls.GET(request, data=data, errors=errors, **kwargs)
-
-
-### Utils for Tests
-
-def MockEnv(path, method):
-    """Returns a simple WSGI environment.  Pretends to be a class.
-    >>> env = MockEnv("/path", "POST")
-    >>> env # doctest:+ELLIPSIS
-    {'SERVER_PORT': '80', 'SERVER_PROTOCOL': 'HTTP/1.1', 'SCRIPT_NAME': '', 'wsgi.input': ...
-    >>> env[u"PATH_INFO"]
-    '/path'
-    >>> env[u"REQUEST_METHOD"]
-    'POST'
-    """
-    return wz.EnvironBuilder(path=path, method=method).get_environ()
-

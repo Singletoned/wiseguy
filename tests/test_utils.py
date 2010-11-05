@@ -23,3 +23,12 @@ def test_mock_object():
     m2 = utils.MockObject(foo=1, bar='flam')
     assert m1 == m2
     assert repr(m1) == "<MockObject foo=1, bar='flam'>"
+
+
+def test_mock_env():
+    env = utils.MockEnv("/path", "POST")
+    assert env[u"PATH_INFO"] == '/path'
+    assert env[u"REQUEST_METHOD"] == 'POST'
+
+    env = utils.MockEnv("/path", "POST", headers=dict(Foo="flim flam"))
+    assert env[u"HTTP_FOO"] == "flim flam"

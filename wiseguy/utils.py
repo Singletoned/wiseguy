@@ -2,6 +2,7 @@
 
 import re
 
+import werkzeug as wz
 
 def decamelise(s):
     """
@@ -36,3 +37,16 @@ class MockObject(object):
             if not getattr(other, key) == value:
                 return False
         return True
+
+
+def MockEnv(path, method, **kwargs):
+    """Returns a simple WSGI environment.  Pretends to be a class.
+    >>> env = MockEnv("/path", "POST")
+    >>> env # doctest:+ELLIPSIS
+    {'SERVER_PORT': '80', 'SERVER_PROTOCOL': 'HTTP/1.1', 'SCRIPT_NAME': '', 'wsgi.input': ...
+    >>> env[u"PATH_INFO"]
+    '/path'
+    >>> env[u"REQUEST_METHOD"]
+    'POST'
+    """
+    return wz.EnvironBuilder(path=path, method=method, **kwargs).get_environ()
