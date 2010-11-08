@@ -4,6 +4,8 @@ import werkzeug as wz
 import validino
 import jinja2
 
+from wiseguy import form_fields
+
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):
         def decorate(f):
@@ -18,6 +20,7 @@ def create_env_and_render(loader_type, path, name):
     env = jinja2.Environment(
         loader=getattr(jinja2, loader_type)(path, name),
     )
+    env.globals.update(dict(form_fields=form_fields))
     return create_render(env)
 
 def create_render(env):
