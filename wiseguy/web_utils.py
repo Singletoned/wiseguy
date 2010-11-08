@@ -21,7 +21,9 @@ def create_env_and_render(loader_type, path, name):
     return create_render(env)
 
 def create_render(env):
+    "Create a render decorator that passes the return value of a function to the named template"
     def render(template_name, mimetype='text/html'):
+        "Render the return value of the function in the named template, unless it is already a Response object"
         def decorate(f):
             @wraps(f)
             def func(*args, **kwargs):
