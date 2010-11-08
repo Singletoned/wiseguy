@@ -18,6 +18,7 @@ def add_errors(context, elements, id):
 
 @j2.contextfunction
 def input(context, id, label, compulsory=False):
+    "A simple input element"
     if compulsory:
         label = label + "*"
     elements = [
@@ -35,6 +36,7 @@ def input(context, id, label, compulsory=False):
 
 @j2.contextfunction
 def password(context, id, label, compulsory=False):
+    "A password element.  Won't fill the value even if present in context['data']"
     if compulsory:
         label = label + "*"
     elements = [
@@ -51,6 +53,7 @@ def password(context, id, label, compulsory=False):
 
 
 def select(context, id, label, options, compulsory=False):
+    "A select element.  Accepts a list of value, text pairs"
     if compulsory:
         label = label + "*"
     option_elements = []
@@ -75,6 +78,7 @@ def select(context, id, label, options, compulsory=False):
 
 
 def submit(id="submit", label="Submit"):
+    "A simple submit button"
     element = html.input(
         type="submit",
         id=id,
