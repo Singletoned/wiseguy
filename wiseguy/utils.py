@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import re
+import difflib, pprint, re
 
 import werkzeug as wz
 
@@ -50,3 +50,11 @@ def MockEnv(path, method, **kwargs):
     'POST'
     """
     return wz.EnvironBuilder(path=path, method=method, **kwargs).get_environ()
+
+def print_quick_pprint_diff(item1, item2):
+    if not isinstance(item1, basestring):
+        item1 = pprint.pformat(item1)
+    if not isinstance(item2, basestring):
+        item2 = pprint.pformat(item2)
+    for line in list(difflib.unified_diff(item1.split('\n'), item2.split('\n'))):
+        print line
