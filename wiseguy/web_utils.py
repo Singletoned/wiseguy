@@ -2,7 +2,7 @@ from functools import wraps
 
 import werkzeug as wz
 import validino
-
+import jinja2
 
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):
@@ -13,6 +13,12 @@ def create_expose(url_map):
         return decorate
     return expose
 
+def create_env_and_render(loader_type, path, name):
+    "Create a Jinja2 Environment and pass it to create_render"
+    env = jinja2.Environment(
+        loader=getattr(jinja2, loader_type)(path, name),
+    )
+    return create_render(env)
 
 def create_render(env):
     def render(template_name, mimetype='text/html'):
