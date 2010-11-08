@@ -99,6 +99,64 @@ class TestPassword(unittest.TestCase):
         result = form_fields.password(context, 'foo', "Foo:")
         assert expected == result
 
+
+class TestSelect(unittest.TestCase):
+    def test_plain(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        expected = '''
+<label for="foo">Foo:</label>
+<select id="foo" name="foo">
+  <option value="bar1">Bar 1</option>
+  <option value="bar2">Bar 2</option>
+  <option value="bar3">Bar 3</option>
+</select>
+        '''.strip()
+        result = form_fields.select({}, 'foo', "Foo:", options)
+        assert expected == result
+
+    def test_compulsory(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        expected = '''
+<label for="foo">Foo:*</label>
+<select id="foo" name="foo">
+  <option value="bar1">Bar 1</option>
+  <option value="bar2">Bar 2</option>
+  <option value="bar3">Bar 3</option>
+</select>
+        '''.strip()
+        result = form_fields.select({}, 'foo', "Foo:", options, compulsory=True)
+        assert expected == result
+
+    def test_data(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict(data=dict(foo='bar3'))
+        expected = '''
+<label for="foo">Foo:</label>
+<select id="foo" name="foo">
+  <option value="bar1">Bar 1</option>
+  <option value="bar2">Bar 2</option>
+  <option selected value="bar3">Bar 3</option>
+</select>
+        '''.strip()
+        result = form_fields.select(context, 'foo', "Foo:", options)
+        assert expected == result
+
+    def test_errors(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict(errors=dict(foo='Please choose a foo'))
+        expected = '''
+<label for="foo">Foo:</label>
+<select id="foo" name="foo">
+  <option value="bar1">Bar 1</option>
+  <option value="bar2">Bar 2</option>
+  <option value="bar3">Bar 3</option>
+</select>
+<span class="error">Please choose a foo</span>
+        '''.strip()
+        result = form_fields.select(context, 'foo', "Foo:", options)
+        assert expected == result
+
+
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
         expected = '''<input type="submit" id="submit" value="Submit">'''

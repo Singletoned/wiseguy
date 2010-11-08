@@ -49,6 +49,35 @@ def password(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
+def select(context, id, label, options, compulsory=False):
+    if compulsory:
+        label = label + "*"
+    option_elements = []
+    selected = (context.get('data', False) or {}).get(id, '')
+    for (value, text) in options:
+        if value == selected:
+            o = html.option(text, value=value, selected=True)
+        else:
+            o = html.option(text, value=value)
+        option_elements.append("  %s\n"%o)
+    elements = [
+        html.label(
+            label,
+            for_=id),
+        html.select(
+            "\n",
+            *option_elements,
+            name=id,
+            id=id)]
+    if context.get('errors', None):
+        if context['errors'].get(id, ''):
+            elements.append(
+                html.span(
+                    context['errors'][id],
+                    class_='error'))
+    return '\n'.join(elements)
+
+
 def submit(id="submit", label="Submit"):
     element = html.input(
         type="submit",
