@@ -5,6 +5,17 @@ import werkzeug as wz
 
 html = wz.HTMLBuilder('html')
 
+
+def add_errors(context, elements, id):
+    "Add an error, if present, to the list of elements"
+    if context.get('errors', None):
+        if context['errors'].get(id, ''):
+            elements.append(
+                html.span(
+                    context['errors'][id],
+                    class_='error'))
+
+
 @j2.contextfunction
 def input(context, id, label, compulsory=False):
     if compulsory:
@@ -18,12 +29,7 @@ def input(context, id, label, compulsory=False):
             name=id,
             id=id,
             value=j2.escape((context.get('data', False) or {}).get(id, '')))]
-    if context.get('errors', None):
-        if context['errors'].get(id, ''):
-            elements.append(
-                html.span(
-                    context['errors'][id],
-                    class_='error'))
+    add_errors(context, elements, id)
     return '\n'.join(elements)
 
 
@@ -40,12 +46,7 @@ def password(context, id, label, compulsory=False):
             name=id,
             id=id,
             value="")]
-    if context.get('errors', None):
-        if context['errors'].get(id, ''):
-            elements.append(
-                html.span(
-                    context['errors'][id],
-                    class_='error'))
+    add_errors(context, elements, id)
     return '\n'.join(elements)
 
 
@@ -69,12 +70,7 @@ def select(context, id, label, options, compulsory=False):
             *option_elements,
             name=id,
             id=id)]
-    if context.get('errors', None):
-        if context['errors'].get(id, ''):
-            elements.append(
-                html.span(
-                    context['errors'][id],
-                    class_='error'))
+    add_errors(context, elements, id)
     return '\n'.join(elements)
 
 
