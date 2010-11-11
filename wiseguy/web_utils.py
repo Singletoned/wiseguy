@@ -32,7 +32,7 @@ def create_render(env):
             def func(*args, **kwargs):
                 values = f(*args, **kwargs)
                 try:
-                    values.update({u'req':args[0]})
+                    values.update({u'request':args[0]})
                 except (TypeError, AttributeError):
                     return values
                 body = env.get_template(template_name).render(values)

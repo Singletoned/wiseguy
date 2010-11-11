@@ -48,8 +48,8 @@ def test_create_expose():
 
 def test_create_render():
     templates = {
-        u'index': u"This is the index page.  Path: {{ req.path }}.  Greeting: {{ greeting }}",
-        u'about': u"This is the about page.  Path: {{ req.path }}"
+        u'index': u"This is the index page.  Path: {{ request.path }}.  Greeting: {{ greeting }}",
+        u'about': u"This is the about page.  Path: {{ request.path }}"
     }
 
     env = j2.Environment(loader=j2.DictLoader(templates))
