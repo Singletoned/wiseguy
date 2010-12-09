@@ -77,10 +77,14 @@ def select(context, id, label, options, compulsory=False):
     return '\n'.join(elements)
 
 
-def submit(id="submit", label="Submit"):
+def submit(id="submit", label="Submit", class_=""):
     "A simple submit button"
-    element = html.input(
+    kwargs = dict(
         type="submit",
         id=id,
         value=label)
+    if class_:
+        kwargs['class_'] = class_
+    element = html.input(
+        **kwargs)
     return element

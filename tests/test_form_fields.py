@@ -172,3 +172,8 @@ class TestSubmit(unittest.TestCase):
         expected = '''<input type="submit" id="foo" value="Foo&amp;&lt;">'''
         result = form_fields.submit('foo', "Foo&<")
         assert expected == result
+
+    def test_with_classes(self):
+        expected = '''<input class="foo bar" type="submit" id="submit" value="Submit">'''
+        result = form_fields.submit(class_="foo bar")
+        assert expected == result
