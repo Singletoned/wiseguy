@@ -759,7 +759,7 @@ class TestAgent(object):
             status=status,
         )
 
-    def post(self, PATH_INFO='/', data=None, charset='UTF-8', follow=False, history=True, **kwargs):
+    def post(self, PATH_INFO='/', data=None, charset='UTF-8', follow=False, history=True, status=None, **kwargs):
         """
         Make a POST request to the application and return the response.
         """
@@ -783,6 +783,7 @@ class TestAgent(object):
             ),
             follow,
             history,
+            status=status,
         )
 
     def post_multipart(self, PATH_INFO='/', data=None, files=None, charset='UTF-8', follow=False, **kwargs):

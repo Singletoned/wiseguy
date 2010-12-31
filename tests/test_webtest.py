@@ -412,6 +412,10 @@ def test_click_follows_redirect():
     response = link.click(follow=True)
     assert_equal(response.request.path, '/page1')
 
+def test_post_404():
+    page = TestAgent(TestApp()).post('/no_page_here', status="404 NOT FOUND")
+    assert page.status == "404 NOT FOUND"
+
 def test_click_404_raises_error():
     page = TestAgent(TestApp()).get('/bad-link')
     link = page.one("//a[text()='A Bad Link']")
