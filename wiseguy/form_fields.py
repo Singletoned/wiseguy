@@ -29,7 +29,7 @@ def input(context, id, label, compulsory=False):
             type="text",
             name=id,
             id=id,
-            value=j2.escape((context.get('data', False) or {}).get(id, '')))]
+            value=str(j2.escape((context.get('data', False) or {}).get(id, ''))))]
     add_errors(context, elements, id)
     return '\n'.join(elements)
 
