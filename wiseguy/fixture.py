@@ -1,13 +1,58 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from types import ClassType
-import datetime
+from types import ClassType, FunctionType
+import datetime, itertools
+import traceback
 
 import sqlalchemy as sa
 import sqlalchemy.interfaces
-import sqlalchemy.orm
 
+
+class FixtureTeardownError(Exception):
+    """An error that happened in Fixture.__exit__
+    """
+
+    def __init__(self, error, orig_error_type, orig_error_value, orig_error_tb):
+        self.error = error
+        self.orig_error = "".join(traceback.format_exception(orig_error_type, orig_error_value, orig_error_tb))
+
+    def __str__(self):
+        return """%s\n\nOriginal Error was:\n%s""".strip() % (self.error, self.orig_error)
+
+def _get_primary_key_names(cls):
+    p_keys = cls._sa_class_manager.mapper.primary_key
+    p_key_names = [key.name for key in p_keys]
+    return p_key_names
+
+def _get_from_data(cls, session, data):
+    p_key_names = _get_primary_key_names(cls)
+    p_key = [data[key_name] for key_name in p_key_names]
+    item = session.query(cls).get(p_key)
+    return item
+
+def _create_item(cls, **kwargs):
+    item = cls()
+    for key, value in kwargs.items():
+        if item._sa_class_manager.mapper.has_property(key):
+            setattr(item, key, value)
+    return item
+
+def _item_to_dict(item, **kwargs):
+    column_names = [c.name for c in item._sa_class_manager.mapper.columns]
+    d = dict([(k, getattr(item, k)) for k in column_names])
+    for key, value in kwargs.items():
+        d[key] = value
+    return d
+
+def _item_from_dict(item, d, **kwargs):
+    data = {}
+    data.update(d)
+    data.update(kwargs)
+    for key, value in data.items():
+        if item._sa_class_manager.mapper.has_property(key):
+            setattr(item, key, value)
+    return item
 
 def get_data_from_class(_class):
     if not _class:
@@ -73,6 +118,14 @@ class DataMeta(type):
                     datum = make_datum(value, default_data, override_data, _entity_name)
                     setattr(data_class, key, datum)
                     data_class._items[key] = datum
+                elif isinstance(value, FunctionType):
+                    for v_name, v_dict in value():
+                        value_to_make = DatumMeta(v_name, (object,), v_dict)
+                        datum = make_datum(value_to_make, default_data, override_data, _entity_name)
+                        setattr(data_class, v_name, datum)
+                        data_class._items[v_name] = datum
+                    delattr(data_class, key)
+
         return data_class
 
     def __iter__(self):
@@ -81,6 +134,9 @@ class DataMeta(type):
 
     def keys(self):
         return set(self._items.values()).keys()
+
+    def items(self):
+        return self._items.items()
 
     def __len__(self):
         return len(self._items.values())
@@ -114,6 +170,9 @@ class Data(object):
 class DatumMeta(type):
     def __new__(meta, class_name, bases, class_dict):
         datum = type.__new__(meta, class_name, bases, class_dict)
+        # for attr in [k for k in class_dict if not k.startswith('_')]:
+        #     if not hasattr(datum._entity, attr):
+        #         raise AttributeError, "%r has no %r" % (datum._entity, attr)
         return datum
 
     def __setattr__(self, key, value):
@@ -155,7 +214,7 @@ class DatumMeta(type):
             else:
                 item = getattr(self, key)
             data[key] = item
-        item = self._entity.create(**data)
+        item = _create_item(self._entity, **data)
         session.add(item)
         return item
 
@@ -167,16 +226,13 @@ class BaseTester(object):
         self.session = session
         self.query = session.query(self._entity)
 
-    def length_is(self, length):
-        return self.query.count() == length
-
     def count(self):
         return self.query.count()
 
     def all(self, as_dict=False):
         _all = self.query.all()
         if as_dict:
-            return [item.to_dict() for item in _all]
+            return [_item_to_dict(item) for item in _all]
         else:
             return _all
 
@@ -201,11 +257,15 @@ class FixtureMeta(type):
             data.update(getattr(base, '_data', {}))
         for key, value in class_dict.items():
             if not key.startswith("_"):
-                if type(value) == ClassType:
-                    bases = (Data, )
-                    value = DataMeta(key, bases, value.__dict__)
-                    setattr(fixture, key, value)
-                data[key] = value
+                if value:
+                    if type(value) == ClassType:
+                        bases = (Data, )
+                        value = DataMeta(key, bases, value.__dict__)
+                        setattr(fixture, key, value)
+                    data[key] = value
+                else:
+                    if data.has_key(key):
+                        del data[key]
         fixture._data = data
         return fixture
 
@@ -249,9 +309,7 @@ class EnvWrapper(object):
 def make_whereclause(table, p_key):
     clauses = []
     for key, value in p_key.items():
-        clauses.append(
-            getattr(table.c, key)==value
-            )
+        clauses.append(getattr(table.c, key)==value)
     return sa.and_(*clauses)
 
 def get_primary_keys(table, data):
@@ -259,6 +317,12 @@ def get_primary_keys(table, data):
     for key in table.primary_key:
         p_keys[key.name] = data[key.name]
     return p_keys
+
+def get_pkeys_dict(entity_class, data):
+    p_key_names = [key.name for key in entity_class._sa_class_manager.mapper.primary_key]
+    dicts = [dict([(key, item[key]) for key in p_key_names]) for item in data]
+    return dicts
+
 
 class MyProxy(sa.interfaces.ConnectionProxy):
     def __init__(self, tracker):
@@ -274,112 +338,227 @@ class MyProxy(sa.interfaces.ConnectionProxy):
         return execute(clauseelement, *multiparams, **params)
 
 
-def FixtureClassFactory(uri, metadata, sa_classes, env, overrides=None):
-    env = EnvWrapper(env)
+class Fixture(object):
+    __metaclass__ = FixtureMeta
 
-    class TesterManager(object):
-        tester_classes = []
+    def __init__(self, loader):
+        self._loader = loader
+        self._tester_classes = set()
+        self._data_added = None
+        self._data_updated = None
+        self._data = TesterManagerDataDict(self._data)
 
-        def __init__(self, _data, env, add_data):
-            self._tracked_data = {}
-            engine = sa.create_engine(uri, proxy=MyProxy(self._tracked_data))
-            metadata.bind = engine
-            Session = sa.orm.sessionmaker(bind=engine)
-            self.session = Session()
-            self._data = TesterManagerDataDict(_data)
-            self._date_created = datetime.datetime.now()
-            self._env = env
-            self._data_added = None
-            if add_data:
-                self.add_data()
-            for _class in self.tester_classes:
-                attr_name = _class._entity.__name__
-                # self.foo = FooTester(session)
-                setattr(self, attr_name, _class(self.session))
+    def __enter__(self):
+        self.session = self._loader.session_factory()
+        entity_classes, self._data_added, self._data_updated = self._loader.add_data(self._data)
+        for entity_class in entity_classes:
+            self._add_tester_class(entity_class, self.session)
+        return self
 
-        def __enter__(self):
-            return self
+    def __exit__(self, exc_type, value, traceback):
+        try:
+            self._loader.delete_data(self._data_added)
+            self._loader.restore_data(self._data_updated)
+        except sa.exc.IntegrityError, e:
+            raise FixtureTeardownError(e, exc_type, value, traceback)
 
-        def __exit__(self, exc_type, value, traceback):
-            self.remove_tracked_data()
-            if self._data_added:
-                self.remove_data()
-            self.session.close()
+    def _add_data(self, overwrite_data=False, keep_constraints=False):
+        self.session = self._loader.session_factory()
+        entity_classes, self._data_added, self._data_updated = self._loader.add_data(
+            self._data,
+            overwrite_data=overwrite_data,
+            keep_constraints=keep_constraints)
+        return self
 
-        def create(self, *args):
-            for group in args:
-                for item in group:
-                    item.to_sa(self.session)
-            self.session.commit()
-            self.session.close()
-
-        def add_data(self):
-            data_to_add = defaultdict(list)
-            for data_class in self._data.values():
-                entity_class = env[data_class._entity_name]
-                for item in data_class:
-                    data_to_add[entity_class].append(item)
-            # Add the items in the order defined by sa_classes
-            for sa_class in sa_classes:
-                for datum in data_to_add[sa_class]:
-                    data = datum.to_dict()
-                    p_keys = sa_class._sa_class_manager.mapper.primary_key
-                    p_key_names = [key.name for key in p_keys]
-                    p_key = [data[key_name] for key_name in p_key_names]
-                    item = self.session.query(sa_class).get(p_key)
-                    if not item:
-                        item = sa_class()
-                        for key, value in data.items():
-                            setattr(item, key, value)
-                    self.session.add(item)
-            self.session.commit()
-            self.session.close()
-            self._data_added = data_to_add
-
-        def remove_data(self):
-            self.session.expire_all()
-            for entity_class, data in self._data_added.items():
-                p_key_names = [key.name for key in
-                               entity_class._sa_class_manager.mapper.primary_key]
-                for item in data:
-                    p_key = [getattr(item, key) for key in p_key_names]
-                    item = self.session.query(entity_class).get(p_key)
-                    if item:
-                        self.session.delete(item)
-            self.session.commit()
-
-        def remove_tracked_data(self):
-            self.session.close()
-            for table, p_keys in self._tracked_data.items():
-                clauses = [make_whereclause(table, p_key) for p_key in p_keys]
-                where_clause = sa.or_(*clauses)
-                q = table.delete().where(where_clause)
-                self.session.execute(q)
-            self.session.commit()
-
-    for _class in sa_classes:
-        t_class_name = "%sTester" % _class.__name__
-        t_base_name = "%sBase" % t_class_name
-        if overrides and t_base_name in overrides:
-            t_class_bases = (BaseTester, overrides[t_base_name])
+    def __getattr__(self, key):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        elif (hasattr(self._loader.session_factory, 'classes')) and (key in self._loader.session_factory.classes) and hasattr(self, 'session'):
+            entity_class = self._loader.session_factory.classes[key]
+            self._add_tester_class(entity_class, self.session)
+            return getattr(self, key)
         else:
-            t_class_bases = (BaseTester,)
+            raise AttributeError
+
+    def _add_tester_class(self, entity_class, session):
+        t_class_name = "%sTester" % entity_class.__name__
+        t_base_name = "%sBase" % t_class_name
+        t_class_bases = (BaseTester,)
         # Create the FooTester
         t_class = type(
             t_class_name,
             t_class_bases,
-            {'_entity': _class})
-        TesterManager.tester_classes.append(t_class)
+            {'_entity': entity_class})
+        self._tester_classes.add(t_class)
+
         # TesterManager.FooTester = FooTester
-        setattr(TesterManager, t_class_name, t_class)
+        setattr(self, entity_class.__name__, t_class(session))
 
 
-    class Fixture(object):
-        __metaclass__ = FixtureMeta
-        _data = TesterManagerDataDict()
-        _env = env
+class no_autoflush(object):
+    def __init__(self, session):
+        self.session = session
+        self.autoflush = session.autoflush
 
-        def __new__(cls, add_data=True):
-            return TesterManager(cls._data, env, add_data=add_data)
+    def __enter__(self):
+        self.session.autoflush = False
 
-    return Fixture
+    def __exit__(self, type, value, traceback):
+        self.session.autoflush = self.autoflush
+
+
+class NoConstraints(object):
+    def __init__(self, session):
+        self.session = session
+        self.engine_name = self.session.connection().engine.name
+
+    def __enter__(self):
+        self.session.close()
+        "Disable all constraints on the session"
+        if self.engine_name == 'mssql':
+            self.session.execute(
+                '''EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"''')
+        self.session.commit()
+        self.session.close()
+
+    def __exit__(self, excp_type, value, traceback):
+        "Restore all constraints on the session"
+        self.session.close()
+        if self.engine_name == 'mssql':
+            self.session.execute(
+                '''EXEC sp_msforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"''')
+        self.session.commit()
+        self.session.close()
+
+
+class EmptyWith(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __enter__(self, *args, **kwargs):
+        pass
+
+    def __exit__(self, type, value, traceback):
+        pass
+
+
+class BaseLoader(object):
+    """A base class for loaders.
+
+    The first argument to Loader needs to be either a dict of {'DataClassname': sa_class} or if every DataClass is named after the sa_class with 'Data' appended (as ours are), then you can just pass it an object that has the sa_classes as attrs (eg our mappers module).Obviously replace the call to `init_simple` with a call to a more complicated `Session` creation func."""
+    def __init__(self, env, session_factory):
+        self.env = EnvWrapper(env)
+        self.session_factory = session_factory
+
+
+class NoDataLoader(BaseLoader):
+    """A Loader that doesn't load data"""
+    def add_data(self, data):
+        entity_classes = set()
+        for data_class in data.values():
+            entity_class = self.env[data_class._entity_name]
+            entity_classes.add(entity_class)
+        return (entity_classes, [], [])
+
+    def delete_data(self, data):
+        pass
+
+    def restore_data(self, data):
+        pass
+
+
+class Loader(BaseLoader):
+    """A basic holder for an env and a session."""
+    def add_data(self, data, overwrite_data=True, keep_constraints=False):
+        session = self.session_factory()
+        entity_classes = set()
+        data_added = defaultdict(list)
+        data_updated = defaultdict(list)
+        if keep_constraints:
+            constraint_checker = EmptyWith
+        else:
+            constraint_checker = NoConstraints
+        with constraint_checker(session):
+            with no_autoflush(session):
+                for data_class in data.values():
+                    entity_class = self.env[data_class._entity_name]
+                    entity_classes.add(entity_class)
+                    for datum in data_class:
+                        item_data = datum.to_dict()
+                        item = _get_from_data(entity_class, session, item_data)
+                        if item:
+                            if overwrite_data:
+                                data_updated[entity_class].append(_item_to_dict(item))
+                                _item_from_dict(item, item_data)
+                                session.add(item)
+                        else:
+                            item = _create_item(entity_class, **item_data)
+                            session.add(item)
+                            data_added[entity_class].append(_item_to_dict(item))
+                session.commit()
+        session.close()
+        return (entity_classes, data_added, data_updated)
+
+    def _process_data(self, data_to_process):
+        items = [
+            (entity_class._sa_class_manager.mapper.mapped_table, get_pkeys_dict(entity_class, data))
+            for (entity_class, data) in data_to_process.items()]
+        processed_items = []
+
+        def process_item(table, p_keys):
+            # Break joins into seperate tables
+            result = []
+            if isinstance(table, sqlalchemy.types.expression.Join):
+                for join_table in [table.left, table.right]:
+                    data = [dict(
+                        [(key, datum[key]) for key in datum
+                         if hasattr(join_table.c, key)]) for datum in p_keys]
+                    result.append((join_table, data))
+            else:
+                result.append((table, p_keys))
+            return result
+
+        for table, p_keys in items:
+            processed_items.extend(process_item(table, p_keys))
+
+        return processed_items
+
+    def delete_data(self, data_added):
+        session = self.session_factory()
+
+        processed_items = self._process_data(data_added)
+
+        with NoConstraints(session):
+            with no_autoflush(session):
+                for table, p_key_list in processed_items:
+                    for p_keys in batch(p_key_list, 100):
+                        clauses = [make_whereclause(table, p_key) for p_key in p_keys]
+                        where_clause = sa.or_(*clauses)
+                        q = table.delete().where(where_clause)
+                        session.execute(q)
+                session.commit()
+            session.close()
+
+    def restore_data(self, data_updated):
+        session = self.session_factory()
+
+        with no_autoflush(session):
+            with NoConstraints(session):
+                for entity_class, data_list in data_updated.items():
+                    for original_data in data_list:
+                        item = _get_from_data(entity_class, session, original_data)
+                        assert item
+                        _item_from_dict(item, original_data)
+                session.commit()
+        session.close()
+
+
+def batch(items, count):
+    "Return the items in groups of count"
+    items = iter(items)
+    while True:
+        result = list(itertools.islice(items, count))
+        if len(result) > 0:
+            yield result
+        else:
+            raise StopIteration
