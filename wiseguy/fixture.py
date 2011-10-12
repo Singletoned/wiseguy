@@ -467,7 +467,7 @@ class NoDataLoader(BaseLoader):
         pass
 
 
-class Loader(BaseLoader):
+class SQLAlchemyLoader(BaseLoader):
     """A basic holder for an env and a session."""
     def add_data(self, data, overwrite_data=True, keep_constraints=False):
         session = self.session_factory()

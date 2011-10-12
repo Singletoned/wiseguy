@@ -71,17 +71,15 @@ class SecondFixture(fixture.Fixture):
     class CommentData:
         comment2 = CommentData.comment2
 
-loader = fixture.Loader(schema, schema.Session)
+sa_loader = fixture.SQLAlchemyLoader(schema, schema.Session)
 
-def test_loader():
-    loader = fixture.Loader(env=schema, session_factory=schema.Session)
-
+def test_sqlalchemy_loader():
     assert hasattr(schema, 'Article')
-    assert isinstance(loader.env, fixture.EnvWrapper)
-    assert loader.env.ArticleData == schema.Article
-    assert loader.env['ArticleData'] == schema.Article
+    assert isinstance(sa_loader.env, fixture.EnvWrapper)
+    assert sa_loader.env.ArticleData == schema.Article
+    assert sa_loader.env['ArticleData'] == schema.Article
 
-    with FirstFixture(loader) as tester:
+    with FirstFixture(sa_loader) as tester:
         assert tester.Article.count() == 1
         assert tester.Comment.count() == 1
 
@@ -91,7 +89,7 @@ def test_Fixture_env():
 
     assert not hasattr(FirstFixture, '_env')
 
-    test_loader = fixture.Loader(schema, schema.Session)
+    test_loader = fixture.SQLAlchemyLoader(schema, schema.Session)
 
     with FirstFixture(test_loader) as tester:
         assert tester._loader.env.ArticleData == schema.Article
@@ -236,7 +234,7 @@ def test_data_inheritance():
     assert article.stub == "new_article"
     assert article.name == "The First Article"
 
-    with NewFixture(loader) as tester:
+    with NewFixture(sa_loader) as tester:
         article = tester.Article.one()
         assert article.stub == "new_article"
         assert article.name == "The First Article"
@@ -269,7 +267,7 @@ def test_fixture_inheritance():
     assert NewFixture2.CommentData.comment1.name == "Mr Smith"
     assert len(NewFixture2.CommentData) == 2
 
-    with NewFixture2(loader) as tester:
+    with NewFixture2(sa_loader) as tester:
         assert tester.Article.one()
         assert tester.Comment.count() == 2
 
@@ -290,7 +288,7 @@ def test_override():
     assert NewFixture.ArticleData._items != ArticleData._items
     assert not (NewFixture.ArticleData._items is ArticleData._items)
 
-    with NewFixture(loader) as tester:
+    with NewFixture(sa_loader) as tester:
         for article in tester.Article.all():
             assert article.name == "overridden"
 
@@ -301,7 +299,7 @@ def test_override():
 def test_first_fixture():
     schema.with_empty_db()
 
-    with FirstFixture(loader) as tester:
+    with FirstFixture(sa_loader) as tester:
         article1 = tester.session.query(schema.Article).one()
         assert tester.Article.one() == article1
         assert tester.Article.count() == 1
@@ -344,7 +342,7 @@ def test_multiple_inheritance():
                 name = 'Bob'
                 body = 'I like this article'
 
-    with FixtureThree(loader) as tester:
+    with FixtureThree(sa_loader) as tester:
         assert tester.Article.count() == 2
 
 
@@ -374,7 +372,7 @@ def test_generator_functions():
 
     assert len(GeneratorFixture._data['ArticleData2']) == 4
 
-    with GeneratorFixture(loader) as tester:
+    with GeneratorFixture(sa_loader) as tester:
         assert tester.Article.count() == 4
 
 
@@ -387,7 +385,7 @@ def test_fixture_teardown():
             comment1 = CommentData.comment1
             comment2 = CommentData.comment2
 
-    with TeardownFixture(loader) as tester:
+    with TeardownFixture(sa_loader) as tester:
         expected = [
             TeardownFixture.ArticleData.article1.to_dict(),
             TeardownFixture.ArticleData.article2.to_dict()]
@@ -421,7 +419,7 @@ def test_NoDataLoader():
 #             comment1 = CommentData.comment1
 #             comment2 = CommentData.comment2
 
-#     with TrackingFixture(loader) as tester:
+#     with TrackingFixture(sa_loader) as tester:
 #         article3 = schema.Article()
 #         article3.stub = "article3"
 #         article3.name = "The Third Article"
@@ -469,14 +467,14 @@ def test_restoring_overwritten_data():
                 name = "Mr Smith"
                 body = "This one is not so good."
 
-    with ExistingFixture(loader) as T1:
+    with ExistingFixture(sa_loader) as T1:
         assert T1.Article.count() == 1
         assert T1.Comment.count() == 1
 
         original_article = T1.Article.one()
         assert original_article.name == "The First Article"
 
-        with UpdatedFixture(loader) as T2:
+        with UpdatedFixture(sa_loader) as T2:
             assert T1.Article.count() == 2
             assert T1.Comment.count() == 2
 
@@ -497,7 +495,7 @@ def test_restoring_overwritten_data():
         assert restored_article.name == "The First Article"
 
 def test_to_dict():
-    with FirstFixture(loader) as tester:
+    with FirstFixture(sa_loader) as tester:
         article = tester.Article.one()
         expected = dict(
             stub=u"article1",
@@ -517,7 +515,7 @@ def test_to_dict():
         assert result == expected
 
 def test_from_dict():
-    with FirstFixture(loader) as tester:
+    with FirstFixture(sa_loader) as tester:
         article = schema.Article()
         data = dict(
             foo="bar",
