@@ -5,6 +5,68 @@ import validino as v
 from wiseguy import web_utils as wu, utils
 
 
+def test_base_app():
+    class TestRequest(wz.BaseRequest):
+        def __init__(self, environ, **kwargs):
+            super(self.__class__, self).__init__(environ)
+            self.url = wz.Href("/submount")
+
+    url_map = wz.routing.Map([
+        wz.routing.Rule('/', endpoint=lambda r: wz.Response("Index")),
+        wz.routing.Rule('/foo', endpoint=lambda r: wz.Response("Foo Page")),
+        wz.routing.Rule('/bar', endpoint=lambda r: ('bar', 'text/html', {'bar_var': "flumble"})),
+        wz.routing.Rule('/wrong', endpoint=lambda request: wz.redirect(request.url('/baz'))),
+        wz.routing.Rule('/config', endpoint=lambda request: wz.Response(request.app.config['mountpoint'])),
+        ])
+    env = j2.Environment(
+        loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
+        extensions=['jinja2.ext.i18n'])
+
+    app = wu.BaseApp(
+        config=dict(mountpoint=u"/submount"),
+        url_map=url_map,
+        env=env,
+        request_class=TestRequest)
+
+    assert app.mountpoint() == u"/submount"
+    assert app.mountpoint(u"bar") == u"/submount/bar"
+
+    assert app.config['mountpoint'] == u"/submount"
+    assert 'url' in app.env.globals
+    assert 'gettext' in app.env.globals
+
+    for rule in app.url_map.iter_rules():
+        assert rule.rule.startswith('/submount')
+
+    environ = wz.test.create_environ('/submount/')
+    response = app(environ, lambda s, h: s)
+    assert list(response) == ["Index"]
+
+    environ = wz.test.create_environ('/submount')
+    response = app(environ, lambda s, h: s)
+    response = list(response)[0]
+    assert "Redirecting..." in response
+    assert "/submount/" in response
+
+    environ = wz.test.create_environ('/submount/foo')
+    response = app(environ, lambda s, h: s)
+    assert list(response) == ["Foo Page"]
+
+    environ = wz.test.create_environ('/submount/bar')
+    response = app(environ, lambda s, h: s)
+    assert list(response) == ["Bar Page flumble"]
+
+    environ = wz.test.create_environ('/submount/config')
+    response = app(environ, lambda s, h: s)
+    assert list(response) == ["/submount"]
+
+    environ = wz.test.create_environ('/submount/wrong')
+    response = app(environ, lambda s, h: s)
+    response = list(response)[0]
+    assert "Redirecting..." in response
+    assert "/submount/baz" in response
+
+
 def test_create_expose():
     url_map = wz.routing.Map()
     expose = wu.create_expose(url_map)

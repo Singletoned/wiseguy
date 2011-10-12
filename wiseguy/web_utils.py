@@ -6,6 +6,40 @@ import jinja2
 
 from wiseguy import form_fields
 
+
+class BaseApp(object):
+    def __init__(self, config, url_map, env, request_class=wz.Request):
+        self.config = config
+        self.env = env
+        self.mountpoint = wz.Href(config['mountpoint'])
+        self._request_class = request_class
+        self.env.globals.update(
+            dict(
+                gettext=lambda x: _(x),
+                url=self.mountpoint))
+        self.url_map = wz.routing.Map([
+            wz.routing.Submount(
+                self.mountpoint(),
+                url_map.iter_rules())])
+
+    def __call__(self, environ, start_response):
+        req = self._request_class(environ)
+        req.app = self
+        req.map_adapter = self.url_map.bind_to_environ(environ)
+        try:
+            endpoint, kwargs = req.map_adapter.match()
+            res = endpoint(req, **kwargs)
+            if not isinstance(res, wz.BaseResponse):
+                template_name, mimetype, values = res
+                values = dict(request=req, **values)
+                body = self.env.get_template(template_name).render(values)
+                res = wz.Response(body, mimetype=mimetype)
+        except wz.exceptions.HTTPException, e:
+            res = e
+        res = res(environ, start_response)
+        return wz.ClosingIterator(res)
+
+
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):
         def decorate(f):
