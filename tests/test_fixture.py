@@ -88,10 +88,12 @@ def test_sqlalchemy_loader():
 def test_mongo_loader():
     try:
         import pymongo
+        import ming
     except ImportError:
         raise nose.plugins.skip.SkipTest
-    connection = pymongo.Connection()
-    session_factory = lambda : connection.test_db
+    from ming.datastore import DataStore
+    session = DataStore('mim://', database='test').db
+    session_factory = lambda : session
     mongo_loader = fixture.MongoLoader(env=schema, session_factory=session_factory)
 
     assert hasattr(schema, 'Article')
