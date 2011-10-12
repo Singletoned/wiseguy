@@ -4,6 +4,7 @@ import itertools
 
 import py.test
 import sqlalchemy as sa
+import nose.plugins.skip
 
 from tests import fixture_test_schema as schema
 from wiseguy import fixture, utils
@@ -80,6 +81,27 @@ def test_sqlalchemy_loader():
     assert sa_loader.env['ArticleData'] == schema.Article
 
     with FirstFixture(sa_loader) as tester:
+        assert tester.Article.count() == 1
+        assert tester.Comment.count() == 1
+
+
+def test_mongo_loader():
+    try:
+        import pymongo
+    except ImportError:
+        raise nose.plugins.skip.SkipTest
+    connection = pymongo.Connection()
+    session_factory = lambda : connection.test_db
+    mongo_loader = fixture.MongoLoader(env=schema, session_factory=session_factory)
+
+    assert hasattr(schema, 'Article')
+    assert isinstance(mongo_loader.env, fixture.EnvWrapper)
+    assert mongo_loader.env.ArticleData == schema.Article
+    assert mongo_loader.env['ArticleData'] == schema.Article
+
+    with FirstFixture(mongo_loader) as tester:
+        assert tester.session['Article'].count() == 1
+        assert tester.session['Comment'].count() == 1
         assert tester.Article.count() == 1
         assert tester.Comment.count() == 1
 

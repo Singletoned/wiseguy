@@ -248,6 +248,14 @@ class SQLAlchemyTester(object):
     def filter(self, *args, **kwargs):
         return self.query.filter(*args, **kwargs)
 
+class MongoTester(object):
+    def __init__(self, session):
+        self.session = session
+        self.collection = session[self._entity.__name__]
+
+    def count(self):
+        return self.collection.count()
+
 class FixtureMeta(type):
     def __new__(meta, class_name, bases, class_dict):
         fixture = type.__new__(meta, class_name, bases, class_dict)
@@ -465,6 +473,41 @@ class NoDataLoader(BaseLoader):
 
     def restore_data(self, data):
         pass
+
+
+class MongoLoader(BaseLoader):
+    """A loader for MongoDB"""
+    def add_data(self, data):
+        session = self.session_factory()
+        entity_classes = set()
+        data_added = defaultdict(list)
+        for data_class in data.values():
+            entity_class = self.env[data_class._entity_name]
+            entity_classes.add(entity_class)
+            for datum in data_class:
+                item_data = datum.to_dict()
+                item_id = session[entity_class.__name__].insert(item_data)
+                data_added[entity_class].append(item_id)
+        return (entity_classes, data_added, [])
+
+    def delete_data(self, data_added):
+        session = self.session_factory()
+        for entity_class in data_added:
+            session[entity_class.__name__].remove()
+
+    def restore_data(self, data):
+        pass
+
+    def _make_tester_class(self, entity_class, session):
+        t_class_name = "%sTester" % entity_class.__name__
+        t_base_name = "%sBase" % t_class_name
+        t_class_bases = (MongoTester,)
+        # Create the FooTester
+        t_class = type(
+            t_class_name,
+            t_class_bases,
+            {'_entity': entity_class})
+        return t_class
 
 
 class SQLAlchemyLoader(BaseLoader):
