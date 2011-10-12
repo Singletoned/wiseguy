@@ -39,6 +39,17 @@ class BaseApp(object):
         res = res(environ, start_response)
         return wz.ClosingIterator(res)
 
+def render(template_name, mimetype="text/html"):
+    def decorate(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            values = func(*args, **kwargs)
+            if isinstance(values, wz.BaseResponse):
+                return values
+            else:
+                return (template_name, mimetype, values)
+        return wrapper
+    return decorate
 
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):

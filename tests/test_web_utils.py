@@ -66,6 +66,21 @@ def test_base_app():
     assert "Redirecting..." in response
     assert "/submount/baz" in response
 
+def test_render():
+    foo = lambda x: x
+    mock_request = object()
+    wrapped_foo = wu.render("bar.html", "text/flibble")(foo)
+    template_name, mimetype, values = wrapped_foo(mock_request)
+    assert template_name == "bar.html"
+    assert mimetype == "text/flibble"
+    assert values == mock_request
+
+    test_response = wz.BaseResponse("")
+    foo = lambda x: test_response
+    mock_request = object()
+    wrapped_foo = wu.render("bar.html", "text/flibble")(foo)
+    response = wrapped_foo(mock_request)
+    assert response is test_response
 
 def test_create_expose():
     url_map = wz.routing.Map()
