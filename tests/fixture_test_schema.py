@@ -44,6 +44,7 @@ classes = [Article, Comment]
 def with_empty_db():
     Session.close_all()
     engine.dispose()
+    metadata.drop_all()
     metadata.create_all()
 
 metadata.create_all()
