@@ -221,7 +221,7 @@ class DatumMeta(type):
 class Datum(object):
     __metaclass__ = DatumMeta
 
-class BaseTester(object):
+class SQLAlchemyTester(object):
     def __init__(self, session):
         self.session = session
         self.query = session.query(self._entity)
@@ -442,7 +442,7 @@ class BaseLoader(object):
     def _make_tester_class(self, entity_class, session):
         t_class_name = "%sTester" % entity_class.__name__
         t_base_name = "%sBase" % t_class_name
-        t_class_bases = (BaseTester,)
+        t_class_bases = (SQLAlchemyTester,)
         # Create the FooTester
         t_class = type(
             t_class_name,
