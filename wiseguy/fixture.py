@@ -352,7 +352,10 @@ class Fixture(object):
         self.session = self._loader.session_factory()
         entity_classes, self._data_added, self._data_updated = self._loader.add_data(self._data)
         for entity_class in entity_classes:
-            self._add_tester_class(entity_class, self.session)
+            tester_class = self._loader._make_tester_class(entity_class, self.session)
+            self._tester_classes.add(tester_class)
+            # TesterManager.FooTester = FooTester
+            setattr(self, entity_class.__name__, tester_class(self.session))
         return self
 
     def __exit__(self, exc_type, value, traceback):
@@ -379,20 +382,6 @@ class Fixture(object):
             return getattr(self, key)
         else:
             raise AttributeError
-
-    def _add_tester_class(self, entity_class, session):
-        t_class_name = "%sTester" % entity_class.__name__
-        t_base_name = "%sBase" % t_class_name
-        t_class_bases = (BaseTester,)
-        # Create the FooTester
-        t_class = type(
-            t_class_name,
-            t_class_bases,
-            {'_entity': entity_class})
-        self._tester_classes.add(t_class)
-
-        # TesterManager.FooTester = FooTester
-        setattr(self, entity_class.__name__, t_class(session))
 
 
 class no_autoflush(object):
@@ -449,6 +438,17 @@ class BaseLoader(object):
     def __init__(self, env, session_factory):
         self.env = EnvWrapper(env)
         self.session_factory = session_factory
+
+    def _make_tester_class(self, entity_class, session):
+        t_class_name = "%sTester" % entity_class.__name__
+        t_base_name = "%sBase" % t_class_name
+        t_class_bases = (BaseTester,)
+        # Create the FooTester
+        t_class = type(
+            t_class_name,
+            t_class_bases,
+            {'_entity': entity_class})
+        return t_class
 
 
 class NoDataLoader(BaseLoader):
