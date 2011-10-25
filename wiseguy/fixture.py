@@ -114,7 +114,7 @@ class DataMeta(type):
                     value = class_dict[key]
                 else:
                     value = getattr(data_class, key)
-                if type(value) in [ClassType, DatumMeta]:
+                if isinstance(value, (ClassType, DatumMeta)):
                     datum = make_datum(value, default_data, override_data, _entity_name)
                     setattr(data_class, key, datum)
                     data_class._items[key] = datum
