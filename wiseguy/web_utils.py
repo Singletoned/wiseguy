@@ -11,7 +11,7 @@ class BaseApp(object):
     def __init__(self, config, url_map, env, request_class=wz.Request):
         self.config = config
         self.env = env
-        self.mountpoint = wz.Href(config['mountpoint'])
+        self.mountpoint = wz.Href(config.get('mountpoint', '/'))
         self._request_class = request_class
         self.env.globals.update(
             dict(

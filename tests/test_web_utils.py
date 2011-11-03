@@ -67,6 +67,14 @@ def test_base_app():
     assert "Redirecting..." in response
     assert "/submount/baz" in response
 
+def test_base_app_minimal():
+    url_map = wz.routing.Map()
+    env = j2.Environment()
+    application = wu.BaseApp(
+        config=dict(),
+        url_map=url_map,
+        env=env)
+
 def test_render():
     foo = lambda x: x
     mock_request = object()
