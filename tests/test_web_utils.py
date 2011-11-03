@@ -1,4 +1,5 @@
 import werkzeug as wz
+import werkzeug.test
 import jinja2 as j2
 import validino as v
 
