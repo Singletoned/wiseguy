@@ -60,6 +60,16 @@ def create_expose(url_map):
         return decorate
     return expose
 
+
+class UrlMap(wz.routing.Map):
+    def expose(self, rule, methods=['GET'], **kw):
+        def decorate(f):
+            kw['endpoint'] = f
+            self.add(wz.routing.Rule(rule, methods=methods, **kw))
+            return f
+        return decorate
+
+
 def create_env_and_render(loader_type, path, name):
     "Create a Jinja2 Environment and pass it to create_render"
     env = jinja2.Environment(

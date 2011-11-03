@@ -131,8 +131,11 @@ def test_create_expose():
 
     url_map_1 = wz.routing.Map()
     expose_1 = wu.create_expose(url_map_1)
+    url_map_2 = wu.UrlMap()
+    expose_2 = url_map_2.expose
 
     yield do_test, url_map_1, expose_1
+    yield do_test, url_map_2, expose_2
 
 
 def test_create_render():

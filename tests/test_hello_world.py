@@ -4,10 +4,9 @@ import wiseguy.web_utils
 import werkzeug as wz
 import jinja2
 
-url_map = wz.routing.Map()
-expose = wiseguy.web_utils.create_expose(url_map)
+url_map = wiseguy.web_utils.UrlMap()
 
-@expose(u"/")
+@url_map.expose(u"/")
 @wiseguy.web_utils.render('index.html')
 def index(request):
     return dict(greeting="Hello", name="World")
