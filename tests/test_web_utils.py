@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import werkzeug as wz
 import werkzeug.test
 import jinja2 as j2
