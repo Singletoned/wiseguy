@@ -92,44 +92,47 @@ def test_render():
     assert response is test_response
 
 def test_create_expose():
-    url_map = wz.routing.Map()
-    expose = wu.create_expose(url_map)
+    def do_test(url_map, expose):
+        @expose(u"/test")
+        def get(param1):
+            u"This is the get function"
+            return "GET " + param1
 
-    @expose(u"/test")
-    def get(param1):
-        u"This is the get function"
-        return "GET " + param1
+        assert get.__doc__ == u"This is the get function"
+        assert get.__name__ == "get"
 
-    assert get.__doc__ == u"This is the get function"
-    assert get.__name__ == "get"
+        @expose(u"/test", methods=[u"POST"])
+        def post(param1):
+            u"This is the post function"
+            return "POST " + param1
 
-    @expose(u"/test", methods=[u"POST"])
-    def post(param1):
-        u"This is the post function"
-        return "POST " + param1
+        assert post.__doc__ == u"This is the post function"
+        assert post.__name__ == "post"
 
-    assert post.__doc__ == u"This is the post function"
-    assert post.__name__ == "post"
+        @expose(u"/test_both", methods=[u"GET", "POST"])
+        def post_and_get(param1):
+            u"This is the post_and_get function"
+            return "GET POST " + param1
 
-    @expose(u"/test_both", methods=[u"GET", "POST"])
-    def post_and_get(param1):
-        u"This is the post_and_get function"
-        return "GET POST " + param1
+        assert post_and_get.__doc__ == u"This is the post_and_get function"
+        assert post_and_get.__name__ == "post_and_get"
 
-    assert post_and_get.__doc__ == u"This is the post_and_get function"
-    assert post_and_get.__name__ == "post_and_get"
+        def check_url(_url, _method, _endpoint, _response):
+            urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
+            endpoint, kwargs = urls.match()
+            assert endpoint == _endpoint, u"Should have chosen the correct function"
+            res = endpoint("p1", **kwargs)
+            assert res == _response
 
-    def check_url(_url, _method, _endpoint, _response):
-        urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
-        endpoint, kwargs = urls.match()
-        assert endpoint == _endpoint, u"Should have chosen the correct function"
-        res = endpoint("p1", **kwargs)
-        assert res == _response
+        check_url(u"/test", u"GET", get, u"GET p1")
+        check_url(u"/test", u"POST", post, u"POST p1")
+        check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
+        check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
 
-    check_url(u"/test", u"GET", get, u"GET p1")
-    check_url(u"/test", u"POST", post, u"POST p1")
-    check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
-    check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
+    url_map_1 = wz.routing.Map()
+    expose_1 = wu.create_expose(url_map_1)
+
+    yield do_test, url_map_1, expose_1
 
 
 def test_create_render():
