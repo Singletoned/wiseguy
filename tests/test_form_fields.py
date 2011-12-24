@@ -186,3 +186,15 @@ class TestSubmit(unittest.TestCase):
         result = form_fields.submit(class_="foo bar")
         result = result.strip()
         assert expected == result
+
+
+class TestBootstrapFormFields(unittest.TestCase):
+    def test_input(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
+</fieldset>'''.strip()
+        result = form_fields.bootstrap_input(context, 'foo', "Foo:")
+        result = result.strip()
+        assert expected == result

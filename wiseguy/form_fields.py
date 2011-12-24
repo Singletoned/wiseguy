@@ -16,9 +16,7 @@ def add_errors(context, elements, id):
                     {'class': 'error'}))
 
 
-@j2.contextfunction
-def input(context, id, label, compulsory=False):
-    "A simple input element"
+def _input(context, id, label, compulsory):
     if compulsory:
         label = label + "*"
     elements = [
@@ -31,8 +29,32 @@ def input(context, id, label, compulsory=False):
             id=id,
             value=str((context.get('data', False) or {}).get(id, '')))]
     add_errors(context, elements, id)
+    return elements
+
+
+@j2.contextfunction
+def input(context, id, label, compulsory=False):
+    "A simple input element"
+    elements = _input(context, id, label, compulsory)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
+
+
+@j2.contextfunction
+def bootstrap_input(context, id, label, compulsory=False):
+    "A Bootstrap input element"
+    elements = _input(context, id, label, compulsory=False)
+    label, input = elements
+    label.attrib['class'] = "control-label"
+    input = html.DIV(
+        input,
+        {'class': 'controls'})
+    element = html.FIELDSET(
+        label,
+        input,
+        {'class': 'control-group'})
+    element = lxml.html.tostring(element, pretty_print=True)
+    return element
 
 
 @j2.contextfunction
