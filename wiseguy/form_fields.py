@@ -57,9 +57,7 @@ def bootstrap_input(context, id, label, compulsory=False):
     return element
 
 
-@j2.contextfunction
-def password(context, id, label, compulsory=False):
-    "A password element.  Won't fill the value even if present in context['data']"
+def _password(context, id, label, compulsory):
     if compulsory:
         label = label + "*"
     elements = [
@@ -72,8 +70,32 @@ def password(context, id, label, compulsory=False):
             id=id,
             value="")]
     add_errors(context, elements, id)
+    return elements
+
+
+@j2.contextfunction
+def password(context, id, label, compulsory=False):
+    "A password element.  Won't fill the value even if present in context['data']"
+    elements = _password(context, id, label, compulsory)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
+
+
+@j2.contextfunction
+def bootstrap_password(context, id, label, compulsory=False):
+    "A Bootstrap input element"
+    elements = _password(context, id, label, compulsory=False)
+    label, input = elements
+    label.attrib['class'] = "control-label"
+    input = html.DIV(
+        input,
+        {'class': 'controls'})
+    element = html.FIELDSET(
+        label,
+        input,
+        {'class': 'control-group'})
+    element = lxml.html.tostring(element, pretty_print=True)
+    return element
 
 
 def select(context, id, label, options, compulsory=False):

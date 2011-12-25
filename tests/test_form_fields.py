@@ -198,3 +198,13 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = form_fields.bootstrap_input(context, 'foo', "Foo:")
         result = result.strip()
         assert expected == result
+
+    def test_password(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
+</fieldset>'''.strip()
+        result = form_fields.bootstrap_password(context, 'foo', "Foo:")
+        result = result.strip()
+        assert expected == result
