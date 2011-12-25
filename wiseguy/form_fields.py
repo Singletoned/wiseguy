@@ -16,6 +16,21 @@ def add_errors(context, elements, id):
                     {'class': 'error'}))
 
 
+def _boostrapise(func, *args, **kwargs):
+    elements = func(*args, **kwargs)
+    label, input = elements
+    label.attrib['class'] = "control-label"
+    input = html.DIV(
+        input,
+        {'class': 'controls'})
+    element = html.FIELDSET(
+        label,
+        input,
+        {'class': 'control-group'})
+    element = lxml.html.tostring(element, pretty_print=True)
+    return element
+
+
 def _input(context, id, label, compulsory):
     if compulsory:
         label = label + "*"
@@ -43,18 +58,7 @@ def input(context, id, label, compulsory=False):
 @j2.contextfunction
 def bootstrap_input(context, id, label, compulsory=False):
     "A Bootstrap input element"
-    elements = _input(context, id, label, compulsory=False)
-    label, input = elements
-    label.attrib['class'] = "control-label"
-    input = html.DIV(
-        input,
-        {'class': 'controls'})
-    element = html.FIELDSET(
-        label,
-        input,
-        {'class': 'control-group'})
-    element = lxml.html.tostring(element, pretty_print=True)
-    return element
+    return _boostrapise(_input, context, id, label, compulsory=False)
 
 
 def _password(context, id, label, compulsory):
@@ -84,18 +88,7 @@ def password(context, id, label, compulsory=False):
 @j2.contextfunction
 def bootstrap_password(context, id, label, compulsory=False):
     "A Bootstrap input element"
-    elements = _password(context, id, label, compulsory=False)
-    label, input = elements
-    label.attrib['class'] = "control-label"
-    input = html.DIV(
-        input,
-        {'class': 'controls'})
-    element = html.FIELDSET(
-        label,
-        input,
-        {'class': 'control-group'})
-    element = lxml.html.tostring(element, pretty_print=True)
-    return element
+    return _boostrapise(_password, context, id, label, compulsory)
 
 
 def _select(context, id, label, options, compulsory):
@@ -133,18 +126,7 @@ def select(context, id, label, options, compulsory=False):
 @j2.contextfunction
 def bootstrap_select(context, id, label, options, compulsory=False):
     "A Bootstrap input element"
-    elements = _select(context, id, label, options, compulsory)
-    label, select = elements
-    label.attrib['class'] = "control-label"
-    select = html.DIV(
-        select,
-        {'class': 'controls'})
-    element = html.FIELDSET(
-        label,
-        select,
-        {'class': 'control-group'})
-    element = lxml.html.tostring(element, pretty_print=True)
-    return element
+    return _boostrapise(_select, context, id, label, options, compulsory)
 
 
 def submit(id="submit", label="Submit", class_=""):
