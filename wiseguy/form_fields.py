@@ -31,7 +31,7 @@ def _boostrapise(func, *args, **kwargs):
     return element
 
 
-def _input(context, id, label, compulsory):
+def _input(context, id, label, compulsory, input_type):
     if compulsory:
         label = label + "*"
     elements = [
@@ -39,7 +39,7 @@ def _input(context, id, label, compulsory):
             label,
             {'for': id}),
         html.INPUT(
-            type="text",
+            type=input_type,
             name=id,
             id=id,
             value=str((context.get('data', False) or {}).get(id, '')))]
@@ -50,7 +50,7 @@ def _input(context, id, label, compulsory):
 @j2.contextfunction
 def input(context, id, label, compulsory=False):
     "A simple input element"
-    elements = _input(context, id, label, compulsory)
+    elements = _input(context, id, label, compulsory, input_type="text")
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -58,50 +58,22 @@ def input(context, id, label, compulsory=False):
 @j2.contextfunction
 def bootstrap_input(context, id, label, compulsory=False):
     "A Bootstrap input element"
-    return _boostrapise(_input, context, id, label, compulsory=False)
-
-
-def _checkbox(context, id, label, compulsory):
-    elements = [
-        html.LABEL(
-            label,
-            {'for': id}),
-        html.INPUT(
-            type="checkbox",
-            name=id,
-            id=id,
-            value="")]
-    return elements
+    return _boostrapise(_input, context, id, label, compulsory=False, input_type="text")
 
 
 @j2.contextfunction
 def checkbox(context, id, label, compulsory=False):
     "A simple input element"
-    elements = _checkbox(context, id, label, compulsory)
+    elements = _input(context, id, label, compulsory, input_type="checkbox")
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
-
-
-def _password(context, id, label, compulsory):
-    if compulsory:
-        label = label + "*"
-    elements = [
-        html.LABEL(
-            label,
-            {'for': id}),
-        html.INPUT(
-            type="password",
-            name=id,
-            id=id,
-            value="")]
-    add_errors(context, elements, id)
-    return elements
 
 
 @j2.contextfunction
 def password(context, id, label, compulsory=False):
     "A password element.  Won't fill the value even if present in context['data']"
-    elements = _password(context, id, label, compulsory)
+    elements = _input(context, id, label, compulsory, input_type="password")
+    elements[1].attrib['value'] = ""
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -109,7 +81,7 @@ def password(context, id, label, compulsory=False):
 @j2.contextfunction
 def bootstrap_password(context, id, label, compulsory=False):
     "A Bootstrap input element"
-    return _boostrapise(_password, context, id, label, compulsory)
+    return _boostrapise(_input, context, id, label, compulsory, input_type="password")
 
 
 def _select(context, id, label, options, compulsory):
