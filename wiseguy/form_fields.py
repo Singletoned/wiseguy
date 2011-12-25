@@ -98,8 +98,7 @@ def bootstrap_password(context, id, label, compulsory=False):
     return element
 
 
-def select(context, id, label, options, compulsory=False):
-    "A select element.  Accepts a list of value, text pairs"
+def _select(context, id, label, options, compulsory):
     if compulsory:
         label = label + "*"
     option_elements = []
@@ -120,8 +119,32 @@ def select(context, id, label, options, compulsory=False):
             name=id,
             id=id)]
     add_errors(context, elements, id)
+    return elements
+
+
+@j2.contextfunction
+def select(context, id, label, options, compulsory=False):
+    "A select element.  Accepts a list of value, text pairs"
+    elements = _select(context, id, label, options, compulsory)
     elements = [lxml.html.tostring(e, pretty_print=True) for e in elements]
     return '\n'.join(elements)
+
+
+@j2.contextfunction
+def bootstrap_select(context, id, label, options, compulsory=False):
+    "A Bootstrap input element"
+    elements = _select(context, id, label, options, compulsory)
+    label, select = elements
+    label.attrib['class'] = "control-label"
+    select = html.DIV(
+        select,
+        {'class': 'controls'})
+    element = html.FIELDSET(
+        label,
+        select,
+        {'class': 'control-group'})
+    element = lxml.html.tostring(element, pretty_print=True)
+    return element
 
 
 def submit(id="submit", label="Submit", class_=""):
