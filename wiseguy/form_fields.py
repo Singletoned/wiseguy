@@ -61,6 +61,27 @@ def bootstrap_input(context, id, label, compulsory=False):
     return _boostrapise(_input, context, id, label, compulsory=False)
 
 
+def _checkbox(context, id, label, compulsory):
+    elements = [
+        html.LABEL(
+            label,
+            {'for': id}),
+        html.INPUT(
+            type="checkbox",
+            name=id,
+            id=id,
+            value="")]
+    return elements
+
+
+@j2.contextfunction
+def checkbox(context, id, label, compulsory=False):
+    "A simple input element"
+    elements = _checkbox(context, id, label, compulsory)
+    elements = [lxml.html.tostring(e) for e in elements]
+    return '\n'.join(elements)
+
+
 def _password(context, id, label, compulsory):
     if compulsory:
         label = label + "*"
