@@ -209,6 +209,21 @@ class TestSelect(unittest.TestCase):
         result = result.strip()
         assert expected == result
 
+    def test_with_values(self):
+        options = ["one", "two", "three"]
+        context = dict()
+        expected = '''
+<label for="foo">Foo:</label>
+
+<select id="foo" name="foo">
+<option value="one">one</option>
+<option value="two">two</option>
+<option value="three">three</option></select>
+        '''.strip()
+        result = form_fields.select(context, 'foo', "Foo:", options)
+        result = result.strip()
+        assert expected == result
+
 
 class TestSubmit(unittest.TestCase):
     def test_plain(self):

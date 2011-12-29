@@ -89,7 +89,11 @@ def _select(context, id, label, options, compulsory):
         label = label + "*"
     option_elements = []
     selected = (context.get('data', False) or {}).get(id, '')
-    for (value, text) in options:
+    for option in options:
+        if isinstance(option, (list, tuple)):
+            value, text = option
+        else:
+            value, text = (option, option)
         if value == selected:
             o = html.OPTION(text, value=value, selected="selected")
         else:
