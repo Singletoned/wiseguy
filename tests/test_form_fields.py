@@ -295,6 +295,25 @@ class TestTextArea(unittest.TestCase):
         assert expected == result
 
 
+class TestTinyMCE(unittest.TestCase):
+    def test_simple(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<script type="text/javascript">
+tinyMCE.init({
+mode : "textareas",
+theme : "simple",
+editor_selector : "mceEditor",
+editor_deselector : "mceNoEditor"
+});
+</script>
+<label for="foo">Foo:*</label>
+<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea>
+        '''.strip()
+        result = form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
+        assert expected == result
+
+
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
         expected = '''<input type="submit" id="submit" value="Submit">'''

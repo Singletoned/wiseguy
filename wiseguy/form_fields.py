@@ -123,6 +123,25 @@ def textarea(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
+@j2.contextfunction
+def tinymce(context, id, label, compulsory=False):
+    elements = _textarea(context, id, label, compulsory)
+    elements[1].attrib['class'] = "mceEditor"
+    script = html.SCRIPT(
+        '''
+tinyMCE.init({
+mode : "textareas",
+theme : "simple",
+editor_selector : "mceEditor",
+editor_deselector : "mceNoEditor"
+});
+''',
+    type="text/javascript")
+    elements.insert(0, script)
+    elements = [lxml.html.tostring(e) for e in elements]
+    return '\n'.join(elements)
+
+
 def _select(context, id, label, options, compulsory):
     if compulsory:
         label = label + "*"
