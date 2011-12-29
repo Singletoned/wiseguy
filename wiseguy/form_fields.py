@@ -98,6 +98,31 @@ def bootstrap_password(context, id, label, compulsory=False):
     return _boostrapise(_input, context, id, label, compulsory, input_type="password")
 
 
+def _textarea(context, id, label, compulsory):
+    if compulsory:
+        label = label + "*"
+    elements = [
+        html.LABEL(
+            label,
+            {'for': id}),
+        html.TEXTAREA(
+            str((context.get('data', False) or {}).get(id, '')),
+            name=id,
+            id=id,
+            rows="4",
+            cols="40",
+)]
+    add_errors(context, elements, id)
+    return elements
+
+
+@j2.contextfunction
+def textarea(context, id, label, compulsory=False):
+    elements = _textarea(context, id, label, compulsory)
+    elements = [lxml.html.tostring(e) for e in elements]
+    return '\n'.join(elements)
+
+
 def _select(context, id, label, options, compulsory):
     if compulsory:
         label = label + "*"
