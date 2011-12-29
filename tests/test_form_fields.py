@@ -108,6 +108,15 @@ class TestCheckbox(unittest.TestCase):
         result = form_fields.checkbox(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_disabled(self):
+        context = dict()
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="checkbox" id="foo" value="" name="foo" disabled>
+        '''.strip()
+        result = form_fields.checkbox(context, 'foo', "Foo:", disabled=True)
+        assert expected == result
+
 
 class TestPassword(unittest.TestCase):
     def test_plain(self):

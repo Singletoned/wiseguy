@@ -65,13 +65,15 @@ def bootstrap_input(context, id, label, compulsory=False):
 
 
 @j2.contextfunction
-def checkbox(context, id, label, compulsory=False, value=_default):
+def checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
     "A simple input element"
     elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
     data_value = (context.get('data', False) or {}).get(id, '')
     if isinstance(data_value, (list, tuple)):
         if value in data_value:
             elements[1].attrib['checked'] = "checked"
+    if disabled:
+        elements[1].attrib['disabled'] = "disabled"
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
