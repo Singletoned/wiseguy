@@ -51,6 +51,15 @@ class TestInput(unittest.TestCase):
         result = form_fields.input(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_non_ascii(self):
+        context = dict(data=dict(foo=u'blah£'), errors=None)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="blah&#163;" name="foo">
+        '''.strip()
+        result = form_fields.input(context, 'foo', "Foo:")
+        assert expected == result
+
 
 class TestCheckbox(unittest.TestCase):
     def test_plain(self):

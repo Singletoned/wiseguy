@@ -34,7 +34,7 @@ def _boostrapise(func, *args, **kwargs):
 
 def _input(context, id, label, compulsory, input_type, value=_default):
     if value is _default:
-        value = str((context.get('data', False) or {}).get(id, ''))
+        value = (context.get('data', False) or {}).get(id, '')
     if compulsory:
         label = label + "*"
     elements = [
