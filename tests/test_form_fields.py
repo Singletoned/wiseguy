@@ -62,6 +62,15 @@ class TestCheckbox(unittest.TestCase):
         result = form_fields.checkbox(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_with_value(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="checkbox" id="foo" value="wibble" name="foo">
+'''.strip()
+        result = form_fields.checkbox(context, 'foo', "Foo:", value="wibble")
+        assert expected == result
+
     def test_empty(self):
         context = dict()
         expected = '''

@@ -5,6 +5,7 @@ import werkzeug as wz
 import lxml.html
 from lxml.html import builder as html
 
+_default = object()
 
 def add_errors(context, elements, id):
     "Add an error, if present, to the list of elements"
@@ -31,7 +32,9 @@ def _boostrapise(func, *args, **kwargs):
     return element
 
 
-def _input(context, id, label, compulsory, input_type):
+def _input(context, id, label, compulsory, input_type, value=_default):
+    if value is _default:
+        value = str((context.get('data', False) or {}).get(id, ''))
     if compulsory:
         label = label + "*"
     elements = [
@@ -42,7 +45,7 @@ def _input(context, id, label, compulsory, input_type):
             type=input_type,
             name=id,
             id=id,
-            value=str((context.get('data', False) or {}).get(id, '')))]
+            value=value)]
     add_errors(context, elements, id)
     return elements
 
@@ -62,9 +65,9 @@ def bootstrap_input(context, id, label, compulsory=False):
 
 
 @j2.contextfunction
-def checkbox(context, id, label, compulsory=False):
+def checkbox(context, id, label, compulsory=False, value=_default):
     "A simple input element"
-    elements = _input(context, id, label, compulsory, input_type="checkbox")
+    elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
