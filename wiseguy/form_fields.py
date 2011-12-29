@@ -177,9 +177,11 @@ def _select(context, id, label, options, compulsory):
 
 
 @j2.contextfunction
-def select(context, id, label, options, compulsory=False):
+def select(context, id, label, options, compulsory=False, disabled=False):
     "A select element.  Accepts a list of value, text pairs"
     elements = _select(context, id, label, options, compulsory)
+    if disabled:
+        elements[1].attrib['disabled'] = "disabled"
     elements = [lxml.html.tostring(e, pretty_print=True) for e in elements]
     return '\n'.join(elements)
 

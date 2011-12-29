@@ -242,6 +242,19 @@ class TestSelect(unittest.TestCase):
         result = result.strip()
         assert expected == result
 
+    def test_disabled(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict()
+        expected = '''<label for="foo">Foo:</label>
+
+<select id="foo" name="foo" disabled>
+<option value="bar1">Bar 1</option>
+<option value="bar2">Bar 2</option>
+<option value="bar3">Bar 3</option></select>
+'''
+        result = form_fields.select(context, 'foo', "Foo:", options, disabled=True)
+        assert expected == result
+
 
 class TestDatePicker(unittest.TestCase):
     def test_simple(self):
