@@ -68,6 +68,8 @@ def bootstrap_input(context, id, label, compulsory=False):
 def checkbox(context, id, label, compulsory=False, value=_default):
     "A simple input element"
     elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
+    if value == (context.get('data', False) or {}).get(id, ''):
+        elements[1].attrib['checked'] = "checked"
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 

@@ -93,9 +93,9 @@ class TestCheckbox(unittest.TestCase):
         context = dict(data=dict(foo='blah'), errors=None)
         expected = '''
 <label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="blah" name="foo">
+<input type="checkbox" id="foo" value="blah" name="foo" checked>
         '''.strip()
-        result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = form_fields.checkbox(context, 'foo', "Foo:", value="blah")
         assert expected == result
 
     def test_errors(self):
