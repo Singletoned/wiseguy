@@ -90,7 +90,7 @@ class TestCheckbox(unittest.TestCase):
         assert expected == result
 
     def test_data(self):
-        context = dict(data=dict(foo='blah'), errors=None)
+        context = dict(data=dict(foo=['blah', 'wangle']), errors=None)
         expected = '''
 <label for="foo">Foo:</label>
 <input type="checkbox" id="foo" value="blah" name="foo" checked>
