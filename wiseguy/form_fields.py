@@ -82,6 +82,17 @@ def password(context, id, label, compulsory=False):
 
 
 @j2.contextfunction
+def datepicker(context, id, label, compulsory=False):
+    "A datepicker element that uses JQueryUI"
+    elements = _input(context, id, label, compulsory, input_type="text")
+    script = html.SCRIPT(
+        '''$(function() {$("#%s").datepicker({dateFormat:'yy-mm-dd'});});''' % id)
+    elements.insert(0, script)
+    elements = [lxml.html.tostring(e) for e in elements]
+    return '\n'.join(elements)
+
+
+@j2.contextfunction
 def bootstrap_password(context, id, label, compulsory=False):
     "A Bootstrap input element"
     return _boostrapise(_input, context, id, label, compulsory, input_type="password")

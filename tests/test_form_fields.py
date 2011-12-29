@@ -234,6 +234,19 @@ class TestSelect(unittest.TestCase):
         assert expected == result
 
 
+class TestDatePicker(unittest.TestCase):
+    def test_simple(self):
+        context = dict()
+        expected = '''
+<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo">
+        '''.strip()
+        result = form_fields.datepicker(context, 'foo', "Foo:")
+        result = result.strip()
+        assert expected == result
+
+
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
         expected = '''<input type="submit" id="submit" value="Submit">'''
