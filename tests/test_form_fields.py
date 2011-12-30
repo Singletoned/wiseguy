@@ -481,6 +481,21 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = result.strip()
         assert expected == result
 
+    def test_select_disabled(self):
+        context = dict(data=None, errors=None)
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><select id="foo" name="foo" disabled>
+<option value=""></option>
+<option value="bar1">Bar 1</option>
+<option value="bar2">Bar 2</option>
+<option value="bar3">Bar 3</option></select></div>
+</fieldset>'''.strip()
+        result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options, disabled=True)
+        result = result.strip()
+        assert expected == result
+
     def test_datepicker(self):
         context = dict()
         expected = '''

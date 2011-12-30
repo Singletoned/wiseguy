@@ -154,7 +154,7 @@ def tinymce(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
-def _select(context, id, label, options, compulsory, blank_option):
+def _select(context, id, label, options, compulsory, disabled, blank_option):
     if compulsory:
         label = label + "*"
     option_elements = []
@@ -184,15 +184,15 @@ def _select(context, id, label, options, compulsory, blank_option):
             name=id,
             id=id)]
     add_errors(context, elements, id)
+    if disabled:
+        elements[1].attrib['disabled'] = "disabled"
     return elements
 
 
 @j2.contextfunction
 def select(context, id, label, options, compulsory=False, disabled=False, blank_option=True):
     "A select element.  Accepts a list of value, text pairs"
-    elements = _select(context, id, label, options, compulsory, blank_option)
-    if disabled:
-        elements[1].attrib['disabled'] = "disabled"
+    elements = _select(context, id, label, options, compulsory, disabled, blank_option)
     elements = [lxml.html.tostring(e, pretty_print=True) for e in elements]
     return '\n'.join(elements)
 
@@ -226,9 +226,9 @@ class BootstrapFormFields(object):
         return _boostrapise(_input, context, id, label, compulsory, input_type="password")
 
     @j2.contextfunction
-    def select(self, context, id, label, options, compulsory=False, blank_option=True):
+    def select(self, context, id, label, options, compulsory=False, disabled=False, blank_option=True):
         "A Bootstrap input element"
-        return _boostrapise(_select, context, id, label, options, compulsory, blank_option)
+        return _boostrapise(_select, context, id, label, options, compulsory, disabled, blank_option)
 
     @j2.contextfunction
     def checkbox(self, context, id, label, compulsory=False, value=_default):
