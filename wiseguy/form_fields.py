@@ -139,7 +139,7 @@ editor_deselector : "mceNoEditor"
 });
 ''',
     type="text/javascript")
-    elements.insert(0, script)
+    elements.insert(len(elements), script)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 

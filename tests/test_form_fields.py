@@ -371,6 +371,8 @@ class TestTinyMCE(unittest.TestCase):
     def test_simple(self):
         context = dict(data=None, errors=None)
         expected = '''
+<label for="foo">Foo:*</label>
+<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea>
 <script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
@@ -379,8 +381,6 @@ editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
 </script>
-<label for="foo">Foo:*</label>
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea>
         '''.strip()
         result = form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
         assert expected == result
