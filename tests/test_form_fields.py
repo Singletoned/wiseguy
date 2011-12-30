@@ -292,6 +292,19 @@ class TestSelect(unittest.TestCase):
         result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
         assert expected == result
 
+    def test_non_ascii(self):
+        options = [(1, "One"), (2, "2"), ('3', u"Bar £")]
+        context = dict(data={'foo': "2"})
+        expected = '''<label for="foo">Foo:</label>
+
+<select id="foo" name="foo">
+<option value="1">One</option>
+<option selected value="2">2</option>
+<option value="3">Bar &#163;</option></select>
+'''
+        result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
+        assert expected == result
+
 
 class TestDatePicker(unittest.TestCase):
     def test_simple(self):

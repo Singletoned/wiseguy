@@ -152,7 +152,7 @@ def _select(context, id, label, options, compulsory, blank_option):
     if compulsory:
         label = label + "*"
     option_elements = []
-    selected = (context.get('data', False) or {}).get(id, '')
+    selected = unicode((context.get('data', False) or {}).get(id, ''))
     if blank_option:
         o = html.OPTION(value="")
         option_elements.append(o)
@@ -161,6 +161,8 @@ def _select(context, id, label, options, compulsory, blank_option):
             value, text = option
         else:
             value, text = (option, option)
+        value = unicode(value)
+        text = unicode(text)
         if value == selected:
             o = html.OPTION(text, value=value, selected="selected")
         else:
