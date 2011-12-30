@@ -191,6 +191,7 @@ class TestSelect(unittest.TestCase):
 <label for="foo">Foo:</label>
 
 <select id="foo" name="foo">
+<option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
@@ -205,6 +206,7 @@ class TestSelect(unittest.TestCase):
 <label for="foo">Foo:*</label>
 
 <select id="foo" name="foo">
+<option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
@@ -220,6 +222,7 @@ class TestSelect(unittest.TestCase):
 <label for="foo">Foo:</label>
 
 <select id="foo" name="foo">
+<option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option selected value="bar3">Bar 3</option></select>
@@ -235,6 +238,7 @@ class TestSelect(unittest.TestCase):
 <label for="foo">Foo:</label>
 
 <select id="foo" name="foo">
+<option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
@@ -252,6 +256,7 @@ class TestSelect(unittest.TestCase):
 <label for="foo">Foo:</label>
 
 <select id="foo" name="foo">
+<option value=""></option>
 <option value="one">one</option>
 <option value="two">two</option>
 <option value="three">three</option></select>
@@ -266,11 +271,25 @@ class TestSelect(unittest.TestCase):
         expected = '''<label for="foo">Foo:</label>
 
 <select id="foo" name="foo" disabled>
+<option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
 '''
         result = form_fields.select(context, 'foo', "Foo:", options, disabled=True)
+        assert expected == result
+
+    def test_without_blank_option(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict()
+        expected = '''<label for="foo">Foo:</label>
+
+<select id="foo" name="foo">
+<option value="bar1">Bar 1</option>
+<option value="bar2">Bar 2</option>
+<option value="bar3">Bar 3</option></select>
+'''
+        result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
         assert expected == result
 
 
@@ -407,6 +426,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         expected = '''
 <fieldset class="control-group">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><select id="foo" name="foo">
+<option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select></div>

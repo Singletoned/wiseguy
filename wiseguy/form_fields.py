@@ -148,11 +148,14 @@ editor_deselector : "mceNoEditor"
     return '\n'.join(elements)
 
 
-def _select(context, id, label, options, compulsory):
+def _select(context, id, label, options, compulsory, blank_option):
     if compulsory:
         label = label + "*"
     option_elements = []
     selected = (context.get('data', False) or {}).get(id, '')
+    if blank_option:
+        o = html.OPTION(value="")
+        option_elements.append(o)
     for option in options:
         if isinstance(option, (list, tuple)):
             value, text = option
@@ -177,9 +180,9 @@ def _select(context, id, label, options, compulsory):
 
 
 @j2.contextfunction
-def select(context, id, label, options, compulsory=False, disabled=False):
+def select(context, id, label, options, compulsory=False, disabled=False, blank_option=True):
     "A select element.  Accepts a list of value, text pairs"
-    elements = _select(context, id, label, options, compulsory)
+    elements = _select(context, id, label, options, compulsory, blank_option)
     if disabled:
         elements[1].attrib['disabled'] = "disabled"
     elements = [lxml.html.tostring(e, pretty_print=True) for e in elements]
@@ -187,9 +190,9 @@ def select(context, id, label, options, compulsory=False, disabled=False):
 
 
 @j2.contextfunction
-def bootstrap_select(context, id, label, options, compulsory=False):
+def bootstrap_select(context, id, label, options, compulsory=False, blank_option=True):
     "A Bootstrap input element"
-    return _boostrapise(_select, context, id, label, options, compulsory)
+    return _boostrapise(_select, context, id, label, options, compulsory, blank_option)
 
 
 def submit(id="submit", label="Submit", class_=""):
