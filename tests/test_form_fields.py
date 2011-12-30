@@ -413,13 +413,15 @@ class TestSubmit(unittest.TestCase):
 
 
 class TestBootstrapFormFields(unittest.TestCase):
+    bootstrap_form_fields = form_fields.BootstrapFormFields()
+
     def test_input(self):
         context = dict(data=None, errors=None)
         expected = '''
 <fieldset class="control-group">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
-        result = form_fields.bootstrap_input(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.input(context, 'foo', "Foo:")
         result = result.strip()
         assert expected == result
 
@@ -429,7 +431,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <fieldset class="control-group">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
-        result = form_fields.bootstrap_password(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.password(context, 'foo', "Foo:")
         result = result.strip()
         assert expected == result
 
@@ -444,6 +446,6 @@ class TestBootstrapFormFields(unittest.TestCase):
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
-        result = form_fields.bootstrap_select({}, 'foo', "Foo:", options)
+        result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options)
         result = result.strip()
         assert expected == result

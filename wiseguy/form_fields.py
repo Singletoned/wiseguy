@@ -59,12 +59,6 @@ def input(context, id, label, compulsory=False):
 
 
 @j2.contextfunction
-def bootstrap_input(context, id, label, compulsory=False):
-    "A Bootstrap input element"
-    return _boostrapise(_input, context, id, label, compulsory=False, input_type="text")
-
-
-@j2.contextfunction
 def checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
     "A simple input element"
     elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
@@ -96,12 +90,6 @@ def datepicker(context, id, label, compulsory=False):
     elements.insert(0, script)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
-
-
-@j2.contextfunction
-def bootstrap_password(context, id, label, compulsory=False):
-    "A Bootstrap input element"
-    return _boostrapise(_input, context, id, label, compulsory, input_type="password")
 
 
 def _textarea(context, id, label, compulsory):
@@ -191,12 +179,6 @@ def select(context, id, label, options, compulsory=False, disabled=False, blank_
     return '\n'.join(elements)
 
 
-@j2.contextfunction
-def bootstrap_select(context, id, label, options, compulsory=False, blank_option=True):
-    "A Bootstrap input element"
-    return _boostrapise(_select, context, id, label, options, compulsory, blank_option)
-
-
 def submit(id="submit", label="Submit", class_=""):
     "A simple submit button"
     kwargs = dict(
@@ -212,3 +194,20 @@ def submit(id="submit", label="Submit", class_=""):
         **kwargs)
     element = lxml.html.tostring(element, pretty_print=True)
     return element
+
+
+class BootstrapFormFields(object):
+    @j2.contextfunction
+    def input(self, context, id, label, compulsory=False):
+        "A Bootstrap input element"
+        return _boostrapise(_input, context, id, label, compulsory=False, input_type="text")
+
+    @j2.contextfunction
+    def password(self, context, id, label, compulsory=False):
+        "A Bootstrap input element"
+        return _boostrapise(_input, context, id, label, compulsory, input_type="password")
+
+    @j2.contextfunction
+    def select(self, context, id, label, options, compulsory=False, blank_option=True):
+        "A Bootstrap input element"
+        return _boostrapise(_select, context, id, label, options, compulsory, blank_option)
