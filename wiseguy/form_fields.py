@@ -233,7 +233,12 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def checkbox(self, context, id, label, compulsory=False, value=_default):
         "A Bootstrap checkbox element"
-        return _boostrapise(_checkbox, context, id, label, compulsory=False, value=value)
+        return _boostrapise(_checkbox, context, id, label, compulsory, value=value)
+
+    @j2.contextfunction
+    def textarea(self, context, id, label, compulsory=False):
+        "A Bootstrap textarea element"
+        return _boostrapise(_textarea, context, id, label, compulsory)
 
     @j2.contextfunction
     def datepicker(self, context, id, label, compulsory=False):

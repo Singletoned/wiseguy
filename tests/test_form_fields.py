@@ -496,6 +496,15 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = result.strip()
         assert expected == result
 
+    def test_textarea(self):
+        context = dict(data=None, errors=None)
+        expected = '''<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo"></textarea></div>
+</fieldset>
+'''
+        result = self.bootstrap_form_fields.textarea(context, 'foo', "Foo:")
+        assert expected == result
+
     def test_datepicker(self):
         context = dict()
         expected = '''
