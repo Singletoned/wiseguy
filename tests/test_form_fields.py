@@ -482,3 +482,20 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:")
         result = result.strip()
         assert expected == result
+
+    def test_tinymce(self):
+        context = dict(data=None, errors=None)
+        expected = '''<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:*</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea></div>
+<script type="text/javascript">
+tinyMCE.init({
+mode : "textareas",
+theme : "simple",
+editor_selector : "mceEditor",
+editor_deselector : "mceNoEditor"
+});
+</script>
+</fieldset>
+'''
+        result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
+        assert expected == result

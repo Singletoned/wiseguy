@@ -125,8 +125,7 @@ def textarea(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
-@j2.contextfunction
-def tinymce(context, id, label, compulsory=False):
+def _tinymce(context, id, label, compulsory):
     elements = _textarea(context, id, label, compulsory)
     elements[1].attrib['class'] = "mceEditor"
     script = html.SCRIPT(
@@ -140,6 +139,12 @@ editor_deselector : "mceNoEditor"
 ''',
     type="text/javascript")
     elements.insert(len(elements), script)
+    return elements
+
+
+@j2.contextfunction
+def tinymce(context, id, label, compulsory=False):
+    elements = _tinymce(context, id, label, compulsory)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -228,4 +233,9 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def datepicker(self, context, id, label, compulsory=False):
         "A Bootstrap datepicker element"
-        return _boostrapise(_datepicker, context, id, label, compulsory=False)
+        return _boostrapise(_datepicker, context, id, label, compulsory)
+
+    @j2.contextfunction
+    def tinymce(self, context, id, label, compulsory=False):
+        "A Bootstrap tinymce element"
+        return _boostrapise(_tinymce, context, id, label, compulsory)
