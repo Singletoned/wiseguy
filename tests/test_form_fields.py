@@ -444,6 +444,16 @@ class TestBootstrapFormFields(unittest.TestCase):
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
         result = result.strip()
+        assert expected == result
+
+    def test_checkbox_with_value(self):
+        context = dict(data=dict(foo=['blah', 'flibble']), errors=None)
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo" checked></div>
+</fieldset>'''.strip()
+        result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
+        result = result.strip()
         utils.print_quick_pprint_diff(expected, result)
         assert expected == result
 

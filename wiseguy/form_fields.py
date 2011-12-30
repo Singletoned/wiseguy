@@ -61,9 +61,7 @@ def input(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
-@j2.contextfunction
-def checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
-    "A simple input element"
+def _checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
     elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
     data_value = (context.get('data', False) or {}).get(id, '')
     if isinstance(data_value, (list, tuple)):
@@ -71,6 +69,13 @@ def checkbox(context, id, label, compulsory=False, value=_default, disabled=Fals
             elements[1].attrib['checked'] = "checked"
     if disabled:
         elements[1].attrib['disabled'] = "disabled"
+    return elements
+
+
+@j2.contextfunction
+def checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
+    "A simple input element"
+    elements = _checkbox(context, id, label, compulsory, value, disabled)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -228,7 +233,7 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def checkbox(self, context, id, label, compulsory=False, value=_default):
         "A Bootstrap checkbox element"
-        return _boostrapise(_input, context, id, label, compulsory=False, input_type="checkbox", value=value)
+        return _boostrapise(_checkbox, context, id, label, compulsory=False, value=value)
 
     @j2.contextfunction
     def datepicker(self, context, id, label, compulsory=False):
