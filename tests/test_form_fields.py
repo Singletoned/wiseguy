@@ -454,7 +454,6 @@ class TestBootstrapFormFields(unittest.TestCase):
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
         result = result.strip()
-        utils.print_quick_pprint_diff(expected, result)
         assert expected == result
 
     def test_password(self):
