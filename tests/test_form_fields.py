@@ -425,6 +425,17 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = result.strip()
         assert expected == result
 
+    def test_input_with_errors(self):
+        context = dict(data=None, errors=dict(foo="Please enter a foo"))
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
+<span class="error">Please enter a foo</span>
+</fieldset>'''.strip()
+        result = self.bootstrap_form_fields.input(context, 'foo', "Foo:")
+        result = result.strip()
+        assert expected == result
+
     def test_checkbox(self):
         context = dict(data=None, errors=None)
         expected = '''

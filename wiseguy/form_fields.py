@@ -19,7 +19,9 @@ def add_errors(context, elements, id):
 
 def _boostrapise(func, *args, **kwargs):
     elements = func(*args, **kwargs)
-    label, input = elements
+    label = elements[0]
+    input = elements[1]
+    rest = elements[2:]
     label.attrib['class'] = "control-label"
     input = html.DIV(
         input,
@@ -27,7 +29,8 @@ def _boostrapise(func, *args, **kwargs):
     element = html.FIELDSET(
         label,
         input,
-        {'class': 'control-group'})
+        {'class': 'control-group'},
+        *rest)
     element = lxml.html.tostring(element, pretty_print=True)
     return element
 
