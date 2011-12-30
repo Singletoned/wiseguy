@@ -429,10 +429,11 @@ class TestBootstrapFormFields(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''
 <fieldset class="control-group">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="" name="foo"></div>
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
         result = result.strip()
+        utils.print_quick_pprint_diff(expected, result)
         assert expected == result
 
     def test_password(self):

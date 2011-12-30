@@ -213,6 +213,6 @@ class BootstrapFormFields(object):
         return _boostrapise(_select, context, id, label, options, compulsory, blank_option)
 
     @j2.contextfunction
-    def checkbox(self, context, id, label, compulsory=False):
+    def checkbox(self, context, id, label, compulsory=False, value=_default):
         "A Bootstrap checkbox element"
-        return _boostrapise(_input, context, id, label, compulsory=False, input_type="checkbox")
+        return _boostrapise(_input, context, id, label, compulsory=False, input_type="checkbox", value=value)
