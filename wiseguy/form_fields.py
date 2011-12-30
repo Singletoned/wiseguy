@@ -84,13 +84,18 @@ def password(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
-@j2.contextfunction
-def datepicker(context, id, label, compulsory=False):
-    "A datepicker element that uses JQueryUI"
+def _datepicker(context, id, label, compulsory):
     elements = _input(context, id, label, compulsory, input_type="text")
     script = html.SCRIPT(
         '''$(function() {$("#%s").datepicker({dateFormat:'yy-mm-dd'});});''' % id)
-    elements.insert(0, script)
+    elements.insert(len(elements), script)
+    return elements
+
+
+@j2.contextfunction
+def datepicker(context, id, label, compulsory=False):
+    "A datepicker element that uses JQueryUI"
+    elements = _datepicker(context, id, label, compulsory)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -219,3 +224,8 @@ class BootstrapFormFields(object):
     def checkbox(self, context, id, label, compulsory=False, value=_default):
         "A Bootstrap checkbox element"
         return _boostrapise(_input, context, id, label, compulsory=False, input_type="checkbox", value=value)
+
+    @j2.contextfunction
+    def datepicker(self, context, id, label, compulsory=False):
+        "A Bootstrap datepicker element"
+        return _boostrapise(_datepicker, context, id, label, compulsory=False)

@@ -310,9 +310,9 @@ class TestDatePicker(unittest.TestCase):
     def test_simple(self):
         context = dict()
         expected = '''
-<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
 <label for="foo">Foo:</label>
 <input type="text" id="foo" value="" name="foo">
+<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
         '''.strip()
         result = form_fields.datepicker(context, 'foo', "Foo:")
         result = result.strip()
@@ -469,5 +469,16 @@ class TestBootstrapFormFields(unittest.TestCase):
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options)
+        result = result.strip()
+        assert expected == result
+
+    def test_datepicker(self):
+        context = dict()
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
+<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
+</fieldset>'''.strip()
+        result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:")
         result = result.strip()
         assert expected == result
