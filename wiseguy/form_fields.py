@@ -17,8 +17,8 @@ def add_errors(context, elements, id):
                     {'class': 'error'}))
 
 
-def _boostrapise(func, *args, **kwargs):
-    elements = func(*args, **kwargs)
+def _boostrapise(func, **kwargs):
+    elements = func(**kwargs)
     label = elements[0]
     input = elements[1]
     rest = elements[2:]
@@ -218,34 +218,74 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def input(self, context, id, label, compulsory=False):
         "A Bootstrap input element"
-        return _boostrapise(_input, context, id, label, compulsory=False, input_type="text")
+        return _boostrapise(_input,
+                            context=context,
+                            id=id,
+                            label=label,
+                            compulsory=False,
+                            input_type="text")
 
     @j2.contextfunction
     def password(self, context, id, label, compulsory=False):
         "A Bootstrap input element"
-        return _boostrapise(_input, context, id, label, compulsory, input_type="password")
+        return _boostrapise(
+            _input,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=compulsory,
+            input_type="password")
 
     @j2.contextfunction
     def select(self, context, id, label, options, compulsory=False, disabled=False, blank_option=True):
         "A Bootstrap input element"
-        return _boostrapise(_select, context, id, label, options, compulsory, disabled, blank_option)
+        return _boostrapise(
+            _select,
+            context=context,
+            id=id,
+            label=label,
+            options=options,
+            compulsory=compulsory,
+            disabled=disabled,
+            blank_option=blank_option)
 
     @j2.contextfunction
     def checkbox(self, context, id, label, compulsory=False, value=_default):
         "A Bootstrap checkbox element"
-        return _boostrapise(_checkbox, context, id, label, compulsory, value=value)
+        return _boostrapise(
+            _checkbox,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=compulsory,
+            value=value)
 
     @j2.contextfunction
     def textarea(self, context, id, label, compulsory=False):
         "A Bootstrap textarea element"
-        return _boostrapise(_textarea, context, id, label, compulsory)
+        return _boostrapise(
+            _textarea,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=compulsory)
 
     @j2.contextfunction
     def datepicker(self, context, id, label, compulsory=False):
         "A Bootstrap datepicker element"
-        return _boostrapise(_datepicker, context, id, label, compulsory)
+        return _boostrapise(
+            _datepicker,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=compulsory)
 
     @j2.contextfunction
     def tinymce(self, context, id, label, compulsory=False):
         "A Bootstrap tinymce element"
-        return _boostrapise(_tinymce, context, id, label, compulsory)
+        return _boostrapise(
+            _tinymce,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=compulsory)
