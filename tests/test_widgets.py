@@ -44,6 +44,22 @@ class TestPagination(unittest.TestCase):
         result = lxml.html.tostring(result)
         assert expected == result
 
+    def test_simple(self):
+        context = dict(offset=0, total=25, limit=5)
+        expected = '''
+<div class="pagination"><ul>
+<li class="prev disabled"><a href="#">&#8592; Previous</a></li>
+<li class="active"><a href="#">1</a></li>
+<li><a href="#">2</a></li>
+<li><a href="#">3</a></li>
+<li><a href="#">4</a></li>
+<li><a href="#">5</a></li>
+<li class="next"><a href="#">Next &#8594;</a></li>
+</ul></div>
+'''.strip()
+        result = widgets.pagination(context).strip()
+        assert expected == result
+
 
 class TestPagecounter(unittest.TestCase):
     def test_simple(self):

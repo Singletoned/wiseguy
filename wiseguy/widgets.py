@@ -53,3 +53,31 @@ def page_counter(context):
             start=start,
             end=end,
             active=active)
+
+
+@j2.contextfunction
+def pagination(context):
+    prev = prev_li(context)
+    next = next_li(context)
+    total = context['total']
+    offset = context['offset']
+    limit = context['limit']
+    elements = []
+    elements.append(prev)
+    for page in page_counter(context):
+        if page['active']:
+            li_class = {'class': (page['active'] and "active" or "")}
+        else:
+            li_class = {}
+        el = html.LI(
+            html.A(
+                str(page['page']),
+                href="#"),
+            li_class)
+        elements.append(el)
+    elements.append(next)
+    div = html.DIV(
+        {'class': 'pagination'},
+        html.UL(
+            *elements))
+    return lxml.html.tostring(div, pretty_print=True)
