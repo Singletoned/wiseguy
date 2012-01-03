@@ -32,3 +32,24 @@ def next_li(context):
         {'class': " ".join(next_classes)},
     )
     return next
+
+def page_counter(context):
+    total = context['total']
+    offset = context['offset']
+    limit = context['limit']
+    current = 0
+    page = 0
+    while current < total:
+        start = current + 1
+        end = current + limit
+        if current <= offset < end:
+            active = True
+        else:
+            active = False
+        current = current + limit
+        page = page + 1
+        yield dict(
+            page=page,
+            start=start,
+            end=end,
+            active=active)

@@ -43,3 +43,18 @@ class TestPagination(unittest.TestCase):
         result = widgets.next_li(context)
         result = lxml.html.tostring(result)
         assert expected == result
+
+
+class TestPagecounter(unittest.TestCase):
+    def test_simple(self):
+        context = dict(offset=0, total=25, limit=5)
+        page_counter = widgets.page_counter(context)
+        result = list(page_counter)
+        expected = [
+            dict(page=1, start=1,  end=5,  active=True),
+            dict(page=2, start=6,  end=10, active=False),
+            dict(page=3, start=11, end=15, active=False),
+            dict(page=4, start=16, end=20, active=False),
+            dict(page=5, start=21, end=25, active=False),
+        ]
+        assert expected == result
