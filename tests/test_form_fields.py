@@ -418,10 +418,10 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_input(self):
         context = dict(data=None, errors=None)
         expected = '''
-<fieldset class="control-group">
+<fieldset class="control-group span4">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.input(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.input(context, 'foo', "Foo:", class_="span4")
         result = result.strip()
         assert expected == result
 
@@ -439,10 +439,10 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_checkbox(self):
         context = dict(data=None, errors=None)
         expected = '''
-<fieldset class="control-group">
+<fieldset class="control-group span2">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
+        result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble", class_="span2")
         result = result.strip()
         assert expected == result
 
@@ -459,10 +459,10 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_password(self):
         context = dict(data=None, errors=None)
         expected = '''
-<fieldset class="control-group">
+<fieldset class="control-group span3">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.password(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.password(context, 'foo', "Foo:", class_="span3")
         result = result.strip()
         assert expected == result
 
@@ -470,14 +470,14 @@ class TestBootstrapFormFields(unittest.TestCase):
         context = dict(data=None, errors=None)
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         expected = '''
-<fieldset class="control-group">
+<fieldset class="control-group span5">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><select id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options)
+        result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options, class_="span5")
         result = result.strip()
         assert expected == result
 
@@ -498,27 +498,27 @@ class TestBootstrapFormFields(unittest.TestCase):
 
     def test_textarea(self):
         context = dict(data=None, errors=None)
-        expected = '''<fieldset class="control-group">
+        expected = '''<fieldset class="control-group span8">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo"></textarea></div>
 </fieldset>
 '''
-        result = self.bootstrap_form_fields.textarea(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.textarea(context, 'foo', "Foo:", class_="span8")
         assert expected == result
 
     def test_datepicker(self):
         context = dict()
         expected = '''
-<fieldset class="control-group">
+<fieldset class="control-group span5">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
 <script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:")
+        result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:", class_="span5")
         result = result.strip()
         assert expected == result
 
     def test_tinymce(self):
         context = dict(data=None, errors=None)
-        expected = '''<fieldset class="control-group">
+        expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea></div>
 <script type="text/javascript">
 tinyMCE.init({
@@ -530,5 +530,5 @@ editor_deselector : "mceNoEditor"
 </script>
 </fieldset>
 '''
-        result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
+        result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True, class_="span6")
         assert expected == result

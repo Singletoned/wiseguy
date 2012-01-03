@@ -17,7 +17,7 @@ def add_errors(context, elements, id):
                     {'class': 'error'}))
 
 
-def _boostrapise(func, **kwargs):
+def _boostrapise(func, class_=None, **kwargs):
     elements = func(**kwargs)
     label = elements[0]
     input = elements[1]
@@ -26,10 +26,13 @@ def _boostrapise(func, **kwargs):
     input = html.DIV(
         input,
         {'class': 'controls'})
+    fieldset_classes = ['control-group']
+    if class_:
+        fieldset_classes.append(class_)
     element = html.FIELDSET(
         label,
         input,
-        {'class': 'control-group'},
+        {'class': " ".join(fieldset_classes)},
         *rest)
     element = lxml.html.tostring(element, pretty_print=True)
     return element
@@ -216,17 +219,18 @@ def submit(id="submit", label="Submit", class_=""):
 
 class BootstrapFormFields(object):
     @j2.contextfunction
-    def input(self, context, id, label, compulsory=False):
+    def input(self, context, id, label, compulsory=False, class_=None):
         "A Bootstrap input element"
         return _boostrapise(_input,
                             context=context,
                             id=id,
                             label=label,
                             compulsory=False,
-                            input_type="text")
+                            input_type="text",
+                            class_=class_)
 
     @j2.contextfunction
-    def password(self, context, id, label, compulsory=False):
+    def password(self, context, id, label, compulsory=False, class_=None):
         "A Bootstrap input element"
         return _boostrapise(
             _input,
@@ -234,10 +238,11 @@ class BootstrapFormFields(object):
             id=id,
             label=label,
             compulsory=compulsory,
-            input_type="password")
+            input_type="password",
+            class_=class_)
 
     @j2.contextfunction
-    def select(self, context, id, label, options, compulsory=False, disabled=False, blank_option=True):
+    def select(self, context, id, label, options, compulsory=False, disabled=False, blank_option=True, class_=None):
         "A Bootstrap input element"
         return _boostrapise(
             _select,
@@ -247,10 +252,11 @@ class BootstrapFormFields(object):
             options=options,
             compulsory=compulsory,
             disabled=disabled,
-            blank_option=blank_option)
+            blank_option=blank_option,
+            class_=class_)
 
     @j2.contextfunction
-    def checkbox(self, context, id, label, compulsory=False, value=_default):
+    def checkbox(self, context, id, label, compulsory=False, value=_default, class_=None):
         "A Bootstrap checkbox element"
         return _boostrapise(
             _checkbox,
@@ -258,34 +264,38 @@ class BootstrapFormFields(object):
             id=id,
             label=label,
             compulsory=compulsory,
-            value=value)
+            value=value,
+            class_=class_)
 
     @j2.contextfunction
-    def textarea(self, context, id, label, compulsory=False):
+    def textarea(self, context, id, label, compulsory=False, class_=None):
         "A Bootstrap textarea element"
         return _boostrapise(
             _textarea,
             context=context,
             id=id,
             label=label,
-            compulsory=compulsory)
+            compulsory=compulsory,
+            class_=class_)
 
     @j2.contextfunction
-    def datepicker(self, context, id, label, compulsory=False):
+    def datepicker(self, context, id, label, compulsory=False, class_=None):
         "A Bootstrap datepicker element"
         return _boostrapise(
             _datepicker,
             context=context,
             id=id,
             label=label,
-            compulsory=compulsory)
+            compulsory=compulsory,
+            class_=class_)
 
     @j2.contextfunction
-    def tinymce(self, context, id, label, compulsory=False):
+    def tinymce(self, context, id, label, compulsory=False, class_=None):
         "A Bootstrap tinymce element"
         return _boostrapise(
             _tinymce,
             context=context,
             id=id,
             label=label,
-            compulsory=compulsory)
+            compulsory=compulsory,
+            class_=class_)
