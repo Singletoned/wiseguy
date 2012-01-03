@@ -18,3 +18,17 @@ def prev_li(context):
         {'class': " ".join(prev_classes)},
     )
     return prev
+
+@j2.contextfunction
+def next_li(context):
+    next_classes = ['next']
+    if not context['total'] > (context['offset'] + context['limit']):
+        next_classes.append('disabled')
+    next = html.LI(
+        html.A(
+            u"Next →",
+            href="#"
+        ),
+        {'class': " ".join(next_classes)},
+    )
+    return next
