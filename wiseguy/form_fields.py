@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import jinja2 as j2
-import werkzeug as wz
 import lxml.html
 from lxml.html import builder as html
 
