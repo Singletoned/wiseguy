@@ -8,13 +8,15 @@ from lxml.html import builder as html
 @j2.contextfunction
 def prev_li(context):
     prev_classes = ['prev']
+    attrs = dict()
     if not context['offset'] > 0:
         prev_classes.append('disabled')
+    else:
+        attrs['href'] = "/"
     prev = html.LI(
         html.A(
             u"← Previous",
-            href="#"
-        ),
+            attrs),
         {'class': " ".join(prev_classes)},
     )
     return prev

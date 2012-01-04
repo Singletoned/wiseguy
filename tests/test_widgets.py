@@ -11,7 +11,7 @@ class TestPagination(unittest.TestCase):
     def test_prev_li_disabled(self):
         context = dict(offset=0)
         expected = '''
-<li class="prev disabled"><a href="#">&#8592; Previous</a></li>
+<li class="prev disabled"><a>&#8592; Previous</a></li>
         '''.strip()
         result = widgets.prev_li(context)
         result = lxml.html.tostring(result)
@@ -20,7 +20,7 @@ class TestPagination(unittest.TestCase):
     def test_prev_li_enabled(self):
         context = dict(offset=1)
         expected = '''
-<li class="prev"><a href="#">&#8592; Previous</a></li>
+<li class="prev"><a href="/">&#8592; Previous</a></li>
         '''.strip()
         result = widgets.prev_li(context)
         result = lxml.html.tostring(result)
@@ -48,7 +48,7 @@ class TestPagination(unittest.TestCase):
         context = dict(offset=0, total=25, limit=5)
         expected = '''
 <div class="pagination"><ul>
-<li class="prev disabled"><a href="#">&#8592; Previous</a></li>
+<li class="prev disabled"><a>&#8592; Previous</a></li>
 <li class="active"><a href="#">1</a></li>
 <li><a href="#">2</a></li>
 <li><a href="#">3</a></li>
