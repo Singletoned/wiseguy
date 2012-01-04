@@ -6,13 +6,14 @@ from lxml.html import builder as html
 
 
 @j2.contextfunction
-def prev_li(context):
+def prev_li(context, item_url):
     prev_classes = ['prev']
     attrs = dict()
     if not context['offset'] > 0:
         prev_classes.append('disabled')
     else:
-        attrs['href'] = "/"
+        new_offset = max(0, context['offset']-context['limit'])
+        attrs['href'] = item_url(offset=new_offset, limit=context['limit'])
     prev = html.LI(
         html.A(
             u"← Previous",
@@ -22,13 +23,14 @@ def prev_li(context):
     return prev
 
 @j2.contextfunction
-def next_li(context):
+def next_li(context, item_url):
     next_classes = ['next']
     attrs = dict()
     if not context['total'] > (context['offset'] + context['limit']):
         next_classes.append('disabled')
     else:
-        attrs['href'] = "/"
+        new_offset = context['offset'] + context['limit']
+        attrs['href'] = item_url(offset=new_offset, limit=context['limit'])
     next = html.LI(
         html.A(
             u"Next →",
@@ -63,8 +65,8 @@ def page_counter(context):
 
 @j2.contextfunction
 def pagination(context, item_url):
-    prev = prev_li(context)
-    next = next_li(context)
+    prev = prev_li(context, item_url)
+    next = next_li(context, item_url)
     total = context['total']
     offset = context['offset']
     limit = context['limit']
