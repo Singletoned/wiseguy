@@ -71,6 +71,7 @@ def pagination(context):
     elements = []
     elements.append(prev)
     for page in page_counter(context):
+        href = context['url'](offset=page['offset'], limit=page['limit'])
         if page['active']:
             li_class = {'class': (page['active'] and "active" or "")}
         else:
@@ -78,7 +79,7 @@ def pagination(context):
         el = html.LI(
             html.A(
                 str(page['page']),
-                href="#"),
+                href=href),
             li_class)
         elements.append(el)
     elements.append(next)

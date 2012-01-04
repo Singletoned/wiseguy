@@ -3,8 +3,11 @@
 import unittest
 
 import lxml.html
+import werkzeug as wz
 
 from wiseguy import widgets
+
+url = wz.Href('/')
 
 
 class TestPagination(unittest.TestCase):
@@ -45,15 +48,15 @@ class TestPagination(unittest.TestCase):
         assert expected == result
 
     def test_simple(self):
-        context = dict(offset=0, total=25, limit=5)
+        context = dict(offset=0, total=25, limit=5, url=url)
         expected = '''
 <div class="pagination"><ul>
 <li class="prev disabled"><a>&#8592; Previous</a></li>
-<li class="active"><a href="#">1</a></li>
-<li><a href="#">2</a></li>
-<li><a href="#">3</a></li>
-<li><a href="#">4</a></li>
-<li><a href="#">5</a></li>
+<li class="active"><a href="/?limit=5&amp;offset=0">1</a></li>
+<li><a href="/?limit=5&amp;offset=5">2</a></li>
+<li><a href="/?limit=5&amp;offset=10">3</a></li>
+<li><a href="/?limit=5&amp;offset=15">4</a></li>
+<li><a href="/?limit=5&amp;offset=20">5</a></li>
 <li class="next"><a href="/">Next &#8594;</a></li>
 </ul></div>
 '''.strip()
