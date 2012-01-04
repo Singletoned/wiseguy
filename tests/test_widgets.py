@@ -8,6 +8,7 @@ import werkzeug as wz
 from wiseguy import widgets
 
 url = wz.Href('/')
+item_url = wz.Href('/item_type')
 
 
 class TestPagination(unittest.TestCase):
@@ -52,15 +53,15 @@ class TestPagination(unittest.TestCase):
         expected = '''
 <div class="pagination"><ul>
 <li class="prev disabled"><a>&#8592; Previous</a></li>
-<li class="active"><a href="/?limit=5&amp;offset=0">1</a></li>
-<li><a href="/?limit=5&amp;offset=5">2</a></li>
-<li><a href="/?limit=5&amp;offset=10">3</a></li>
-<li><a href="/?limit=5&amp;offset=15">4</a></li>
-<li><a href="/?limit=5&amp;offset=20">5</a></li>
+<li class="active"><a href="/item_type?limit=5&amp;offset=0">1</a></li>
+<li><a href="/item_type?limit=5&amp;offset=5">2</a></li>
+<li><a href="/item_type?limit=5&amp;offset=10">3</a></li>
+<li><a href="/item_type?limit=5&amp;offset=15">4</a></li>
+<li><a href="/item_type?limit=5&amp;offset=20">5</a></li>
 <li class="next"><a href="/">Next &#8594;</a></li>
 </ul></div>
 '''.strip()
-        result = widgets.pagination(context).strip()
+        result = widgets.pagination(context, item_url).strip()
         assert expected == result
 
 

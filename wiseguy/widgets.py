@@ -62,7 +62,7 @@ def page_counter(context):
 
 
 @j2.contextfunction
-def pagination(context):
+def pagination(context, item_url):
     prev = prev_li(context)
     next = next_li(context)
     total = context['total']
@@ -71,7 +71,7 @@ def pagination(context):
     elements = []
     elements.append(prev)
     for page in page_counter(context):
-        href = context['url'](offset=page['offset'], limit=page['limit'])
+        href = item_url(offset=page['offset'], limit=page['limit'])
         if page['active']:
             li_class = {'class': (page['active'] and "active" or "")}
         else:
