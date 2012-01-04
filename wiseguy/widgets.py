@@ -24,13 +24,15 @@ def prev_li(context):
 @j2.contextfunction
 def next_li(context):
     next_classes = ['next']
+    attrs = dict()
     if not context['total'] > (context['offset'] + context['limit']):
         next_classes.append('disabled')
+    else:
+        attrs['href'] = "/"
     next = html.LI(
         html.A(
             u"Next →",
-            href="#"
-        ),
+            attrs),
         {'class': " ".join(next_classes)},
     )
     return next

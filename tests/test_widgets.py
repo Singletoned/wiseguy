@@ -29,7 +29,7 @@ class TestPagination(unittest.TestCase):
     def test_next_li_disabled(self):
         context = dict(offset=0, limit=5, total=5)
         expected = '''
-<li class="next disabled"><a href="#">Next &#8594;</a></li>
+<li class="next disabled"><a>Next &#8594;</a></li>
         '''.strip()
         result = widgets.next_li(context)
         result = lxml.html.tostring(result)
@@ -38,7 +38,7 @@ class TestPagination(unittest.TestCase):
     def test_next_li_enabled(self):
         context = dict(offset=0, limit=5, total=10)
         expected = '''
-<li class="next"><a href="#">Next &#8594;</a></li>
+<li class="next"><a href="/">Next &#8594;</a></li>
         '''.strip()
         result = widgets.next_li(context)
         result = lxml.html.tostring(result)
@@ -54,7 +54,7 @@ class TestPagination(unittest.TestCase):
 <li><a href="#">3</a></li>
 <li><a href="#">4</a></li>
 <li><a href="#">5</a></li>
-<li class="next"><a href="#">Next &#8594;</a></li>
+<li class="next"><a href="/">Next &#8594;</a></li>
 </ul></div>
 '''.strip()
         result = widgets.pagination(context).strip()
