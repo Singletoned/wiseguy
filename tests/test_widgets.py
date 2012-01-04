@@ -67,10 +67,10 @@ class TestPagecounter(unittest.TestCase):
         page_counter = widgets.page_counter(context)
         result = list(page_counter)
         expected = [
-            dict(page=1, start=1,  end=5,  active=True),
-            dict(page=2, start=6,  end=10, active=False),
-            dict(page=3, start=11, end=15, active=False),
-            dict(page=4, start=16, end=20, active=False),
-            dict(page=5, start=21, end=25, active=False),
+            dict(page=1, offset=0,  limit=5, start=1,  end=5,  active=True),
+            dict(page=2, offset=5,  limit=5, start=6,  end=10, active=False),
+            dict(page=3, offset=10, limit=5, start=11, end=15, active=False),
+            dict(page=4, offset=15, limit=5, start=16, end=20, active=False),
+            dict(page=5, offset=20, limit=5, start=21, end=25, active=False),
         ]
         assert expected == result

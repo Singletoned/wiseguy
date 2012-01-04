@@ -40,19 +40,21 @@ def page_counter(context):
     current = 0
     page = 0
     while current < total:
+        page = page + 1
         start = current + 1
         end = current + limit
         if current <= offset < end:
             active = True
         else:
             active = False
-        current = current + limit
-        page = page + 1
         yield dict(
             page=page,
+            offset=current,
+            limit=limit,
             start=start,
             end=end,
             active=active)
+        current = current + limit
 
 
 @j2.contextfunction
