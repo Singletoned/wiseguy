@@ -115,3 +115,13 @@ class TestPagecounter(unittest.TestCase):
             dict(page=5, offset=20, limit=5, start=21, end=25, active=False),
         ]
         assert expected == result
+
+
+class TestBreadcrumbs(unittest.TestCase):
+    def test_simple(self):
+        expected = '''
+<ul class="breadcrumb"><li><a href="/">My Site</a></li></ul>
+        '''.strip()
+        pages = [("/", "My Site")]
+        result = widgets.breadcrumbs(pages).strip()
+        assert expected == result

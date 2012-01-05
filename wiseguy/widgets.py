@@ -100,3 +100,17 @@ def pagination(context, item_url, kwargs_filter=None):
         html.UL(
             *elements))
     return lxml.html.tostring(div, pretty_print=True)
+
+
+def breadcrumbs(pages):
+    items = []
+    for page in pages:
+        el = html.LI(
+            html.A(
+                page[1],
+                href=page[0]))
+        items.append(el)
+    bc = html.UL(
+        {'class': "breadcrumb"},
+        *items)
+    return lxml.html.tostring(bc, pretty_print=True)
