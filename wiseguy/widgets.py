@@ -5,15 +5,23 @@ import lxml.html
 from lxml.html import builder as html
 
 
+def _make_href_kwargs(context, kwargs_filter, offset, limit):
+    if kwargs_filter:
+        href_kwargs = kwargs_filter(context, offset=offset, limit=limit)
+    else:
+        href_kwargs = dict(offset=offset, limit=limit)
+    return href_kwargs
+
 @j2.contextfunction
-def prev_li(context, item_url):
+def prev_li(context, item_url, kwargs_filter=None):
     prev_classes = ['prev']
     attrs = dict()
     if not context['offset'] > 0:
         prev_classes.append('disabled')
     else:
         new_offset = max(0, context['offset']-context['limit'])
-        attrs['href'] = item_url(offset=new_offset, limit=context['limit'])
+        href_kwargs = _make_href_kwargs(context, kwargs_filter, new_offset, context['limit'])
+        attrs['href'] = item_url(**href_kwargs)
     prev = html.LI(
         html.A(
             u"← Previous",
@@ -23,14 +31,15 @@ def prev_li(context, item_url):
     return prev
 
 @j2.contextfunction
-def next_li(context, item_url):
+def next_li(context, item_url, kwargs_filter=None):
     next_classes = ['next']
     attrs = dict()
     if not context['total'] > (context['offset'] + context['limit']):
         next_classes.append('disabled')
     else:
         new_offset = context['offset'] + context['limit']
-        attrs['href'] = item_url(offset=new_offset, limit=context['limit'])
+        href_kwargs = _make_href_kwargs(context, kwargs_filter, new_offset, context['limit'])
+        attrs['href'] = item_url(**href_kwargs)
     next = html.LI(
         html.A(
             u"Next →",
@@ -64,16 +73,17 @@ def page_counter(context):
 
 
 @j2.contextfunction
-def pagination(context, item_url):
-    prev = prev_li(context, item_url)
-    next = next_li(context, item_url)
+def pagination(context, item_url, kwargs_filter=None):
+    prev = prev_li(context, item_url, kwargs_filter)
+    next = next_li(context, item_url, kwargs_filter)
     total = context['total']
     offset = context['offset']
     limit = context['limit']
     elements = []
     elements.append(prev)
     for page in page_counter(context):
-        href = item_url(offset=page['offset'], limit=page['limit'])
+        href_kwargs = _make_href_kwargs(context, kwargs_filter, page['offset'], page['limit'])
+        href = item_url(**href_kwargs)
         if page['active']:
             li_class = {'class': (page['active'] and "active" or "")}
         else:
