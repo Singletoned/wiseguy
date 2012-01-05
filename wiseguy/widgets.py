@@ -104,11 +104,23 @@ def pagination(context, item_url, kwargs_filter=None):
 
 def breadcrumbs(pages):
     items = []
-    for page in pages:
-        el = html.LI(
-            html.A(
-                page[1],
-                href=page[0]))
+    last_page_num = len(pages) - 1
+    for page_num, page in enumerate(pages):
+        if not page_num == last_page_num:
+            el = html.LI(
+                html.A(
+                    page[1],
+                    href=page[0]),
+                " ",
+                html.SPAN(
+                    {'class': 'divider'},
+                    "/"))
+        else:
+            el = html.LI(
+                {'class': 'active'},
+                html.A(
+                    page[1],
+                    href=page[0]))
         items.append(el)
     bc = html.UL(
         {'class': "breadcrumb"},

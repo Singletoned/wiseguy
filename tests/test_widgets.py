@@ -120,8 +120,21 @@ class TestPagecounter(unittest.TestCase):
 class TestBreadcrumbs(unittest.TestCase):
     def test_simple(self):
         expected = '''
-<ul class="breadcrumb"><li><a href="/">My Site</a></li></ul>
+<ul class="breadcrumb"><li class="active"><a href="/">My Site</a></li></ul>
         '''.strip()
         pages = [("/", "My Site")]
+        result = widgets.breadcrumbs(pages).strip()
+        assert expected == result
+
+    def test_two_levels(self):
+        expected = '''
+<ul class="breadcrumb">
+<li>
+<a href="/">My Site</a> <span class="divider">/</span>
+</li>
+<li class="active"><a href="/foo">Foo</a></li>
+</ul>
+        '''.strip()
+        pages = [("/", "My Site"), ("/foo", "Foo")]
         result = widgets.breadcrumbs(pages).strip()
         assert expected == result
