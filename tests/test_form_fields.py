@@ -509,6 +509,18 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = result.strip()
         assert expected == result
 
+    def test_search(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<fieldset class="control-group search-form image-search-widget span4">
+<label for="foo" class="control-label">Foo:</label><div class="controls">
+<input type="text" id="foo" value="" name="foo"><a href="#" class="btn">Search</a>
+</div>
+</fieldset>'''.strip()
+        result = self.bootstrap_form_fields.search(context, 'foo', "Foo:", class_="span4")
+        result = result.strip()
+        assert expected == result
+
     def test_checkbox(self):
         context = dict(data=None, errors=None)
         expected = '''

@@ -16,15 +16,15 @@ def add_errors(context, elements, id):
                     {'class': 'error'}))
 
 
-def _boostrapise(func, class_=None, **kwargs):
+def _boostrapise(func, class_=None, controls_length=1, **kwargs):
     elements = func(**kwargs)
     label = elements[0]
-    input = elements[1]
-    rest = elements[2:]
+    inputs = elements[1:controls_length+1]
+    rest = elements[controls_length+1:]
     label.attrib['class'] = "control-label"
     input = html.DIV(
-        input,
-        {'class': 'controls'})
+        {'class': 'controls'},
+        *inputs)
     fieldset_classes = ['control-group']
     if class_:
         fieldset_classes.append(class_)
@@ -54,6 +54,18 @@ def _input(context, id, label, compulsory, input_type, value=_default):
     add_errors(context, elements, id)
     return elements
 
+def _search(context, id, label, compulsory, input_type, value=_default, link_class=None):
+    elements = _input(context, id, label, compulsory, input_type="text")
+    if link_class:
+        attrs = {'class': link_class}
+    else:
+        attrs = {}
+    link = html.A(
+        "Search",
+        attrs,
+        href="#")
+    elements.insert(2, link)
+    return elements
 
 @j2.contextfunction
 def input(context, id, label, compulsory=False):
@@ -65,11 +77,7 @@ def input(context, id, label, compulsory=False):
 @j2.contextfunction
 def search(context, id, label, compulsory=False):
     "A basic search element with link"
-    elements = _input(context, id, label, compulsory, input_type="text")
-    link = html.A(
-        "Search",
-        href="#")
-    elements.insert(2, link)
+    elements = _search(context, id, label, compulsory, input_type="text")
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -237,6 +245,24 @@ class BootstrapFormFields(object):
                             compulsory=False,
                             input_type="text",
                             class_=class_)
+
+    @j2.contextfunction
+    def search(self, context, id, label, compulsory=False, class_=None):
+        "A Bootstrap input element"
+        if class_:
+            class_ = " ".join(["search-form image-search-widget", class_])
+        else:
+            class_ = "search-form image-search-widget"
+        return _boostrapise(
+            _search,
+            controls_length=3,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=False,
+            input_type="text",
+            class_=class_,
+            link_class="btn")
 
     @j2.contextfunction
     def password(self, context, id, label, compulsory=False, class_=None):
