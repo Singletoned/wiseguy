@@ -238,13 +238,14 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def input(self, context, id, label, compulsory=False, class_=None):
         "A Bootstrap input element"
-        return _boostrapise(_input,
-                            context=context,
-                            id=id,
-                            label=label,
-                            compulsory=False,
-                            input_type="text",
-                            class_=class_)
+        return _boostrapise(
+            _input,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=False,
+            input_type="text",
+            class_=class_)
 
     @j2.contextfunction
     def search(self, context, id, label, compulsory=False, class_=None):
