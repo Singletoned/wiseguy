@@ -62,6 +62,16 @@ def input(context, id, label, compulsory=False):
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
+@j2.contextfunction
+def search(context, id, label, compulsory=False):
+    "A basic search element with link"
+    elements = _input(context, id, label, compulsory, input_type="text")
+    link = html.A(
+        "Search",
+        href="#")
+    elements.insert(2, link)
+    elements = [lxml.html.tostring(e) for e in elements]
+    return '\n'.join(elements)
 
 def _checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
     elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
