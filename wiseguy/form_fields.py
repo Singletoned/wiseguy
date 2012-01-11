@@ -54,17 +54,20 @@ def _input(context, id, label, compulsory, input_type, value=_default):
     add_errors(context, elements, id)
     return elements
 
-def _search(context, id, label, compulsory, input_type, value=_default, link_class=None):
+def _search(context, id, label, compulsory, input_type, value=_default, link_class=None, extra_attrs=None, help=None):
     elements = _input(context, id, label, compulsory, input_type="text")
+    if not extra_attrs:
+        extra_attrs = dict()
     if link_class:
-        attrs = {'class': link_class}
-    else:
-        attrs = {}
+        extra_attrs['class'] =  link_class
     link = html.A(
         "Search",
-        attrs,
+        extra_attrs,
         href="#")
     elements.insert(2, link)
+    if help:
+        help = lxml.html.fromstring(help)
+        elements.insert(3, help)
     return elements
 
 @j2.contextfunction
@@ -75,9 +78,9 @@ def input(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 @j2.contextfunction
-def search(context, id, label, compulsory=False):
+def search(context, id, label, compulsory=False, help=None):
     "A basic search element with link"
-    elements = _search(context, id, label, compulsory, input_type="text")
+    elements = _search(context, id, label, compulsory, input_type="text", help=help)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
@@ -248,7 +251,7 @@ class BootstrapFormFields(object):
             class_=class_)
 
     @j2.contextfunction
-    def search(self, context, id, label, compulsory=False, class_=None):
+    def search(self, context, id, label, compulsory=False, class_=None, extra_attrs=None, help=None):
         "A Bootstrap input element"
         if class_:
             class_ = " ".join(["search-form image-search-widget", class_])
@@ -263,7 +266,9 @@ class BootstrapFormFields(object):
             compulsory=False,
             input_type="text",
             class_=class_,
-            link_class="btn")
+            link_class="btn",
+            extra_attrs=extra_attrs,
+            help=help)
 
     @j2.contextfunction
     def password(self, context, id, label, compulsory=False, class_=None):

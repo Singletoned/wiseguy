@@ -142,6 +142,18 @@ class TestSearch(unittest.TestCase):
         result = form_fields.search(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_with_help(self):
+        context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo">
+<a href="#">Search</a>
+<a href="#">Help</a>
+<span class="error">Please enter a foo</span>
+        '''.strip()
+        result = form_fields.search(context, 'foo', "Foo:", help='''<a href="#">Help</a>''')
+        assert expected == result
+
 
 class TestCheckbox(unittest.TestCase):
     def test_plain(self):
