@@ -37,16 +37,21 @@ def _boostrapise(func, class_=None, controls_length=1, **kwargs):
     return element
 
 
-def _input(context, id, label, compulsory, input_type, value=_default):
+def _input(context, id, label, compulsory, input_type, value=_default, class_=None):
     if value is _default:
         value = unicode((context.get('data', False) or {}).get(id, ''))
     if compulsory:
         label = label + "*"
+    if class_:
+        extra_attrs = {'class': class_}
+    else:
+        extra_attrs = {}
     elements = [
         html.LABEL(
             label,
             {'for': id}),
         html.INPUT(
+            extra_attrs,
             type=input_type,
             name=id,
             id=id,
@@ -71,9 +76,9 @@ def _search(context, id, label, compulsory, input_type, value=_default, link_cla
     return elements
 
 @j2.contextfunction
-def input(context, id, label, compulsory=False):
+def input(context, id, label, compulsory=False, class_=None):
     "A simple input element"
-    elements = _input(context, id, label, compulsory, input_type="text")
+    elements = _input(context, id, label, compulsory, input_type="text", class_=class_)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 

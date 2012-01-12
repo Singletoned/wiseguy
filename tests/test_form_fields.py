@@ -69,6 +69,15 @@ class TestInput(unittest.TestCase):
         result = form_fields.input(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_with_class(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo" class="bar">
+        '''.strip()
+        result = form_fields.input(context, 'foo', "Foo:", class_="bar")
+        assert expected == result
+
 
 class TestSearch(unittest.TestCase):
     def test_plain(self):
