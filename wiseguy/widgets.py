@@ -73,7 +73,7 @@ def page_counter(context):
 
 
 @j2.contextfunction
-def pagination(context, item_url, kwargs_filter=None):
+def pagination(context, item_url, kwargs_filter=None, class_=None):
     prev = prev_li(context, item_url, kwargs_filter)
     next = next_li(context, item_url, kwargs_filter)
     total = context['total']
@@ -95,8 +95,12 @@ def pagination(context, item_url, kwargs_filter=None):
             li_class)
         elements.append(el)
     elements.append(next)
+    classes = ['pagination']
+    if class_:
+        classes.append(class_)
+    classes = " ".join(classes)
     div = html.DIV(
-        {'class': 'pagination'},
+        {'class': classes},
         html.UL(
             *elements))
     return lxml.html.tostring(div, pretty_print=True)

@@ -84,6 +84,22 @@ class TestPagination(unittest.TestCase):
         result = widgets.pagination(context, item_url).strip()
         assert expected == result
 
+    def test_with_class(self):
+        context = dict(offset=0, total=25, limit=5, url=url)
+        expected = '''
+<div class="pagination centered"><ul>
+<li class="prev disabled"><a>&#8592; Previous</a></li>
+<li class="active"><a href="/item_type?limit=5&amp;offset=0">1</a></li>
+<li><a href="/item_type?limit=5&amp;offset=5">2</a></li>
+<li><a href="/item_type?limit=5&amp;offset=10">3</a></li>
+<li><a href="/item_type?limit=5&amp;offset=15">4</a></li>
+<li><a href="/item_type?limit=5&amp;offset=20">5</a></li>
+<li class="next"><a href="/item_type?limit=5&amp;offset=5">Next &#8594;</a></li>
+</ul></div>
+'''.strip()
+        result = widgets.pagination(context, item_url, class_="centered").strip()
+        assert expected == result
+
     def test_with_kwargs_filter(self):
         context = dict(offset=10, total=25, limit=5, url=url, DEFAULT_LIMIT=5)
         kwargs_filter = lambda c, **k: dict(offset=k['offset'])
