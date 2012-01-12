@@ -266,7 +266,7 @@ class BootstrapFormFields(object):
             compulsory=False,
             input_type="text",
             class_=class_,
-            link_class="btn",
+            link_class="btn search",
             extra_attrs=extra_attrs,
             help=help)
 
