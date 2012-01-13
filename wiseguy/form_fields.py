@@ -136,12 +136,18 @@ def datepicker(context, id, label, compulsory=False):
 def _textarea(context, id, label, compulsory):
     if compulsory:
         label = label + "*"
+    data = context.get('data', False) or {}
+    text = data.get(id, '')
+    if isinstance(text, str):
+        text = text.decode('utf8')
+    else:
+        text = unicode(text)
     elements = [
         html.LABEL(
             label,
             {'for': id}),
         html.TEXTAREA(
-            str((context.get('data', False) or {}).get(id, '')),
+            text,
             name=id,
             id=id,
             rows="4",

@@ -450,6 +450,15 @@ class TestTextArea(unittest.TestCase):
         result = form_fields.textarea(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_non_ascii(self):
+        context = dict(data=dict(foo='Flibble Giblets£'), errors=None)
+        expected = '''
+<label for="foo">Foo:</label>
+<textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets&#163;</textarea>
+        '''.strip()
+        result = form_fields.textarea(context, 'foo', "Foo:")
+        assert expected == result
+
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
