@@ -16,23 +16,28 @@ def add_errors(context, elements, id):
                     {'class': 'error'}))
 
 
-def _boostrapise(func, class_=None, controls_length=1, **kwargs):
-    elements = func(**kwargs)
+def _boostrapise(func, context, id, class_=None, controls_length=1, **kwargs):
+    elements = func(context=context, id=id, **kwargs)
     label = elements[0]
-    inputs = elements[1:controls_length+1]
-    rest = elements[controls_length+1:]
+    rest = elements[1:]
     label.attrib['class'] = "control-label"
     input = html.DIV(
         {'class': 'controls'},
-        *inputs)
+        *rest)
     fieldset_classes = ['control-group']
+    if context.get('errors', None):
+        if context['errors'].get(id, ''):
+            fieldset_classes.append("error")
     if class_:
         fieldset_classes.append(class_)
     element = html.FIELDSET(
         label,
         input,
         {'class': " ".join(fieldset_classes)},
-        *rest)
+        )
+    help = element.xpath("//span[contains(@class, 'error')]")
+    if help:
+        help[0].attrib['class'] = help[0].attrib['class'] + ' help-inline'
     element = lxml.html.tostring(element, pretty_print=True)
     return element
 

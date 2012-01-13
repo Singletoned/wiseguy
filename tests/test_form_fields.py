@@ -531,9 +531,10 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_input_with_errors(self):
         context = dict(data=None, errors=dict(foo="Please enter a foo"))
         expected = '''
-<fieldset class="control-group">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
-<span class="error">Please enter a foo</span>
+<fieldset class="control-group error">
+<label for="foo" class="control-label">Foo:</label><div class="controls">
+<input type="text" id="foo" value="" name="foo"><span class="error help-inline">Please enter a foo</span>
+</div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.input(context, 'foo', "Foo:")
         result = result.strip()
@@ -624,8 +625,9 @@ class TestBootstrapFormFields(unittest.TestCase):
         context = dict()
         expected = '''
 <fieldset class="control-group span5">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
-<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
+<label for="foo" class="control-label">Foo:</label><div class="controls">
+<input type="text" id="foo" value="" name="foo"><script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
+</div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:", class_="span5")
         result = result.strip()
@@ -634,8 +636,8 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_tinymce(self):
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
-<label for="foo" class="control-label">Foo:*</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea></div>
-<script type="text/javascript">
+<label for="foo" class="control-label">Foo:*</label><div class="controls">
+<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
@@ -643,6 +645,7 @@ editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
 </script>
+</div>
 </fieldset>
 '''
         result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True, class_="span6")
