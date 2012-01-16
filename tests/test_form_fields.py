@@ -470,8 +470,8 @@ class TestTextArea(unittest.TestCase):
         assert expected == result
 
 
-class TestTinyMCE(unittest.TestCase):
-    def test_simple(self):
+class TestEditor(unittest.TestCase):
+    def test_tinymce(self):
         context = dict(data=None, errors=None)
         expected = '''
 <label for="foo">Foo:*</label>
@@ -486,6 +486,22 @@ editor_deselector : "mceNoEditor"
 </script>
         '''.strip()
         result = form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
+        assert expected == result
+
+    def test_ckeditor(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<label for="foo">Foo:*</label>
+<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea>
+<script type="text/javascript">
+CKEDITOR.replace(
+    'foo',
+    {
+        toolbar: 'Basic',
+        customConfig : ''});
+</script>
+        '''.strip()
+        result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
         assert expected == result
 
 
@@ -649,4 +665,21 @@ editor_deselector : "mceNoEditor"
 </fieldset>
 '''
         result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True, class_="span6")
+        assert expected == result
+
+    def test_ckeditor(self):
+        context = dict(data=None, errors=None)
+        expected = '''<fieldset class="control-group span6">
+<label for="foo" class="control-label">Foo:*</label><div class="controls">
+<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+CKEDITOR.replace(
+    'foo',
+    {
+        toolbar: 'Basic',
+        customConfig : ''});
+</script>
+</div>
+</fieldset>
+'''
+        result = self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True, class_="span6")
         assert expected == result

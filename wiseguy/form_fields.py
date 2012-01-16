@@ -193,6 +193,29 @@ def tinymce(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
+def _ckeditor(context, id, label, compulsory):
+    elements = _textarea(context, id, label, compulsory)
+    elements[1].attrib['class'] = "mceEditor"
+    script = html.SCRIPT(
+        '''
+CKEDITOR.replace(
+    '%s',
+    {
+        toolbar: 'Basic',
+        customConfig : ''});
+''' % id,
+        type="text/javascript")
+    elements.insert(len(elements), script)
+    return elements
+
+
+@j2.contextfunction
+def ckeditor(context, id, label, compulsory=False):
+    elements = _ckeditor(context, id, label, compulsory)
+    elements = [lxml.html.tostring(e) for e in elements]
+    return '\n'.join(elements)
+
+
 def _select(context, id, label, options, compulsory, disabled, blank_option):
     if compulsory:
         label = label + "*"
@@ -351,6 +374,17 @@ class BootstrapFormFields(object):
         "A Bootstrap tinymce element"
         return _boostrapise(
             _tinymce,
+            context=context,
+            id=id,
+            label=label,
+            compulsory=compulsory,
+            class_=class_)
+
+    @j2.contextfunction
+    def ckeditor(self, context, id, label, compulsory=False, class_=None):
+        "A Bootstrap tinymce element"
+        return _boostrapise(
+            _ckeditor,
             context=context,
             id=id,
             label=label,
