@@ -169,20 +169,26 @@ def textarea(context, id, label, compulsory=False):
     return '\n'.join(elements)
 
 
-def _tinymce(context, id, label, compulsory):
+def _editor(context, id, label, compulsory, script):
     elements = _textarea(context, id, label, compulsory)
     elements[1].attrib['class'] = "mceEditor"
     script = html.SCRIPT(
-        '''
+        script,
+        type="text/javascript")
+    elements.insert(len(elements), script)
+    return elements
+
+
+def _tinymce(context, id, label, compulsory):
+    script = '''
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
 editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
-''',
-    type="text/javascript")
-    elements.insert(len(elements), script)
+'''
+    elements = _editor(context, id, label, compulsory, script)
     return elements
 
 
@@ -194,18 +200,14 @@ def tinymce(context, id, label, compulsory=False):
 
 
 def _ckeditor(context, id, label, compulsory):
-    elements = _textarea(context, id, label, compulsory)
-    elements[1].attrib['class'] = "mceEditor"
-    script = html.SCRIPT(
-        '''
+    script = '''
 CKEDITOR.replace(
     '%s',
     {
         toolbar: 'Basic',
         customConfig : ''});
-''' % id,
-        type="text/javascript")
-    elements.insert(len(elements), script)
+''' % id
+    elements = _editor(context, id, label, compulsory, script)
     return elements
 
 
