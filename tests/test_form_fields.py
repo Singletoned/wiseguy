@@ -507,26 +507,30 @@ CKEDITOR.replace(
 
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
+        context = dict()
         expected = '''<input type="submit" id="submit" value="Submit">'''
-        result = form_fields.submit()
+        result = form_fields.submit(context)
         result = result.strip()
         assert expected == result
 
     def test_with_labels(self):
+        context = dict()
         expected = '''<input type="submit" id="foo" value="Foo!">'''
-        result = form_fields.submit('foo', "Foo!")
+        result = form_fields.submit(context, 'foo', "Foo!")
         result = result.strip()
         assert expected == result
 
     def test_bad_value(self):
+        context = dict()
         expected = '''<input type="submit" id="foo" value="Foo&amp;&lt;">'''
-        result = form_fields.submit('foo', "Foo&<")
+        result = form_fields.submit(context, 'foo', "Foo&<")
         result = result.strip()
         assert expected == result
 
     def test_with_classes(self):
+        context = dict()
         expected = '''<input type="submit" id="submit" value="Submit" class="foo bar">'''
-        result = form_fields.submit(class_="foo bar")
+        result = form_fields.submit(context, class_="foo bar")
         result = result.strip()
         assert expected == result
 

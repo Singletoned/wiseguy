@@ -261,7 +261,8 @@ def select(context, id, label, options, compulsory=False, disabled=False, blank_
     return '\n'.join(elements)
 
 
-def submit(id="submit", label="Submit", class_=""):
+@j2.contextfunction
+def submit(context, id="submit", label="Submit", class_=""):
     "A simple submit button"
     kwargs = dict(
         type="submit",
