@@ -51,6 +51,8 @@ def _input(context, id, label, compulsory, input_type, value=_default, class_=No
         extra_attrs = {'class': class_}
     else:
         extra_attrs = {}
+    if 'disabled_form' in context:
+        extra_attrs['disabled'] = "disabled"
     elements = [
         html.LABEL(
             label,
@@ -100,7 +102,7 @@ def _checkbox(context, id, label, compulsory=False, value=_default, disabled=Fal
     if isinstance(data_value, (list, tuple)):
         if value in data_value:
             elements[1].attrib['checked'] = "checked"
-    if disabled:
+    if disabled or ('disabled_form' in context):
         elements[1].attrib['disabled'] = "disabled"
     return elements
 
@@ -159,6 +161,8 @@ def _textarea(context, id, label, compulsory):
             cols="40",
 )]
     add_errors(context, elements, id)
+    if 'disabled_form' in context:
+        elements[1].attrib['disabled'] = "disabled"
     return elements
 
 
@@ -200,13 +204,18 @@ def tinymce(context, id, label, compulsory=False):
 
 
 def _ckeditor(context, id, label, compulsory):
+    kwargs = dict(id=id)
+    if 'disabled_form' in context:
+        kwargs['readonly'] = '\n        readOnly: true,'
+    else:
+        kwargs['readonly'] = ''
     script = '''
 CKEDITOR.replace(
-    '%s',
+    '%(id)s',
     {
-        toolbar: 'Basic',
+        toolbar: 'Basic',%(readonly)s
         customConfig : ''});
-''' % id
+''' % kwargs
     elements = _editor(context, id, label, compulsory, script)
     return elements
 
@@ -248,7 +257,7 @@ def _select(context, id, label, options, compulsory, disabled, blank_option):
             name=id,
             id=id)]
     add_errors(context, elements, id)
-    if disabled:
+    if disabled or ('disabled_form' in context):
         elements[1].attrib['disabled'] = "disabled"
     return elements
 
@@ -268,6 +277,8 @@ def submit(context, id="submit", label="Submit", class_=""):
         type="submit",
         id=id,
         value=label)
+    if 'disabled_form' in context:
+        kwargs['disabled'] = 'disabled'
     if class_:
         args = ({'class': class_},)
     else:

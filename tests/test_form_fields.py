@@ -78,6 +78,15 @@ class TestInput(unittest.TestCase):
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
         assert expected == result
 
+    def test_disabled_form(self):
+        context = dict(data=None, errors=None, disabled_form=True)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo" disabled class="bar">
+        '''.strip()
+        result = form_fields.input(context, 'foo', "Foo:", class_="bar")
+        assert expected == result
+
 
 class TestSearch(unittest.TestCase):
     def test_plain(self):
@@ -163,6 +172,16 @@ class TestSearch(unittest.TestCase):
         result = form_fields.search(context, 'foo', "Foo:", help='''<a href="#">Help</a>''')
         assert expected == result
 
+    def test_disabled_form(self):
+        context = dict(data=dict(), errors=None, disabled_form=True)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo" disabled>
+<a href="#">Search</a>
+        '''.strip()
+        result = form_fields.search(context, 'foo', "Foo:")
+        assert expected == result
+
 
 class TestCheckbox(unittest.TestCase):
     def test_plain(self):
@@ -229,6 +248,15 @@ class TestCheckbox(unittest.TestCase):
         result = form_fields.checkbox(context, 'foo', "Foo:", disabled=True)
         assert expected == result
 
+    def test_disabled_form(self):
+        context = dict(disabled_form=True)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="checkbox" id="foo" value="" name="foo" disabled>
+        '''.strip()
+        result = form_fields.checkbox(context, 'foo', "Foo:")
+        assert expected == result
+
 
 class TestPassword(unittest.TestCase):
     def test_plain(self):
@@ -273,6 +301,15 @@ class TestPassword(unittest.TestCase):
 <label for="foo">Foo:</label>
 <input type="password" id="foo" value="" name="foo">
 <span class="error">Please enter a foo</span>
+        '''.strip()
+        result = form_fields.password(context, 'foo', "Foo:")
+        assert expected == result
+
+    def test_errors(self):
+        context = dict(data=dict(), errors=None, disabled_form=True)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="password" id="foo" value="" name="foo" disabled>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         assert expected == result
@@ -373,6 +410,20 @@ class TestSelect(unittest.TestCase):
         result = form_fields.select(context, 'foo', "Foo:", options, disabled=True)
         assert expected == result
 
+    def test_disabled_form(self):
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict(disabled_form=True)
+        expected = '''<label for="foo">Foo:</label>
+
+<select id="foo" name="foo" disabled>
+<option value=""></option>
+<option value="bar1">Bar 1</option>
+<option value="bar2">Bar 2</option>
+<option value="bar3">Bar 3</option></select>
+'''
+        result = form_fields.select(context, 'foo', "Foo:", options)
+        assert expected == result
+
     def test_without_blank_option(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict()
@@ -406,6 +457,17 @@ class TestDatePicker(unittest.TestCase):
         expected = '''
 <label for="foo">Foo:</label>
 <input type="text" id="foo" value="" name="foo">
+<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
+        '''.strip()
+        result = form_fields.datepicker(context, 'foo', "Foo:")
+        result = result.strip()
+        assert expected == result
+
+    def test_disabled_form(self):
+        context = dict(disabled_form=True)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo" disabled>
 <script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
         '''.strip()
         result = form_fields.datepicker(context, 'foo', "Foo:")
@@ -469,6 +531,15 @@ class TestTextArea(unittest.TestCase):
         result = form_fields.textarea(context, 'foo', "Foo:")
         assert expected == result
 
+    def test_disabled_form(self):
+        context = dict(disabled_form=True)
+        expected = '''
+<label for="foo">Foo:</label>
+<textarea id="foo" rows="4" cols="40" name="foo" disabled></textarea>
+        '''.strip()
+        result = form_fields.textarea(context, 'foo', "Foo:")
+        assert expected == result
+
 
 class TestEditor(unittest.TestCase):
     def test_tinymce(self):
@@ -504,6 +575,23 @@ CKEDITOR.replace(
         result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
         assert expected == result
 
+    def test_ckeditor_disabled_form(self):
+        context = dict(data=None, errors=None, disabled_form=True)
+        expected = '''
+<label for="foo">Foo:*</label>
+<textarea id="foo" rows="4" cols="40" name="foo" disabled class="mceEditor"></textarea>
+<script type="text/javascript">
+CKEDITOR.replace(
+    'foo',
+    {
+        toolbar: 'Basic',
+        readOnly: true,
+        customConfig : ''});
+</script>
+        '''.strip()
+        result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
+        assert expected == result
+
 
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
@@ -530,6 +618,14 @@ class TestSubmit(unittest.TestCase):
     def test_with_classes(self):
         context = dict()
         expected = '''<input type="submit" id="submit" value="Submit" class="foo bar">'''
+        result = form_fields.submit(context, class_="foo bar")
+        result = result.strip()
+        assert expected == result
+
+    def test_disabled_form(self):
+        context = dict(disabled_form=True)
+        expected = '''
+<input disabled type="submit" id="submit" value="Submit" class="foo bar">'''.strip()
         result = form_fields.submit(context, class_="foo bar")
         result = result.strip()
         assert expected == result
