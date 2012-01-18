@@ -42,15 +42,15 @@ def _boostrapise(func, context, id, class_=None, controls_length=1, **kwargs):
     return element
 
 
-def _input(context, id, label, compulsory, input_type, value=_default, class_=None):
+def _input(context, id, label, compulsory, input_type, value=_default, class_=None, extra_attrs=None):
     if value is _default:
         value = unicode((context.get('data', False) or {}).get(id, ''))
     if compulsory:
         label = label + "*"
+    if not extra_attrs:
+        extra_attrs = dict()
     if class_:
-        extra_attrs = {'class': class_}
-    else:
-        extra_attrs = {}
+        extra_attrs['class'] = class_
     if 'disabled_form' in context:
         extra_attrs['disabled'] = "disabled"
     elements = [
@@ -83,7 +83,7 @@ def _search(context, id, label, compulsory, input_type, value=_default, link_cla
     return elements
 
 @j2.contextfunction
-def input(context, id, label, compulsory=False, class_=None):
+def input(context, id, label, compulsory=False, class_=None, extra_attrs=None):
     "A simple input element"
     elements = _input(context, id, label, compulsory, input_type="text", class_=class_)
     elements = [lxml.html.tostring(e) for e in elements]
@@ -292,7 +292,7 @@ def submit(context, id="submit", label="Submit", class_=""):
 
 class BootstrapFormFields(object):
     @j2.contextfunction
-    def input(self, context, id, label, compulsory=False, class_=None):
+    def input(self, context, id, label, compulsory=False, class_=None, extra_attrs=None):
         "A Bootstrap input element"
         return _boostrapise(
             _input,
@@ -301,7 +301,8 @@ class BootstrapFormFields(object):
             label=label,
             compulsory=False,
             input_type="text",
-            class_=class_)
+            class_=class_,
+            extra_attrs=extra_attrs)
 
     @j2.contextfunction
     def search(self, context, id, label, compulsory=False, class_=None, extra_attrs=None, help=None):
