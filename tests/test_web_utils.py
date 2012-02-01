@@ -205,3 +205,28 @@ def test_FormHandler():
     result = FooForm(request)
     expected = ("GET", dict(foo="abc"))
     assert result == expected
+
+def test_create_require():
+    require_mod_2 = wu.create_require(
+        lambda r: bool(r.value),
+        response_builder=lambda r, f, *a, **k: (r, f, a, k))
+
+    def foo(request, *args, **kwargs):
+        return utils.MockObject(
+            args=args,
+            kwargs=kwargs)
+
+    decorated_foo = require_mod_2(foo)
+
+    passing_request = utils.MockObject(value=True)
+    response = decorated_foo(passing_request, 1, 2, a=1, b=2)
+    assert isinstance(response, utils.MockObject)
+    assert response.args == (1, 2)
+    assert response.kwargs == {'a': 1, 'b': 2}
+
+    failing_request = utils.MockObject(value=False)
+    func, request, args, kwargs = decorated_foo(failing_request, 1, 2, a=1, b=2)
+    assert func == foo
+    assert request == failing_request
+    assert args == (1, 2)
+    assert kwargs == {'a': 1, 'b': 2}
