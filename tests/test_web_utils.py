@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import lxml.html
 import werkzeug as wz
 import werkzeug.test
 import jinja2 as j2
@@ -230,3 +231,10 @@ def test_create_require():
     assert request == failing_request
     assert args == (1, 2)
     assert kwargs == {'a': 1, 'b': 2}
+
+
+def test_render_widget():
+    widget = lxml.html.fromstring("foo")
+    result = wu.render_widget(widget)
+    expected = "<p>foo</p>"
+    assert result == expected

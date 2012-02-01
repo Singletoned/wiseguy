@@ -128,3 +128,8 @@ class FormHandler(object):
             except cls._validator_error, e:
                 errors = e.unpack_errors()
                 return cls.GET(request, data=data, errors=errors, **kwargs)
+
+
+def render_widget(widget):
+    import lxml.html
+    return lxml.html.tostring(widget)
