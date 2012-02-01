@@ -6,11 +6,11 @@ from lxml.html import builder as html
 
 _default = object()
 
-def add_errors(context, elements, id):
+def add_errors(context, element, id):
     "Add an error, if present, to the list of elements"
     if context.get('errors', None):
         if context['errors'].get(id, ''):
-            elements.append(
+            element.append(
                 html.SPAN(
                     context['errors'][id],
                     {'class': 'error'}))
@@ -53,7 +53,7 @@ def _input(context, id, label, compulsory, input_type, value=_default, class_=No
         extra_attrs['class'] = class_
     if 'disabled_form' in context:
         extra_attrs['disabled'] = "disabled"
-    elements = [
+    element = html.DIV(
         html.LABEL(
             label,
             {'for': id}),
@@ -62,12 +62,12 @@ def _input(context, id, label, compulsory, input_type, value=_default, class_=No
             type=input_type,
             name=id,
             id=id,
-            value=value)]
-    add_errors(context, elements, id)
-    return elements
+            value=value))
+    add_errors(context, element, id)
+    return element
 
 def _search(context, id, label, compulsory, input_type, value=_default, link_class=None, extra_attrs=None, help=None):
-    elements = _input(context, id, label, compulsory, input_type="text")
+    element = _input(context, id, label, compulsory, input_type="text")
     if not extra_attrs:
         extra_attrs = dict()
     if link_class:
@@ -76,11 +76,11 @@ def _search(context, id, label, compulsory, input_type, value=_default, link_cla
         "Search",
         extra_attrs,
         href="#")
-    elements.insert(2, link)
+    element.insert(2, link)
     if help:
         help = lxml.html.fromstring(help)
-        elements.insert(3, help)
-    return elements
+        element.insert(3, help)
+    return element
 
 @j2.contextfunction
 def input(context, id, label, compulsory=False, class_=None, extra_attrs=None):
