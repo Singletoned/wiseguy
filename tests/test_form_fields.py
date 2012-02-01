@@ -569,7 +569,7 @@ CKEDITOR.replace(
     'foo',
     {
         toolbar: 'Basic',
-        customConfig : ''});
+        customConfig: ''});
 </script>
         '''.strip()
         result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
@@ -584,9 +584,9 @@ CKEDITOR.replace(
 CKEDITOR.replace(
     'foo',
     {
-        toolbar: 'Basic',
         readOnly: true,
-        customConfig : ''});
+        toolbar: 'Basic',
+        customConfig: ''});
 </script>
         '''.strip()
         result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
@@ -776,7 +776,7 @@ CKEDITOR.replace(
     'foo',
     {
         toolbar: 'Basic',
-        customConfig : ''});
+        customConfig: ''});
 </script>
 </div>
 </fieldset>

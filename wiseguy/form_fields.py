@@ -204,18 +204,19 @@ def tinymce(context, id, label, compulsory=False):
 
 
 def _ckeditor(context, id, label, compulsory):
-    kwargs = dict(id=id)
+    ck_options = {
+        'toolbar': "'Basic'",
+        'customConfig': "''"}
     if 'disabled_form' in context:
-        kwargs['readonly'] = '\n        readOnly: true,'
-    else:
-        kwargs['readonly'] = ''
+        ck_options['readOnly'] = "true"
+    ck_options = ["%s: %s" % (k,v) for (k,v) in ck_options.items()]
+    ck_options = ",\n        ".join(ck_options)
     script = '''
 CKEDITOR.replace(
     '%(id)s',
     {
-        toolbar: 'Basic',%(readonly)s
-        customConfig : ''});
-''' % kwargs
+        %(options)s});
+''' % dict(id=id, options=ck_options)
     elements = _editor(context, id, label, compulsory, script)
     return elements
 
