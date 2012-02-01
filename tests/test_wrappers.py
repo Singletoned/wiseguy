@@ -29,3 +29,14 @@ class TestWrappers(unittest.TestCase):
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
+
+    def test_compulsory(self):
+        context = dict()
+        expected = '''
+<fieldset class="control-group">
+<label for="foo" class="control-label">Foo:*</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
+</fieldset>'''.strip()
+        result = wrappers.compulsory(
+            self.bootstrap_form_fields.input(context, 'foo', "Foo:"))
+        result = lxml.html.tostring(result, pretty_print=True)
+        result = result.strip()
