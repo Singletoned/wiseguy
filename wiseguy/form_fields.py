@@ -38,7 +38,6 @@ def _boostrapise(func, context, id, class_=None, controls_length=1, **kwargs):
     help = element.xpath("//span[contains(@class, 'error')]")
     if help:
         help[0].attrib['class'] = help[0].attrib['class'] + ' help-inline'
-    element = lxml.html.tostring(element, pretty_print=True)
     return element
 
 

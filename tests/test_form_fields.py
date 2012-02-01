@@ -2,6 +2,8 @@
 
 import unittest
 
+import lxml.html
+
 from wiseguy import form_fields
 
 class TestInput(unittest.TestCase):
@@ -641,6 +643,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.input(context, 'foo', "Foo:", class_="span4")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -653,6 +656,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 </div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -665,6 +669,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 </div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.search(context, 'foo', "Foo:", class_="span4")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -675,6 +680,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo"></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble", class_="span2")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -685,6 +691,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo" checked></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -695,6 +702,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.password(context, 'foo', "Foo:", class_="span3")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -710,6 +718,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options, class_="span5")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -725,6 +734,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options, disabled=True)
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -735,6 +745,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 </fieldset>
 '''
         result = self.bootstrap_form_fields.textarea(context, 'foo', "Foo:", class_="span8")
+        result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
 
     def test_datepicker(self):
@@ -746,6 +757,7 @@ class TestBootstrapFormFields(unittest.TestCase):
 </div>
 </fieldset>'''.strip()
         result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:", class_="span5")
+        result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
 
@@ -765,6 +777,7 @@ editor_deselector : "mceNoEditor"
 </fieldset>
 '''
         result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True, class_="span6")
+        result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
 
     def test_ckeditor(self):
@@ -782,4 +795,5 @@ CKEDITOR.replace(
 </fieldset>
 '''
         result = self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True, class_="span6")
+        result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
