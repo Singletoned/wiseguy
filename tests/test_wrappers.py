@@ -26,8 +26,7 @@ class TestWrappers(unittest.TestCase):
         result = wrappers.span(
             5,
             self.bootstrap_form_fields.input(context, 'foo', "Foo:"))
-        result = lxml.html.tostring(result, pretty_print=True)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
@@ -38,8 +37,8 @@ class TestWrappers(unittest.TestCase):
 </fieldset>'''.strip()
         result = wrappers.compulsory(
             self.bootstrap_form_fields.input(context, 'foo', "Foo:"))
-        result = lxml.html.tostring(result, pretty_print=True)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
 
     def test_with_class(self):
         context = dict()
