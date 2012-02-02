@@ -275,7 +275,7 @@ def submit(context, id="submit", label="Submit", class_=""):
 
 class BootstrapFormFields(object):
     @j2.contextfunction
-    def input(self, context, id, label, class_=None, extra_attrs=None, width=None):
+    def input(self, context, id, label, extra_attrs=None):
         "A Bootstrap input element"
         return _boostrapise(
             _input,
@@ -283,16 +283,11 @@ class BootstrapFormFields(object):
             id=id,
             label=label,
             input_type="text",
-            class_=class_,
             extra_attrs=extra_attrs)
 
     @j2.contextfunction
-    def search(self, context, id, label, class_=None, extra_attrs=None, help=None):
+    def search(self, context, id, label, extra_attrs=None, help=None):
         "A Bootstrap input element"
-        if class_:
-            class_ = " ".join(["search-form image-search-widget", class_])
-        else:
-            class_ = "search-form image-search-widget"
         return _boostrapise(
             _search,
             controls_length=3,
@@ -300,24 +295,22 @@ class BootstrapFormFields(object):
             id=id,
             label=label,
             input_type="text",
-            class_=class_,
             link_class="btn search",
             extra_attrs=extra_attrs,
             help=help)
 
     @j2.contextfunction
-    def password(self, context, id, label, class_=None):
+    def password(self, context, id, label):
         "A Bootstrap input element"
         return _boostrapise(
             _input,
             context=context,
             id=id,
             label=label,
-            input_type="password",
-            class_=class_)
+            input_type="password")
 
     @j2.contextfunction
-    def select(self, context, id, label, options, disabled=False, blank_option=True, class_=None):
+    def select(self, context, id, label, options, disabled=False, blank_option=True):
         "A Bootstrap input element"
         return _boostrapise(
             _select,
@@ -326,56 +319,50 @@ class BootstrapFormFields(object):
             label=label,
             options=options,
             disabled=disabled,
-            blank_option=blank_option,
-            class_=class_)
+            blank_option=blank_option)
 
     @j2.contextfunction
-    def checkbox(self, context, id, label, value=_default, class_=None):
+    def checkbox(self, context, id, label, value=_default):
         "A Bootstrap checkbox element"
         return _boostrapise(
             _checkbox,
             context=context,
             id=id,
             label=label,
-            value=value,
-            class_=class_)
+            value=value)
 
     @j2.contextfunction
-    def textarea(self, context, id, label, class_=None):
+    def textarea(self, context, id, label):
         "A Bootstrap textarea element"
         return _boostrapise(
             _textarea,
             context=context,
             id=id,
-            label=label,
-            class_=class_)
+            label=label)
 
     @j2.contextfunction
-    def datepicker(self, context, id, label, class_=None):
+    def datepicker(self, context, id, label):
         "A Bootstrap datepicker element"
         return _boostrapise(
             _datepicker,
             context=context,
             id=id,
-            label=label,
-            class_=class_)
+            label=label)
 
     @j2.contextfunction
-    def tinymce(self, context, id, label, class_=None):
+    def tinymce(self, context, id, label):
         "A Bootstrap tinymce element"
         return _boostrapise(
             _tinymce,
             context=context,
             id=id,
-            label=label,
-            class_=class_)
+            label=label)
 
     @j2.contextfunction
-    def ckeditor(self, context, id, label, class_=None):
+    def ckeditor(self, context, id, label):
         "A Bootstrap tinymce element"
         return _boostrapise(
             _ckeditor,
             context=context,
             id=id,
-            label=label,
-            class_=class_)
+            label=label)

@@ -719,7 +719,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <fieldset class="control-group span4">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.input(context, 'foo', "Foo:", class_="span4")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.input(context, 'foo', "Foo:"),
+            "/fieldset",
+            "span4")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
@@ -745,7 +748,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <input type="text" id="foo" value="" name="foo"><a href="#" class="btn search">Search</a>
 </div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.search(context, 'foo', "Foo:", class_="span4")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.search(context, 'foo', "Foo:"),
+            "/fieldset",
+            "search-form image-search-widget span4")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
@@ -756,7 +762,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <fieldset class="control-group span2">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble", class_="span2")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble"),
+            "/fieldset",
+            "span2")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
@@ -778,7 +787,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <fieldset class="control-group span3">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.password(context, 'foo', "Foo:", class_="span3")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.password(context, 'foo', "Foo:"),
+            "/fieldset",
+            "span3")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
@@ -794,7 +806,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options, class_="span5")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.select({}, 'foo', "Foo:", options),
+            "/fieldset",
+            "span5")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
@@ -821,7 +836,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo"></textarea></div>
 </fieldset>
 '''
-        result = self.bootstrap_form_fields.textarea(context, 'foo', "Foo:", class_="span8")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.textarea(context, 'foo', "Foo:"),
+            "/fieldset",
+            "span8")
         result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
 
@@ -833,7 +851,10 @@ class TestBootstrapFormFields(unittest.TestCase):
 <input type="text" id="foo" value="" name="foo"><script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
 </div>
 </fieldset>'''.strip()
-        result = self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:", class_="span5")
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.datepicker(context, 'foo', "Foo:"),
+            "/fieldset",
+            "span5")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
         assert expected == result
@@ -853,8 +874,11 @@ editor_deselector : "mceNoEditor"
 </div>
 </fieldset>
 '''
-        result = wrappers.compulsory(
-            self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", class_="span6"))
+        result = wrappers.with_class(
+            wrappers.compulsory(
+                self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:")),
+            "/fieldset",
+            "span6")
         result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
 
@@ -872,7 +896,10 @@ CKEDITOR.replace(
 </div>
 </fieldset>
 '''
-        result = wrappers.compulsory(
-            self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:", class_="span6"))
+        result = wrappers.with_class(
+            wrappers.compulsory(
+                self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:")),
+            "/fieldset",
+            "span6")
         result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
