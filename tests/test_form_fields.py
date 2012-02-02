@@ -4,7 +4,7 @@ import unittest
 
 import lxml.html
 
-from wiseguy import form_fields
+from wiseguy import form_fields, wrappers
 
 class TestInput(unittest.TestCase):
     def test_plain(self):
@@ -36,7 +36,8 @@ class TestInput(unittest.TestCase):
 <label for="foo">Foo:*</label><input type="text" id="foo" value="" name="foo">
 </div>
         '''.strip()
-        result = form_fields.input(context, 'foo', "Foo:", compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.input(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -137,7 +138,8 @@ class TestSearch(unittest.TestCase):
 <label for="foo">Foo:*</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a>
 </div>
         '''.strip()
-        result = form_fields.search(context, 'foo', "Foo:", compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.search(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -249,7 +251,8 @@ class TestCheckbox(unittest.TestCase):
 <label for="foo">Foo:*</label><input type="checkbox" id="foo" value="" name="foo">
 </div>
         '''.strip()
-        result = form_fields.checkbox(context, 'foo', "Foo:", compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.checkbox(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -328,7 +331,8 @@ class TestPassword(unittest.TestCase):
 <label for="foo">Foo:*</label><input type="password" id="foo" value="" name="foo">
 </div>
         '''.strip()
-        result = form_fields.password(context, 'foo', "Foo:", compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.password(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -392,7 +396,8 @@ class TestSelect(unittest.TestCase):
 <option value="bar3">Bar 3</option></select>
 </div>
         '''.strip()
-        result = form_fields.select({}, 'foo', "Foo:", options, compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.select({}, 'foo', "Foo:", options))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -561,7 +566,8 @@ class TestTextArea(unittest.TestCase):
 <label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
 </div>
         '''.strip()
-        result = form_fields.textarea(context, 'foo', "Foo:", compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.textarea(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -625,7 +631,8 @@ editor_deselector : "mceNoEditor"
 </script>
 </div>
         '''.strip()
-        result = form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
+        result = wrappers.compulsory(
+            form_fields.tinymce(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -846,7 +853,8 @@ editor_deselector : "mceNoEditor"
 </div>
 </fieldset>
 '''
-        result = self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", compulsory=True, class_="span6")
+        result = wrappers.compulsory(
+            self.bootstrap_form_fields.tinymce(context, 'foo', "Foo:", class_="span6"))
         result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
 
@@ -864,6 +872,7 @@ CKEDITOR.replace(
 </div>
 </fieldset>
 '''
-        result = self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True, class_="span6")
+        result = wrappers.compulsory(
+            self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:", class_="span6"))
         result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
