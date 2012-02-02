@@ -14,3 +14,9 @@ def compulsory(element):
     _label = element.xpath("//label")[0]
     _label.text = _label.text + "*"
     return element
+
+def with_class(element, path, class_name):
+    els = element.xpath(path)
+    for el in els:
+        _add_class(el, class_name)
+    return element

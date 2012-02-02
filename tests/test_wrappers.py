@@ -40,3 +40,16 @@ class TestWrappers(unittest.TestCase):
             self.bootstrap_form_fields.input(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
+
+    def test_with_class(self):
+        context = dict()
+        expected = '''
+<fieldset class="control-group flamble">
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo"></div>
+</fieldset>'''.strip()
+        result = wrappers.with_class(
+            self.bootstrap_form_fields.input(context, 'foo', "Foo:"),
+            "//fieldset",
+            "flamble")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
