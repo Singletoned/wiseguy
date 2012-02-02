@@ -63,6 +63,7 @@ def _input(context, id, label, input_type, value=_default, class_=None, extra_at
     add_errors(context, element, id)
     return element
 
+
 def _search(context, id, label, input_type, value=_default, link_class=None, extra_attrs=None, help=None):
     element = _input(context, id, label, input_type="text")
     if not extra_attrs:
@@ -79,15 +80,18 @@ def _search(context, id, label, input_type, value=_default, link_class=None, ext
         element.insert(3, help)
     return element
 
+
 @j2.contextfunction
 def input(context, id, label, class_=None, extra_attrs=None):
     "A simple input element"
     return _input(context, id, label, input_type="text", class_=class_)
 
+
 @j2.contextfunction
 def search(context, id, label, help=None):
     "A basic search element with link"
     return _search(context, id, label, input_type="text", help=help)
+
 
 def _checkbox(context, id, label, value=_default, disabled=False):
     elements = _input(context, id, label, input_type="checkbox", value=value)
@@ -146,8 +150,7 @@ def _textarea(context, id, label):
             name=id,
             id=id,
             rows="4",
-            cols="40",
-))
+            cols="40"))
     add_errors(context, element, id)
     if 'disabled_form' in context:
         element[1].attrib['disabled'] = "disabled"
