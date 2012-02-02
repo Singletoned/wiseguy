@@ -84,16 +84,12 @@ def _search(context, id, label, compulsory, input_type, value=_default, link_cla
 @j2.contextfunction
 def input(context, id, label, compulsory=False, class_=None, extra_attrs=None):
     "A simple input element"
-    elements = _input(context, id, label, compulsory, input_type="text", class_=class_)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return _input(context, id, label, compulsory, input_type="text", class_=class_)
 
 @j2.contextfunction
 def search(context, id, label, compulsory=False, help=None):
     "A basic search element with link"
-    elements = _search(context, id, label, compulsory, input_type="text", help=help)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return _search(context, id, label, compulsory, input_type="text", help=help)
 
 def _checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
     elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
@@ -103,15 +99,13 @@ def _checkbox(context, id, label, compulsory=False, value=_default, disabled=Fal
             elements[1].attrib['checked'] = "checked"
     if disabled or ('disabled_form' in context):
         elements[1].attrib['disabled'] = "disabled"
-    return elements
+    return html.DIV(*elements)
 
 
 @j2.contextfunction
 def checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
     "A simple input element"
-    elements = _checkbox(context, id, label, compulsory, value, disabled)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return _checkbox(context, id, label, compulsory, value, disabled)
 
 
 @j2.contextfunction
@@ -119,8 +113,7 @@ def password(context, id, label, compulsory=False):
     "A password element.  Won't fill the value even if present in context['data']"
     elements = _input(context, id, label, compulsory, input_type="password")
     elements[1].attrib['value'] = ""
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return elements
 
 
 def _datepicker(context, id, label, compulsory):
@@ -148,7 +141,7 @@ def _textarea(context, id, label, compulsory):
         text = text.decode('utf8')
     else:
         text = unicode(text)
-    elements = [
+    element = html.DIV(
         html.LABEL(
             label,
             {'for': id}),
@@ -158,18 +151,16 @@ def _textarea(context, id, label, compulsory):
             id=id,
             rows="4",
             cols="40",
-)]
-    add_errors(context, elements, id)
+))
+    add_errors(context, element, id)
     if 'disabled_form' in context:
-        elements[1].attrib['disabled'] = "disabled"
-    return elements
+        element[1].attrib['disabled'] = "disabled"
+    return element
 
 
 @j2.contextfunction
 def textarea(context, id, label, compulsory=False):
-    elements = _textarea(context, id, label, compulsory)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return _textarea(context, id, label, compulsory)
 
 
 def _editor(context, id, label, compulsory, script):
@@ -196,10 +187,8 @@ editor_deselector : "mceNoEditor"
 
 
 @j2.contextfunction
-def tinymce(context, id, label, compulsory=False):
-    elements = _tinymce(context, id, label, compulsory)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+def tinymce(context, id, label, compulsory):
+    return _tinymce(context, id, label, compulsory)
 
 
 def _ckeditor(context, id, label, compulsory):
@@ -223,8 +212,7 @@ CKEDITOR.replace(
 @j2.contextfunction
 def ckeditor(context, id, label, compulsory=False):
     elements = _ckeditor(context, id, label, compulsory)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return html.DIV(*elements)
 
 
 def _select(context, id, label, options, compulsory, disabled, blank_option):
@@ -247,7 +235,7 @@ def _select(context, id, label, options, compulsory, disabled, blank_option):
         else:
             o = html.OPTION(text, value=value)
         option_elements.append(o)
-    elements = [
+    element = html.DIV(
         html.LABEL(
             label,
             {'for': id}),
@@ -255,19 +243,17 @@ def _select(context, id, label, options, compulsory, disabled, blank_option):
             "\n",
             *option_elements,
             name=id,
-            id=id)]
-    add_errors(context, elements, id)
+            id=id))
+    add_errors(context, element, id)
     if disabled or ('disabled_form' in context):
-        elements[1].attrib['disabled'] = "disabled"
-    return elements
+        element[1].attrib['disabled'] = "disabled"
+    return element
 
 
 @j2.contextfunction
 def select(context, id, label, options, compulsory=False, disabled=False, blank_option=True):
     "A select element.  Accepts a list of value, text pairs"
-    elements = _select(context, id, label, options, compulsory, disabled, blank_option)
-    elements = [lxml.html.tostring(e, pretty_print=True) for e in elements]
-    return '\n'.join(elements)
+    return _select(context, id, label, options, compulsory, disabled, blank_option)
 
 
 @j2.contextfunction

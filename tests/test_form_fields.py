@@ -10,83 +10,100 @@ class TestInput(unittest.TestCase):
     def test_plain(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_empty(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:*</label>
-<input type="text" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:*</label><input type="text" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", compulsory=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_data(self):
         context = dict(data=dict(foo='blah'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="blah" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="blah" name="foo">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
-<span class="error">Please enter a foo</span>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo"><span class="error">Please enter a foo</span>
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_non_ascii(self):
         context = dict(data=dict(foo=u'blah£'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="blah&#163;" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="blah&#163;" name="foo">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_non_text(self):
         context = dict(data=dict(foo=1), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="1" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="1" name="foo">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_with_class(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo" class="bar">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo" class="bar">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled_form(self):
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo" disabled class="bar">
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo" disabled class="bar">
+</div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -94,94 +111,100 @@ class TestSearch(unittest.TestCase):
     def test_plain(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_empty(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:*</label>
-<input type="text" id="foo" value="" name="foo">
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:*</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:", compulsory=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_data(self):
         context = dict(data=dict(foo='blah'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="blah" name="foo">
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="blah" name="foo"><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
-<a href="#">Search</a>
-<span class="error">Please enter a foo</span>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a><span class="error">Please enter a foo</span>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_non_ascii(self):
         context = dict(data=dict(foo=u'blah£'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="blah&#163;" name="foo">
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="blah&#163;" name="foo"><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_non_text(self):
         context = dict(data=dict(foo=1), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="1" name="foo">
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="1" name="foo"><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_with_help(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo">
-<a href="#">Search</a>
-<a href="#">Help</a>
-<span class="error">Please enter a foo</span>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a><a href="#">Help</a><span class="error">Please enter a foo</span>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:", help='''<a href="#">Help</a>''')
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled_form(self):
         context = dict(data=dict(), errors=None, disabled_form=True)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo" disabled>
-<a href="#">Search</a>
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo" disabled><a href="#">Search</a>
+</div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -189,74 +212,89 @@ class TestCheckbox(unittest.TestCase):
     def test_plain(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo">
+</div>
 '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_with_value(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="wibble" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="wibble" name="foo">
+</div>
 '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", value="wibble")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_empty(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:*</label>
-<input type="checkbox" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:*</label><input type="checkbox" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", compulsory=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_data(self):
         context = dict(data=dict(foo=['blah', 'wangle']), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="blah" name="foo" checked>
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="blah" name="foo" checked>
+</div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", value="blah")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="" name="foo">
-<span class="error">Please enter a foo</span>
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo"><span class="error">Please enter a foo</span>
+</div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="" name="foo" disabled>
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo" disabled>
+</div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", disabled=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled_form(self):
         context = dict(disabled_form=True)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="checkbox" id="foo" value="" name="foo" disabled>
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo" disabled>
+</div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -264,37 +302,45 @@ class TestPassword(unittest.TestCase):
     def test_plain(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="password" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_empty(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-<input type="password" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:*</label>
-<input type="password" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:*</label><input type="password" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:", compulsory=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_data(self):
         context = dict(data=dict(foo='blah'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="password" id="foo" value="" name="foo">
+<div>
+<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo">
+</div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_errors(self):
@@ -310,10 +356,12 @@ class TestPassword(unittest.TestCase):
     def test_errors(self):
         context = dict(data=dict(), errors=None, disabled_form=True)
         expected = '''
-<label for="foo">Foo:</label>
-<input type="password" id="foo" value="" name="foo" disabled>
+<div>
+<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo" disabled>
+</div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -321,135 +369,141 @@ class TestSelect(unittest.TestCase):
     def test_plain(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         expected = '''
-<label for="foo">Foo:</label>
-
-<select id="foo" name="foo">
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
+</div>
         '''.strip()
         result = form_fields.select({}, 'foo', "Foo:", options)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         expected = '''
-<label for="foo">Foo:*</label>
-
-<select id="foo" name="foo">
+<div>
+<label for="foo">Foo:*</label><select id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
+</div>
         '''.strip()
         result = form_fields.select({}, 'foo', "Foo:", options, compulsory=True)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_data(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict(data=dict(foo='bar3'))
         expected = '''
-<label for="foo">Foo:</label>
-
-<select id="foo" name="foo">
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option selected value="bar3">Bar 3</option></select>
+</div>
         '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_errors(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict(errors=dict(foo='Please choose a foo'))
         expected = '''
-<label for="foo">Foo:</label>
-
-<select id="foo" name="foo">
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
-<option value="bar3">Bar 3</option></select>
-
-<span class="error">Please choose a foo</span>
+<option value="bar3">Bar 3</option></select><span class="error">Please choose a foo</span>
+</div>
         '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_with_values(self):
         options = ["one", "two", "three"]
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-
-<select id="foo" name="foo">
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value=""></option>
 <option value="one">one</option>
 <option value="two">two</option>
 <option value="three">three</option></select>
+</div>
         '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict()
-        expected = '''<label for="foo">Foo:</label>
-
-<select id="foo" name="foo" disabled>
+        expected = '''
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo" disabled>
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
-'''
+</div>
+'''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options, disabled=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled_form(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict(disabled_form=True)
-        expected = '''<label for="foo">Foo:</label>
-
-<select id="foo" name="foo" disabled>
+        expected = '''
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo" disabled>
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
-'''
+</div>
+'''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_without_blank_option(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict()
-        expected = '''<label for="foo">Foo:</label>
-
-<select id="foo" name="foo">
+        expected = '''
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select>
-'''
+</div>
+'''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_non_ascii(self):
         options = [(1, "One"), (2, "2"), ('3', u"Bar £")]
         context = dict(data={'foo': "2"})
-        expected = '''<label for="foo">Foo:</label>
-
-<select id="foo" name="foo">
+        expected = '''
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value="1">One</option>
 <option selected value="2">2</option>
 <option value="3">Bar &#163;</option></select>
-'''
+</div>
+'''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -481,65 +535,78 @@ class TestTextArea(unittest.TestCase):
     def test_plain(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_empty(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:</label>
-<textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_compulsory(self):
         context = dict()
         expected = '''
-<label for="foo">Foo:*</label>
-<textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<div>
+<label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:", compulsory=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_data(self):
         context = dict(data=dict(foo='Flibble Giblets'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets</textarea>
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets</textarea>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_non_ascii(self):
         context = dict(data=dict(foo='Flibble Giblets£'), errors=None)
         expected = '''
-<label for="foo">Foo:</label>
-<textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets&#163;</textarea>
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets&#163;</textarea>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
-<label for="foo">Foo:</label>
-<textarea id="foo" rows="4" cols="40" name="foo"></textarea>
-<span class="error">Please enter a foo</span>
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea><span class="error">Please enter a foo</span>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled_form(self):
         context = dict(disabled_form=True)
         expected = '''
-<label for="foo">Foo:</label>
-<textarea id="foo" rows="4" cols="40" name="foo" disabled></textarea>
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled></textarea>
+</div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -547,9 +614,8 @@ class TestEditor(unittest.TestCase):
     def test_tinymce(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:*</label>
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea>
-<script type="text/javascript">
+<div>
+<label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
@@ -557,32 +623,34 @@ editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
 </script>
+</div>
         '''.strip()
         result = form_fields.tinymce(context, 'foo', "Foo:", compulsory=True)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_ckeditor(self):
         context = dict(data=None, errors=None)
         expected = '''
-<label for="foo">Foo:*</label>
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea>
-<script type="text/javascript">
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
         toolbar: 'Basic',
         customConfig: ''});
 </script>
+</div>
         '''.strip()
-        result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
+        result = form_fields.ckeditor(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_ckeditor_disabled_form(self):
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
-<label for="foo">Foo:*</label>
-<textarea id="foo" rows="4" cols="40" name="foo" disabled class="mceEditor"></textarea>
-<script type="text/javascript">
+<div>
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled class="mceEditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -590,8 +658,10 @@ CKEDITOR.replace(
         toolbar: 'Basic',
         customConfig: ''});
 </script>
+</div>
         '''.strip()
-        result = form_fields.ckeditor(context, 'foo', "Foo:", compulsory=True)
+        result = form_fields.ckeditor(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
