@@ -24,8 +24,8 @@ class TestWrappers(unittest.TestCase):
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo" class="span5"></div>
 </fieldset>'''.strip()
         result = wrappers.span(
-            5,
-            self.bootstrap_form_fields.input(context, 'foo', "Foo:"))
+            self.bootstrap_form_fields.input(context, 'foo', "Foo:"),
+            5)
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 

@@ -5,7 +5,7 @@ def _add_class(element, class_name):
     classes.append(class_name)
     element.attrib['class'] = " ".join(classes)
 
-def span(length, element):
+def span(element, length):
     _input = element.xpath('//input')[0]
     _add_class(_input, 'span%s'%length)
     return element
