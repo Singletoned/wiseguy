@@ -17,7 +17,7 @@ def test_add_class():
 class TestWrappers(unittest.TestCase):
     bootstrap_form_fields = form_fields.BootstrapFormFields()
 
-    def test_span_select(self):
+    def test_width_select(self):
         context = dict(data=None, errors=None)
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         expected = '''
@@ -28,19 +28,19 @@ class TestWrappers(unittest.TestCase):
 <option value="bar2">Bar 2</option>
 <option value="bar3">Bar 3</option></select></div>
 </fieldset>'''.strip()
-        result = wrappers.span(
+        result = wrappers.width(
             self.bootstrap_form_fields.select({}, 'foo', "Foo:", options),
             5)
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
-    def test_span_input(self):
+    def test_width_input(self):
         context = dict(data=None, errors=None)
         expected = '''
 <fieldset class="control-group">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="text" id="foo" value="" name="foo" class="span5"></div>
 </fieldset>'''.strip()
-        result = wrappers.span(
+        result = wrappers.width(
             self.bootstrap_form_fields.input(context, 'foo', "Foo:"),
             5)
         result = lxml.html.tostring(result, pretty_print=True).strip()
