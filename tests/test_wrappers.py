@@ -17,7 +17,7 @@ def test_add_class():
 class TestWrappers(unittest.TestCase):
     bootstrap_form_fields = form_fields.BootstrapFormFields()
 
-    def test_span5(self):
+    def test_span_input(self):
         context = dict(data=None, errors=None)
         expected = '''
 <fieldset class="control-group">
