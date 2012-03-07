@@ -903,3 +903,10 @@ CKEDITOR.replace(
             "span6")
         result = lxml.html.tostring(result, pretty_print=True)
         assert expected == result
+
+    def test_submit(self):
+        context = dict()
+        expected = '''<input type="submit" id="foo" value="Foo!" class="btn">'''
+        result = self.bootstrap_form_fields.submit(context, 'foo', "Foo!")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result

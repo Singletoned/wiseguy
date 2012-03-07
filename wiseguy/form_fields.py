@@ -365,3 +365,12 @@ class BootstrapFormFields(object):
             context=context,
             id=id,
             label=label)
+
+    @j2.contextfunction
+    def submit(self, context, id, label):
+        "A Bootstrap submit element"
+        return submit(
+            context=context,
+            id=id,
+            label=label,
+            class_="btn")
