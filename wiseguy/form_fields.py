@@ -301,12 +301,14 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def password(self, context, id, label):
         "A Bootstrap input element"
-        return _boostrapise(
+        element = _boostrapise(
             _input,
             context=context,
             id=id,
             label=label,
             input_type="password")
+        element.xpath('//input')[0].attrib['value'] = ""
+        return element
 
     @j2.contextfunction
     def select(self, context, id, label, options, disabled=False, blank_option=True):

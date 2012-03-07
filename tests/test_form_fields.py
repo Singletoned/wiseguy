@@ -782,7 +782,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         assert expected == result
 
     def test_password(self):
-        context = dict(data=None, errors=None)
+        context = dict(data=dict(foo="blah"), errors=None)
         expected = '''
 <fieldset class="control-group span3">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
