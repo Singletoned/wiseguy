@@ -269,7 +269,6 @@ def submit(context, id="submit", label="Submit", class_=""):
     element = html.INPUT(
         *args,
         **kwargs)
-    element = lxml.html.tostring(element, pretty_print=True)
     return element
 
 
