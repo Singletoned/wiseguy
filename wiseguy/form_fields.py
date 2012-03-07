@@ -369,10 +369,10 @@ class BootstrapFormFields(object):
             label=label)
 
     @j2.contextfunction
-    def submit(self, context, id, label):
+    def submit(self, context, id="submit", label="Submit", class_="btn-primary"):
         "A Bootstrap submit element"
         return submit(
             context=context,
             id=id,
             label=label,
-            class_="btn")
+            class_=class_)
