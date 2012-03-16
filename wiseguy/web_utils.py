@@ -71,6 +71,15 @@ class UrlMap(wz.routing.Map):
             return f
         return decorate
 
+    def expose_submount(self, path):
+        def decorate(f):
+            self.add(
+                wz.routing.Submount(
+                    path,
+                    f.url_map.iter_rules()))
+            return f
+        return decorate
+
 
 def create_env_and_render(loader_type, path, name):
     "Create a Jinja2 Environment and pass it to create_render"

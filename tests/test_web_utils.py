@@ -238,3 +238,37 @@ def test_render_widget():
     result = wu.render_widget(widget)
     expected = "<p>foo</p>"
     assert result == expected
+
+def test_url_map_submount():
+    url_map = wu.UrlMap()
+
+    @url_map.expose_submount('/foo')
+    class FooController(object):
+        url_map = wu.UrlMap()
+
+        @url_map.expose("/flibble")
+        def flibble_view():
+            return "Hullo"
+
+    environ = wz.test.create_environ('/flibble')
+    endpoint, kwargs = FooController.url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
+
+    environ = wz.test.create_environ('/foo/flibble')
+    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
+
+    @url_map.expose_submount('')
+    class BarController(object):
+        url_map = wu.UrlMap()
+
+        @url_map.expose("/flibble")
+        def flibble_view():
+            return "Hullo"
+
+    environ = wz.test.create_environ('/flibble')
+    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
