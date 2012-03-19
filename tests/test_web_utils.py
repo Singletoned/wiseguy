@@ -272,3 +272,20 @@ def test_url_map_submount():
     endpoint, kwargs = url_map.bind_to_environ(environ).match()
     result = endpoint(**kwargs)
     assert result == "Hullo"
+
+    @url_map.expose_submount('/flamble')
+    class FlambleController(object):
+        url_map = wu.UrlMap()
+
+        @url_map.expose("/flibble")
+        def flibble_view():
+            return "Hullo"
+
+    @url_map.expose_submount('/flooble')
+    class FloobleController(FlambleController):
+        pass
+
+    environ = wz.test.create_environ('/flooble/flibble')
+    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
