@@ -126,12 +126,13 @@ def create_require(predicate, response_builder):
 
 
 class Handler(object):
-    def __new__(cls):
+    def __new__(cls, _parent=None):
         handler = object.__new__(cls)
+        handler._parent = _parent
         for k, v in cls.__dict__.items():
             if isinstance(v, type):
                 if issubclass(v, Handler):
-                    setattr(handler, k, v())
+                    setattr(handler, k, v(_parent=handler))
         return handler
 
 

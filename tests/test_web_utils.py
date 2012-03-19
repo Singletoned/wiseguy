@@ -319,3 +319,4 @@ class test_Handler(unittest.TestCase):
 
         bar_handler = BarHandler()
         assert isinstance(bar_handler.foo, FooHandler)
+        assert bar_handler.foo._parent == bar_handler
