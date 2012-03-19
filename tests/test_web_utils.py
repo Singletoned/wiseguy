@@ -289,3 +289,16 @@ def test_url_map_submount():
     endpoint, kwargs = url_map.bind_to_environ(environ).match()
     result = endpoint(**kwargs)
     assert result == "Hullo"
+
+
+def test_Handler():
+    class FooHandler(wu.Handler):
+        url_route = "/foo"
+
+        def __call__(self):
+            return "FOO!"
+
+    foo_handler = FooHandler()
+
+    assert foo_handler.url_route == "/foo"
+    assert foo_handler() == "FOO!"

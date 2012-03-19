@@ -125,6 +125,10 @@ def create_require(predicate, response_builder):
     return require
 
 
+class Handler(object):
+    pass
+
+
 class FormHandler(object):
     _validator_error = validino.Invalid
     def __new__(cls, request, **kwargs):
