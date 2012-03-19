@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import unittest
+
 import lxml.html
 import werkzeug as wz
 import werkzeug.test
@@ -291,14 +293,15 @@ def test_url_map_submount():
     assert result == "Hullo"
 
 
-def test_Handler():
-    class FooHandler(wu.Handler):
-        url_route = "/foo"
+class test_Handler(unittest.TestCase):
+    def test_simple(self):
+        class FooHandler(wu.Handler):
+            url_route = "/foo"
 
-        def __call__(self):
-            return "FOO!"
+            def __call__(self):
+                return "FOO!"
 
-    foo_handler = FooHandler()
+        foo_handler = FooHandler()
 
-    assert foo_handler.url_route == "/foo"
-    assert foo_handler() == "FOO!"
+        assert foo_handler.url_route == "/foo"
+        assert foo_handler() == "FOO!"
