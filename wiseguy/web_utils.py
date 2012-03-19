@@ -126,7 +126,13 @@ def create_require(predicate, response_builder):
 
 
 class Handler(object):
-    pass
+    def __new__(cls):
+        handler = object.__new__(cls)
+        for k, v in cls.__dict__.items():
+            if isinstance(v, type):
+                if issubclass(v, Handler):
+                    setattr(handler, k, v())
+        return handler
 
 
 class FormHandler(object):

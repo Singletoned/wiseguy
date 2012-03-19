@@ -305,3 +305,17 @@ class test_Handler(unittest.TestCase):
 
         assert foo_handler.url_route == "/foo"
         assert foo_handler() == "FOO!"
+
+    def test_inheritance(self):
+        class FooHandler(wu.Handler):
+            url_route = "/foo"
+
+            def __call__(self):
+                return "FOO!"
+
+        class BarHandler(wu.Handler):
+            url_map = wu.UrlMap()
+            foo = FooHandler
+
+        bar_handler = BarHandler()
+        assert isinstance(bar_handler.foo, FooHandler)
