@@ -39,7 +39,6 @@ def test_base_app():
 
     assert app.config['mountpoint'] == u"/submount"
     assert 'url' in app.env.globals
-    assert 'gettext' in app.env.globals
 
     for rule in app.url_map.iter_rules():
         assert rule.rule.startswith('/submount')

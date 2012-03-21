@@ -16,9 +16,7 @@ class BaseApp(object):
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
         self._request_class = request_class
         self.env.globals.update(
-            dict(
-                gettext=lambda x: _(x),
-                url=self.mountpoint))
+            dict(url=self.mountpoint))
         self.url_map = wz.routing.Map([
             wz.routing.Submount(
                 self.mountpoint(),
