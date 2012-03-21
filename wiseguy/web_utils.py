@@ -6,7 +6,7 @@ import werkzeug as wz
 import validino
 import jinja2
 
-from wiseguy import form_fields
+from wiseguy import form_fields, utils
 
 
 class BaseApp(object):
@@ -140,7 +140,8 @@ class FormHandler(object):
         if request.method == 'GET':
             return cls.GET(request, **kwargs)
         elif request.method == 'POST':
-            data = request.form.to_dict()
+            data = utils.flatten_dict(
+                request.form.to_dict(flat=False))
             try:
                 return cls.POST(request, data=data, **kwargs)
             except cls._validator_error, e:

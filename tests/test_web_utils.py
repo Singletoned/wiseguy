@@ -205,7 +205,7 @@ class TestFormHandler(unittest.TestCase):
         class MockRequest(object):
             method = "POST"
             form = utils.MockObject(
-                to_dict=lambda: dict(foo="blam"))
+                to_dict=lambda flat: dict(foo="blam"))
 
         result = self.FooForm(MockRequest)
         expected = "This is POST with item_id: None and data: {'foo': 'blam'}"
@@ -215,10 +215,20 @@ class TestFormHandler(unittest.TestCase):
         class MockRequest(object):
             method = "POST"
             form = utils.MockObject(
-                to_dict=lambda: dict(do_raise=True))
+                to_dict=lambda flat: dict(do_raise=True))
 
         result = self.FooForm(MockRequest)
         expected = "This is GET with item_id: None and data: {'do_raise': True} and errors: {None: 'You told me to raise'}"
+        assert result == expected
+
+    def test_POST_with_nested_data(self):
+        class MockRequest(object):
+            method = "POST"
+            form = utils.MockObject(
+                to_dict=lambda flat: dict(flamble=[1,2,3], flooble=["flooble"]))
+
+        result = self.FooForm(MockRequest)
+        expected = "This is POST with item_id: None and data: {'flamble': [1, 2, 3], 'flooble': 'flooble'}"
         assert result == expected
 
 
