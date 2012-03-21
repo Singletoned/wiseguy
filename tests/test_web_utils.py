@@ -194,10 +194,12 @@ class TestFormHandler(unittest.TestCase):
             method = "GET"
 
         result = self.FooForm(MockRequest)
-        assert result == "This is GET with item_id: None and data: None and errors: None"
+        expected = "This is GET with item_id: None and data: None and errors: None"
+        assert result == expected
 
         result = self.FooForm(MockRequest, item_id="foo")
-        assert result == "This is GET with item_id: foo and data: None and errors: None"
+        expected = "This is GET with item_id: foo and data: None and errors: None"
+        assert result == expected
 
     def test_POST(self):
         class MockRequest(object):
@@ -206,7 +208,8 @@ class TestFormHandler(unittest.TestCase):
                 to_dict=lambda: dict(foo="blam"))
 
         result = self.FooForm(MockRequest)
-        assert result == "This is POST with item_id: None and data: {'foo': 'blam'}"
+        expected = "This is POST with item_id: None and data: {'foo': 'blam'}"
+        assert result == expected
 
     def test_POST_with_error(self):
         class MockRequest(object):
@@ -215,7 +218,8 @@ class TestFormHandler(unittest.TestCase):
                 to_dict=lambda: dict(do_raise=True))
 
         result = self.FooForm(MockRequest)
-        assert result == "This is GET with item_id: None and data: {'do_raise': True} and errors: {None: 'You told me to raise'}"
+        expected = "This is GET with item_id: None and data: {'do_raise': True} and errors: {None: 'You told me to raise'}"
+        assert result == expected
 
 
 def test_create_require():
