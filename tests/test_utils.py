@@ -3,6 +3,18 @@
 from wiseguy import utils
 
 
+def test_flatten_dict():
+    data = dict(
+        empty=[],
+        single=[1],
+        multi=[1,2,3])
+    result = utils.flatten_dict(data)
+    expected = dict(
+        empty=[],
+        single=1,
+        multi=[1,2,3])
+    assert result == expected
+
 def test_decamelise():
     pairs = [
         ("CamelCase", 'camel_case'),

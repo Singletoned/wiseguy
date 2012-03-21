@@ -4,6 +4,12 @@ import difflib, pprint, re
 
 import werkzeug as wz
 
+def flatten_dict(d):
+    for k, v in d.items():
+        if isinstance(v, list) and (len(v)==1):
+            d[k] = v[0]
+    return d
+
 def decamelise(s):
     """
     >>> decamelise("CamelCase")
