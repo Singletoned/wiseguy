@@ -180,33 +180,40 @@ def test_create_render():
 def test_FormHandler():
     class FooForm(wu.FormHandler):
         @staticmethod
-        def GET(request, data=None, errors=None):
-            return ("GET", data)
+        def GET(request, data=None, errors=None, item_id=None):
+            return "This is GET with item_id: %s and data: %s and errors: %s" % (item_id, data, errors)
 
         @staticmethod
-        def POST(request, data=None):
-            s = v.Schema(
-                dict(foo=v.integer())
-                )
-            data = s(data)
-            return ("POST", data)
+        def POST(request, data=None, item_id=None):
+            if data == dict(do_raise=True):
+                raise v.Invalid("You told me to raise")
+            return "This is POST with item_id: %s and data: %s" % (item_id, data)
 
-    request = utils.MockObject(method='GET')
-    result = FooForm(request)
-    expected = ("GET", None)
-    assert result == expected
 
-    form = utils.MockObject(to_dict=lambda: dict(foo=1))
-    request = utils.MockObject(method='POST', form=form)
-    result = FooForm(request)
-    expected = ("POST", dict(foo=1))
-    assert result == expected
+    class MockRequest(object):
+        method = "GET"
 
-    form = utils.MockObject(to_dict=lambda: dict(foo="abc"))
-    request = utils.MockObject(method='POST', form=form)
-    result = FooForm(request)
-    expected = ("GET", dict(foo="abc"))
-    assert result == expected
+    result = FooForm(MockRequest)
+    assert result == "This is GET with item_id: None and data: None and errors: None"
+
+    result = FooForm(MockRequest, item_id="foo")
+    assert result == "This is GET with item_id: foo and data: None and errors: None"
+
+    class MockRequest(object):
+        method = "POST"
+        form = utils.MockObject(
+            to_dict=lambda: dict(foo="blam"))
+
+    result = FooForm(MockRequest)
+    assert result == "This is POST with item_id: None and data: {'foo': 'blam'}"
+
+    class MockRequest(object):
+        method = "POST"
+        form = utils.MockObject(
+            to_dict=lambda: dict(do_raise=True))
+
+    result = FooForm(MockRequest)
+    assert result == "This is GET with item_id: None and data: {'do_raise': True} and errors: {None: 'You told me to raise'}"
 
 def test_create_require():
     require_mod_2 = wu.create_require(
