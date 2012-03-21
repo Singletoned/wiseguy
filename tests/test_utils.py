@@ -44,3 +44,24 @@ def test_mock_env():
 
     env = utils.MockEnv("/path", "POST", headers=dict(Foo="flim flam"))
     assert env[u"HTTP_FOO"] == "flim flam"
+
+
+def test_dotted_getattr():
+    class Foo:
+        class Bar:
+            baz = 1
+
+    result = utils.dotted_getattr(Foo, 'Bar.baz')
+    expected = 1
+    assert expected == result
+
+    result = utils.dotted_getattr(Foo, 'Bum.botty', None)
+    expected = None
+    assert expected == result
+
+    try:
+        result = utils.dotted_getattr(Foo, 'Bar.botty')
+    except AttributeError:
+        pass
+    else:
+        raise
