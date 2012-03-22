@@ -640,7 +640,7 @@ editor_deselector : "mceNoEditor"
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -657,7 +657,7 @@ CKEDITOR.replace(
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled class="mceEditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -886,7 +886,7 @@ editor_deselector : "mceNoEditor"
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<textarea id="foo" rows="4" cols="40" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {

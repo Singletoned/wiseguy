@@ -162,9 +162,9 @@ def textarea(context, id, label):
     return _textarea(context, id, label)
 
 
-def _editor(context, id, label, script):
+def _editor(context, id, label, script, class_):
     elements = _textarea(context, id, label)
-    elements[1].attrib['class'] = "mceEditor"
+    elements[1].attrib['class'] = class_
     script = html.SCRIPT(
         script,
         type="text/javascript")
@@ -181,7 +181,7 @@ editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
 '''
-    elements = _editor(context, id, label, script)
+    elements = _editor(context, id, label, script, class_="mceEditor")
     return elements
 
 
@@ -204,7 +204,7 @@ CKEDITOR.replace(
     {
         %(options)s});
 ''' % dict(id=id, options=ck_options)
-    elements = _editor(context, id, label, script)
+    elements = _editor(context, id, label, script, class_="ckeditor")
     return elements
 
 
