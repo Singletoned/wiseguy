@@ -671,6 +671,35 @@ CKEDITOR.replace(
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+    def test_wysihtml5(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><div class="btn-toolbar" id="toolbar"><div class="btn-group">
+<a data-wysihtml5-command="bold" class="btn">Bold</a><a data-wysihtml5-command="Italic" class="btn">Italic</a><a data-wysihtml5-command="createLink" class="btn">Insert Link</a><div data-wysihtml5-dialog="createLink" style="display: none;" class="modal">
+<div class="modal-header"><h3>Insert Link</h3></div>
+<div class="modal-form"><fieldset class="control-group">
+<label class="control-label" for="foo-input">Href:</label><div class="controls"><input id="foo-input" value="http://" data-wysihtml5-dialog-field="href"></div>
+</fieldset></div>
+<div class="modal-footer">
+<a class="btn" data-wysihtml5-dialog-action="save">Save</a><a class="btn" data-wysihtml5-dialog-action="cancel">Cancel</a>
+</div>
+</div>
+</div></div>
+<textarea id="foo" name="foo" class="wysihtml5"></textarea><script type="text/javascript">
+new wysihtml5.Editor(
+    'foo',
+    {
+    parserRules: {tags: {strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, span: {}, a: {set_attributes: {target: '_blank',}, check_attributes: {href: 'url'}}}},
+    name: 'foo',
+    toolbar: 'toolbar'});
+</script>
+</div>
+        '''.strip()
+        result = form_fields.wysihtml5(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
 
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
@@ -899,6 +928,40 @@ CKEDITOR.replace(
         result = wrappers.with_class(
             wrappers.compulsory(
                 self.bootstrap_form_fields.ckeditor(context, 'foo', "Foo:")),
+            "/fieldset",
+            "span6")
+        result = lxml.html.tostring(result, pretty_print=True)
+        assert expected == result
+
+    def test_wysihtml5(self):
+        context = dict(data=None, errors=None)
+        expected = '''<fieldset class="control-group span6">
+<label for="foo" class="control-label">Foo:*</label><div class="controls">
+<div class="btn-toolbar" id="toolbar"><div class="btn-group">
+<a data-wysihtml5-command="bold" class="btn">Bold</a><a data-wysihtml5-command="Italic" class="btn">Italic</a><a data-wysihtml5-command="createLink" class="btn">Insert Link</a><div data-wysihtml5-dialog="createLink" style="display: none;" class="modal">
+<div class="modal-header"><h3>Insert Link</h3></div>
+<div class="modal-form"><fieldset class="control-group">
+<label class="control-label" for="foo-input">Href:</label><div class="controls"><input id="foo-input" value="http://" data-wysihtml5-dialog-field="href"></div>
+</fieldset></div>
+<div class="modal-footer">
+<a class="btn" data-wysihtml5-dialog-action="save">Save</a><a class="btn" data-wysihtml5-dialog-action="cancel">Cancel</a>
+</div>
+</div>
+</div></div>
+<textarea id="foo" name="foo" class="wysihtml5"></textarea><script type="text/javascript">
+new wysihtml5.Editor(
+    'foo',
+    {
+    parserRules: {tags: {strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, span: {}, a: {set_attributes: {target: '_blank',}, check_attributes: {href: 'url'}}}},
+    name: 'foo',
+    toolbar: 'toolbar'});
+</script>
+</div>
+</fieldset>
+'''
+        result = wrappers.with_class(
+            wrappers.compulsory(
+                self.bootstrap_form_fields.wysihtml5(context, 'foo', "Foo:")),
             "/fieldset",
             "span6")
         result = lxml.html.tostring(result, pretty_print=True)
