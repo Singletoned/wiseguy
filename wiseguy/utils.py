@@ -12,6 +12,14 @@ def flatten_dict(d):
             d[k] = v[0]
     return d
 
+def listify(*args):
+    """
+    >>> l = [1, 2, 3, ]
+    >>> listify('a', 'b', *l)
+    ['a', 'b', 1, 2, 3]
+    """
+    return list(args)
+
 def dotted_getattr(item, attr_string, default=_DEFAULT):
     """Breaks up ``attr_string`` by dots then recursively gets the elements from ``item``::
         >>> l = list()
