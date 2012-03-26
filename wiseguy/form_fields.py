@@ -149,8 +149,7 @@ def _textarea(context, id, label):
             text,
             name=id,
             id=id,
-            rows="4",
-            cols="40"))
+            ))
     add_errors(context, element, id)
     if 'disabled_form' in context:
         element[1].attrib['disabled'] = "disabled"

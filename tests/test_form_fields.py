@@ -541,7 +541,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -552,7 +552,7 @@ class TestTextArea(unittest.TestCase):
         context = dict()
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -563,7 +563,7 @@ class TestTextArea(unittest.TestCase):
         context = dict()
         expected = '''
 <div>
-<label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<label for="foo">Foo:*</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = wrappers.compulsory(
@@ -575,7 +575,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=dict(foo='Flibble Giblets'), errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets</textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo">Flibble Giblets</textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -586,7 +586,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=dict(foo='Flibble Giblets£'), errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets&#163;</textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo">Flibble Giblets&#163;</textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -597,7 +597,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea><span class="error">Please enter a foo</span>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea><span class="error">Please enter a foo</span>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -608,7 +608,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled></textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo" disabled></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -621,7 +621,7 @@ class TestEditor(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:*</label><textarea id="foo" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
@@ -640,7 +640,7 @@ editor_deselector : "mceNoEditor"
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" class="ckeditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -657,7 +657,7 @@ CKEDITOR.replace(
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea id="foo" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -833,7 +833,7 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_textarea(self):
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span8">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo"></textarea></div>
+<label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" name="foo"></textarea></div>
 </fieldset>
 '''
         result = wrappers.with_class(
@@ -863,7 +863,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<textarea id="foo" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
@@ -886,7 +886,7 @@ editor_deselector : "mceNoEditor"
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
-<textarea id="foo" rows="4" cols="40" name="foo" class="ckeditor"></textarea><script type="text/javascript">
+<textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
