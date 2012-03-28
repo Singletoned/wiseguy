@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps
+import uuid
 
 import werkzeug as wz
 import validino
@@ -77,6 +78,21 @@ class UrlMap(wz.routing.Map):
                     f.url_map.iter_rules()))
             return f
         return decorate
+
+
+class UUIDConverter(wz.routing.BaseConverter):
+    def __init__(self, url_map):
+        super(UUIDConverter, self).__init__(url_map)
+        self.regex = '(?:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})'
+
+    def to_python(self, value):
+        return str(uuid.UUID(value))
+
+    def from_url(self, value):
+        if isinstance(uuid.UUID, value):
+            return value
+        else:
+            return uuid.UUID(value)
 
 
 def create_env_and_render(loader_type, path, name):

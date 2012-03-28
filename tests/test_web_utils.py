@@ -142,6 +142,16 @@ def test_create_expose():
     yield do_test, url_map_2, expose_2
 
 
+def test_UUIDConverter():
+    url_map = wz.routing.Map([
+        wz.routing.Rule("/<uuid:foo_id>", endpoint="foo")],
+        converters={'uuid':wu.UUIDConverter})
+    adapter = url_map.bind('example.com')
+    result = adapter.match("/01234567-89AB-CDEF-0123-456789ABCDEF")
+    expected = ("foo", {"foo_id": "01234567-89ab-cdef-0123-456789abcdef"})
+    assert result == expected
+
+
 def test_create_render():
     templates = {
         u'index': u"This is the index page.  Path: {{ request.path }}.  Greeting: {{ greeting }}",
