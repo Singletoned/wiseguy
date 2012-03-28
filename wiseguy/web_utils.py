@@ -2,6 +2,7 @@
 
 from functools import wraps
 import uuid
+import os
 
 import werkzeug as wz
 import validino
@@ -51,6 +52,22 @@ def render(template_name, mimetype="text/html"):
                 return (template_name, mimetype, values)
         return wrapper
     return decorate
+
+def make_client_env(var_dir, client):
+    env = jinja2.Environment(
+        loader=jinja2.ChoiceLoader([
+            jinja2.FileSystemLoader(
+                os.path.join(
+                    var_dir,
+                    client,
+                    "templates")),
+            jinja2.FileSystemLoader(
+                os.path.join(
+                    var_dir,
+                    "default",
+                    "templates"))]),
+        extensions=['jinja2.ext.i18n'])
+    return env
 
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import os
 
 import lxml.html
 import werkzeug as wz
@@ -9,6 +10,9 @@ import jinja2 as j2
 import validino as v
 
 from wiseguy import web_utils as wu, utils
+
+
+var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
 
 def test_base_app():
@@ -185,6 +189,30 @@ def test_create_render():
     res = contact(req)
     assert u"Redirecting..." in res.response[0]
     assert u"/other_page" in res.response[0]
+
+
+def test_make_client_env():
+    mrflibble_env = wu.make_client_env(
+        var_dir=var_dir,
+        client="mrflibble")
+    result = mrflibble_env.get_template("index.html").render()
+    assert "Mr Flibble" in result
+    assert not "default" in result
+
+    result = mrflibble_env.get_template("page.html").render()
+    assert "default page" in result
+    assert not "flibble" in result
+
+    ladywotsit_env = wu.make_client_env(
+        var_dir=var_dir,
+        client="ladywotsit")
+    result = ladywotsit_env.get_template("index.html").render()
+    assert "default" in result
+    assert not "Mr Flibble" in result
+
+    result = ladywotsit_env.get_template("page.html").render()
+    assert "default page" in result
+    assert not "flibble" in result
 
 
 class TestFormHandler(unittest.TestCase):
