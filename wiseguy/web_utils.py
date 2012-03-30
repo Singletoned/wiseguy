@@ -53,7 +53,7 @@ def render(template_name, mimetype="text/html"):
         return wrapper
     return decorate
 
-def make_client_env(var_dir, client):
+def make_client_env(var_dir, client, extra_globals=None):
     env = jinja2.Environment(
         loader=jinja2.ChoiceLoader([
             jinja2.FileSystemLoader(
@@ -67,6 +67,8 @@ def make_client_env(var_dir, client):
                     "default",
                     "templates"))]),
         extensions=['jinja2.ext.i18n'])
+    if extra_globals:
+        env.globals.update(extra_globals)
     return env
 
 def create_expose(url_map):

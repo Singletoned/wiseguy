@@ -194,29 +194,35 @@ def test_create_render():
 def test_make_client_env():
     mrflibble_env = wu.make_client_env(
         var_dir=var_dir,
-        client="mrflibble")
+        client="mrflibble",
+        extra_globals=dict(a_global_func=lambda:"This is global"))
     result = mrflibble_env.get_template("index.html").render()
     assert "Mr Flibble" in result
     assert not "default" in result
     assert not "master template" in result
+    assert "This is global" in result
 
     result = mrflibble_env.get_template("page.html").render()
     assert "default page" in result
     assert not "flibble" in result
     assert not "master template" in result
+    assert "This is global" in result
 
     ladywotsit_env = wu.make_client_env(
         var_dir=var_dir,
-        client="ladywotsit")
+        client="ladywotsit",
+        extra_globals=dict(a_global_func=lambda:"This is global"))
     result = ladywotsit_env.get_template("index.html").render()
     assert "default" in result
     assert not "Mr Flibble" in result
     assert not "master template" in result
+    assert "This is global" in result
 
     result = ladywotsit_env.get_template("page.html").render()
     assert "default page" in result
     assert not "flibble" in result
     assert not "master template" in result
+    assert "This is global" in result
 
 
 class TestFormHandler(unittest.TestCase):
