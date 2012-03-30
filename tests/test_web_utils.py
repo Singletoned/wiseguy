@@ -83,6 +83,19 @@ def test_base_app_minimal():
         url_map=url_map,
         env=env)
 
+def test_make_url_map():
+    flibble_conv = lambda: "flibble"
+    sub_url_map = wz.routing.Map(
+        [
+            wz.routing.Rule('/', endpoint="."),
+            wz.routing.Rule('/foo', endpoint="foo")],
+        converters=dict(flibble=flibble_conv))
+    url_map = wu.make_url_map("/blammo", sub_url_map)
+    adapter = url_map.bind('example.com')
+    assert adapter.match('/blammo/') == (".", {})
+    assert adapter.match('/blammo/foo') == ("foo", {})
+    assert url_map.converters['flibble'] == flibble_conv
+
 def test_render():
     foo = lambda x: x
     mock_request = object()

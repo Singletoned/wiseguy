@@ -41,6 +41,15 @@ class BaseApp(object):
         res = res(environ, start_response)
         return wz.ClosingIterator(res)
 
+def make_url_map(mountpoint, sub_url_map):
+    url_map = wz.routing.Map([
+        wz.routing.Submount(
+            mountpoint,
+            sub_url_map.iter_rules())],
+        converters=sub_url_map.converters)
+    return url_map
+
+
 def render(template_name, mimetype="text/html"):
     def decorate(func):
         @wraps(func)
