@@ -28,9 +28,10 @@ def test_base_app():
         wz.routing.Rule('/wrong', endpoint=lambda request: wz.redirect(request.url('/baz'))),
         wz.routing.Rule('/config', endpoint=lambda request: wz.Response(request.app.config['mountpoint'])),
         ])
-    env = j2.Environment(
-        loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
-        extensions=['jinja2.ext.i18n'])
+    env = wu.JinjaEnv(
+        j2.Environment(
+            loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
+            extensions=['jinja2.ext.i18n']))
 
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
