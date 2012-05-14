@@ -492,8 +492,9 @@ class MongoLoader(BaseLoader):
 
     def delete_data(self, data_added):
         session = self.session_factory()
-        for entity_class in data_added:
-            session[entity_class.__name__].remove()
+        for collection_name in session.collection_names():
+            if not collection_name == 'system.indexes':
+                session.drop_collection(collection_name)
 
     def restore_data(self, data):
         pass
