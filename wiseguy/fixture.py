@@ -256,6 +256,12 @@ class MongoTester(object):
     def count(self):
         return self.collection.count()
 
+    def all(self):
+        return self.collection.find()
+
+    def find_one(self, **kwargs):
+        return self.collection.find_one(kwargs)
+
 class FixtureMeta(type):
     def __new__(meta, class_name, bases, class_dict):
         fixture = type.__new__(meta, class_name, bases, class_dict)
