@@ -14,3 +14,7 @@ def test_process_jade():
 </div>'''
     result = wg.html.process_jade(d)
     assert expected == result
+
+def test_jade():
+    d = wg.html.jade("html: body: div#main")
+    assert d.tag == "html"

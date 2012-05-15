@@ -2,6 +2,7 @@
 
 import pyjade
 
+import lxml.html
 
 class HTMLCompiler(pyjade.compiler.Compiler):
     def attributes(self, attrs):
@@ -19,6 +20,11 @@ class HTMLCompiler(pyjade.compiler.Compiler):
             params['class'] = " ".join(classes)
         self.buf.append("".join([''' %s="%s"''' % (k,v) for (k,v) in params.items()]))
 
+
+def jade(src):
+    text = process_jade(src)
+    el = lxml.html.fromstring(text)
+    return el
 
 def process_jade(src):
     parser = pyjade.parser.Parser(src)
