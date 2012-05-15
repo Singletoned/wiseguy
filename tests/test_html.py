@@ -2,7 +2,8 @@
 
 import pyjade
 
-from wiseguy.html import process_jade
+import wiseguy as wg
+import wiseguy.html
 
 
 def test_process_jade():
@@ -11,5 +12,5 @@ def test_process_jade():
     expected = '''
 <div id="foo" class="bar">Hullo
 </div>'''
-    result = process_jade(d)
+    result = wg.html.process_jade(d)
     assert expected == result
