@@ -4,6 +4,18 @@ import pyjade
 
 import lxml.html
 
+
+class HtmlElement(lxml.html.HtmlElement):
+    def to_string(self):
+        return lxml.html.tostring(self)
+
+class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
+    def lookup(self, node_type, document, namespace, name):
+        return HtmlElement
+
+parser = lxml.html.HTMLParser()
+parser.set_element_class_lookup(HtmlElementLookup())
+
 class HTMLCompiler(pyjade.compiler.Compiler):
     def attributes(self, attrs):
         return " ".join(['''%s="%s"''' % (k,v) for (k,v) in attrs.items()])
@@ -23,7 +35,7 @@ class HTMLCompiler(pyjade.compiler.Compiler):
 
 def jade(src):
     text = process_jade(src)
-    el = lxml.html.fromstring(text)
+    el = lxml.html.fromstring(text, parser=parser)
     return el
 
 def process_jade(src):
