@@ -14,6 +14,23 @@ def test_add_class():
     assert d.attrib['class'] == 'foo'
 
 
+def test_replace():
+    tree = lxml.html.fromstring(
+'''
+<div>
+  <span class="foo">Hello World</span>
+  <span>!</span>
+</div>''')
+    path = "//span[@class='foo']"
+    new_element = lxml.html.fromstring('''<b>Foo</b>''')
+    expected = '''
+<div>
+  <b>Foo</b><span>!</span>
+</div>'''.strip()
+    result = lxml.html.tostring(
+        wrappers.replace(tree, path, new_element)).strip()
+    assert expected == result
+
 class TestWrappers(unittest.TestCase):
     bootstrap_form_fields = form_fields.BootstrapFormFields()
 

@@ -20,3 +20,10 @@ def with_class(element, path, class_name):
     for el in els:
         _add_class(el, class_name)
     return element
+
+def replace(tree, path, new_element):
+    els = tree.xpath(path)
+    assert len(els) == 1
+    el = els[0]
+    tree.replace(el, new_element)
+    return tree
