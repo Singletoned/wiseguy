@@ -29,5 +29,5 @@ def jade(src):
 def process_jade(src):
     parser = pyjade.parser.Parser(src)
     block = parser.parse()
-    compiler = HTMLCompiler(block)
+    compiler = HTMLCompiler(block, pretty=False)
     return compiler.compile()
