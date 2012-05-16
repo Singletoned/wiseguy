@@ -4,6 +4,39 @@ import difflib, pprint, re
 
 import werkzeug as wz
 
+_DEFAULT = object()
+
+def flatten_dict(d):
+    for k, v in d.items():
+        if isinstance(v, list) and (len(v)==1):
+            d[k] = v[0]
+    return d
+
+def listify(*args):
+    """
+    >>> l = [1, 2, 3, ]
+    >>> listify('a', 'b', *l)
+    ['a', 'b', 1, 2, 3]
+    """
+    return list(args)
+
+def dotted_getattr(item, attr_string, default=_DEFAULT):
+    """Breaks up ``attr_string`` by dots then recursively gets the elements from ``item``::
+        >>> l = list()
+        >>> dotted_getattr(l, u'append.__doc__')
+        'L.append(object) -- append object to end'
+    """
+    attrs = attr_string.split(u'.')
+    for attr in attrs:
+        item = getattr(item, attr, _DEFAULT)
+        if item is _DEFAULT:
+            if default is _DEFAULT:
+                # An AttributeError would have been raised, rereaise it now
+                return getattr(item, attr)
+            else:
+                return default
+    return item
+
 def decamelise(s):
     """
     >>> decamelise("CamelCase")

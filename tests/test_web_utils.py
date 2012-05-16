@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import unittest
+import os
+
 import lxml.html
 import werkzeug as wz
 import werkzeug.test
@@ -7,6 +10,9 @@ import jinja2 as j2
 import validino as v
 
 from wiseguy import web_utils as wu, utils
+
+
+var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
 
 def test_base_app():
@@ -37,7 +43,6 @@ def test_base_app():
 
     assert app.config['mountpoint'] == u"/submount"
     assert 'url' in app.env.globals
-    assert 'gettext' in app.env.globals
 
     for rule in app.url_map.iter_rules():
         assert rule.rule.startswith('/submount')
@@ -77,6 +82,19 @@ def test_base_app_minimal():
         config=dict(),
         url_map=url_map,
         env=env)
+
+def test_make_url_map():
+    flibble_conv = lambda: "flibble"
+    sub_url_map = wz.routing.Map(
+        [
+            wz.routing.Rule('/', endpoint="."),
+            wz.routing.Rule('/foo', endpoint="foo")],
+        converters=dict(flibble=flibble_conv))
+    url_map = wu.make_url_map("/blammo", sub_url_map)
+    adapter = url_map.bind('example.com')
+    assert adapter.match('/blammo/') == (".", {})
+    assert adapter.match('/blammo/foo') == ("foo", {})
+    assert url_map.converters['flibble'] == flibble_conv
 
 def test_render():
     foo = lambda x: x
@@ -141,6 +159,16 @@ def test_create_expose():
     yield do_test, url_map_2, expose_2
 
 
+def test_UUIDConverter():
+    url_map = wz.routing.Map([
+        wz.routing.Rule("/<uuid:foo_id>", endpoint="foo")],
+        converters={'uuid':wu.UUIDConverter})
+    adapter = url_map.bind('example.com')
+    result = adapter.match("/01234567-89AB-CDEF-0123-456789ABCDEF")
+    expected = ("foo", {"foo_id": "01234567-89ab-cdef-0123-456789abcdef"})
+    assert result == expected
+
+
 def test_create_render():
     templates = {
         u'index': u"This is the index page.  Path: {{ request.path }}.  Greeting: {{ greeting }}",
@@ -176,36 +204,94 @@ def test_create_render():
     assert u"/other_page" in res.response[0]
 
 
-def test_FormHandler():
+def test_make_client_env():
+    def check_result(result):
+        assert not "master template" in result
+        assert "This is global" in result
+
+    mrflibble_env = wu.make_client_env(
+        var_dir=var_dir,
+        client="mrflibble",
+        extra_globals=dict(a_global_func=lambda:"This is global"))
+    result = mrflibble_env.get_template("index.html").render()
+    assert "Mr Flibble" in result
+    assert not "default" in result
+    check_result(result)
+
+    result = mrflibble_env.get_template("page.html").render()
+    assert "default page" in result
+    assert not "flibble" in result
+    check_result(result)
+
+    ladywotsit_env = wu.make_client_env(
+        var_dir=var_dir,
+        client="ladywotsit",
+        extra_globals=dict(a_global_func=lambda:"This is global"))
+    result = ladywotsit_env.get_template("index.html").render()
+    assert "default" in result
+    assert not "Mr Flibble" in result
+    check_result(result)
+
+    result = ladywotsit_env.get_template("page.html").render()
+    assert "default page" in result
+    assert not "flibble" in result
+    check_result(result)
+
+
+class TestFormHandler(unittest.TestCase):
     class FooForm(wu.FormHandler):
         @staticmethod
-        def GET(request, data=None, errors=None):
-            return ("GET", data)
+        def GET(request, data=None, errors=None, item_id=None):
+            return "This is GET with item_id: %s and data: %s and errors: %s" % (item_id, data, errors)
 
         @staticmethod
-        def POST(request, data=None):
-            s = v.Schema(
-                dict(foo=v.integer())
-                )
-            data = s(data)
-            return ("POST", data)
+        def POST(request, data=None, item_id=None):
+            if data == dict(do_raise=True):
+                raise v.Invalid("You told me to raise")
+            return "This is POST with item_id: %s and data: %s" % (item_id, data)
 
-    request = utils.MockObject(method='GET')
-    result = FooForm(request)
-    expected = ("GET", None)
-    assert result == expected
+    def test_GET(self):
+        class MockRequest(object):
+            method = "GET"
 
-    form = utils.MockObject(to_dict=lambda: dict(foo=1))
-    request = utils.MockObject(method='POST', form=form)
-    result = FooForm(request)
-    expected = ("POST", dict(foo=1))
-    assert result == expected
+        result = self.FooForm(MockRequest)
+        expected = "This is GET with item_id: None and data: None and errors: None"
+        assert result == expected
 
-    form = utils.MockObject(to_dict=lambda: dict(foo="abc"))
-    request = utils.MockObject(method='POST', form=form)
-    result = FooForm(request)
-    expected = ("GET", dict(foo="abc"))
-    assert result == expected
+        result = self.FooForm(MockRequest, item_id="foo")
+        expected = "This is GET with item_id: foo and data: None and errors: None"
+        assert result == expected
+
+    def test_POST(self):
+        class MockRequest(object):
+            method = "POST"
+            form = utils.MockObject(
+                to_dict=lambda flat: dict(foo="blam"))
+
+        result = self.FooForm(MockRequest)
+        expected = "This is POST with item_id: None and data: {'foo': 'blam'}"
+        assert result == expected
+
+    def test_POST_with_error(self):
+        class MockRequest(object):
+            method = "POST"
+            form = utils.MockObject(
+                to_dict=lambda flat: dict(do_raise=True))
+
+        result = self.FooForm(MockRequest)
+        expected = "This is GET with item_id: None and data: {'do_raise': True} and errors: {None: 'You told me to raise'}"
+        assert result == expected
+
+    def test_POST_with_nested_data(self):
+        class MockRequest(object):
+            method = "POST"
+            form = utils.MockObject(
+                to_dict=lambda flat: dict(flamble=[1,2,3], flooble=["flooble"]))
+
+        result = self.FooForm(MockRequest)
+        expected = "This is POST with item_id: None and data: {'flamble': [1, 2, 3], 'flooble': 'flooble'}"
+        assert result == expected
+
 
 def test_create_require():
     require_mod_2 = wu.create_require(
@@ -238,3 +324,83 @@ def test_render_widget():
     result = wu.render_widget(widget)
     expected = "<p>foo</p>"
     assert result == expected
+
+def test_url_map_submount():
+    url_map = wu.UrlMap()
+
+    @url_map.expose_submount('/foo')
+    class FooController(object):
+        url_map = wu.UrlMap()
+
+        @url_map.expose("/flibble")
+        def flibble_view():
+            return "Hullo"
+
+    environ = wz.test.create_environ('/flibble')
+    endpoint, kwargs = FooController.url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
+
+    environ = wz.test.create_environ('/foo/flibble')
+    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
+
+    @url_map.expose_submount('')
+    class BarController(object):
+        url_map = wu.UrlMap()
+
+        @url_map.expose("/flibble")
+        def flibble_view():
+            return "Hullo"
+
+    environ = wz.test.create_environ('/flibble')
+    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
+
+    @url_map.expose_submount('/flamble')
+    class FlambleController(object):
+        url_map = wu.UrlMap()
+
+        @url_map.expose("/flibble")
+        def flibble_view():
+            return "Hullo"
+
+    @url_map.expose_submount('/flooble')
+    class FloobleController(FlambleController):
+        pass
+
+    environ = wz.test.create_environ('/flooble/flibble')
+    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    result = endpoint(**kwargs)
+    assert result == "Hullo"
+
+
+class test_Handler(unittest.TestCase):
+    def test_simple(self):
+        class FooHandler(wu.Handler):
+            url_route = "/foo"
+
+            def __call__(self):
+                return "FOO!"
+
+        foo_handler = FooHandler()
+
+        assert foo_handler.url_route == "/foo"
+        assert foo_handler() == "FOO!"
+
+    def test_inheritance(self):
+        class FooHandler(wu.Handler):
+            url_route = "/foo"
+
+            def __call__(self):
+                return "FOO!"
+
+        class BarHandler(wu.Handler):
+            url_map = wu.UrlMap()
+            foo = FooHandler
+
+        bar_handler = BarHandler()
+        assert isinstance(bar_handler.foo, FooHandler)
+        assert bar_handler.foo._parent == bar_handler
