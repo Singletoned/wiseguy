@@ -26,3 +26,25 @@ def test_jade():
 <div id="main">    </div>  </body></html>'''.strip()
     result = d.to_string().strip()
     assert result == expected
+
+def test_template_insert():
+    template = """
+html
+  head
+    title
+  body
+    h1#title | placeholder text
+    div#body"""
+    t = wg.html.jade(template)
+    t.insert("title, #title", "Hullo Mr Flibble")
+    t.insert("#body", "Welcome to my web")
+
+    result = t.to_string().strip()
+    expected = '''
+<html>
+<head><title>Hullo Mr Flibble</title></head>
+<body>
+<h1 id="title">Hullo Mr Flibble</h1>
+<div id="body">Welcome to my web</div>  </body>
+</html>'''.strip()
+    assert expected == result
