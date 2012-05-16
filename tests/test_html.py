@@ -37,7 +37,7 @@ html
     div#body"""
     t = wg.html.jade(template)
     t.insert("title, #title", "Hullo Mr Flibble")
-    t.insert("#body", "Welcome to my web")
+    t.insert("#body", wg.html.from_string("<span class='bar'>Welcome to my web</span>"))
 
     result = t.to_string().strip()
     expected = '''
@@ -45,6 +45,7 @@ html
 <head><title>Hullo Mr Flibble</title></head>
 <body>
 <h1 id="title">Hullo Mr Flibble</h1>
-<div id="body">Welcome to my web</div>  </body>
+<div id="body">    <span class="bar">Welcome to my web</span>
+</div>  </body>
 </html>'''.strip()
     assert expected == result
