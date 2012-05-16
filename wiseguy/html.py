@@ -6,8 +6,8 @@ import lxml.html
 
 
 class HtmlElement(lxml.html.HtmlElement):
-    def to_string(self):
-        return lxml.html.tostring(self)
+    def to_string(self, pretty=True):
+        return lxml.html.tostring(self, pretty_print=pretty)
 
 class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
     def lookup(self, node_type, document, namespace, name):
