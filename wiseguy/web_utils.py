@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from functools import wraps
+import uuid
+import os
 
 import werkzeug as wz
 import validino
 import jinja2
 
-from wiseguy import form_fields
+from wiseguy import form_fields, utils
 
 
 class BaseApp(object):
@@ -16,9 +18,7 @@ class BaseApp(object):
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
         self._request_class = request_class
         self.env.globals.update(
-            dict(
-                gettext=lambda x: _(x),
-                url=self.mountpoint))
+            dict(url=self.mountpoint))
         self.url_map = wz.routing.Map([
             wz.routing.Submount(
                 self.mountpoint(),
@@ -41,6 +41,15 @@ class BaseApp(object):
         res = res(environ, start_response)
         return wz.ClosingIterator(res)
 
+def make_url_map(mountpoint, sub_url_map):
+    url_map = wz.routing.Map([
+        wz.routing.Submount(
+            mountpoint,
+            sub_url_map.iter_rules())],
+        converters=sub_url_map.converters)
+    return url_map
+
+
 def render(template_name, mimetype="text/html"):
     def decorate(func):
         @wraps(func)
@@ -52,6 +61,24 @@ def render(template_name, mimetype="text/html"):
                 return (template_name, mimetype, values)
         return wrapper
     return decorate
+
+def make_client_env(var_dir, client, extra_globals=None):
+    env = jinja2.Environment(
+        loader=jinja2.ChoiceLoader([
+            jinja2.FileSystemLoader(
+                os.path.join(
+                    var_dir,
+                    client,
+                    "templates")),
+            jinja2.FileSystemLoader(
+                os.path.join(
+                    var_dir,
+                    "default",
+                    "templates"))]),
+        extensions=['jinja2.ext.i18n'])
+    if extra_globals:
+        env.globals.update(extra_globals)
+    return env
 
 def create_expose(url_map):
     def expose(rule, methods=['GET'], **kw):
@@ -70,6 +97,30 @@ class UrlMap(wz.routing.Map):
             self.add(wz.routing.Rule(rule, methods=methods, **kw))
             return f
         return decorate
+
+    def expose_submount(self, path):
+        def decorate(f):
+            self.add(
+                wz.routing.Submount(
+                    path,
+                    f.url_map.iter_rules()))
+            return f
+        return decorate
+
+
+class UUIDConverter(wz.routing.BaseConverter):
+    def __init__(self, url_map):
+        super(UUIDConverter, self).__init__(url_map)
+        self.regex = '(?:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})'
+
+    def to_python(self, value):
+        return str(uuid.UUID(value))
+
+    def from_url(self, value):
+        if isinstance(uuid.UUID, value):
+            return value
+        else:
+            return uuid.UUID(value)
 
 
 def create_env_and_render(loader_type, path, name):
@@ -116,13 +167,25 @@ def create_require(predicate, response_builder):
     return require
 
 
+class Handler(object):
+    def __new__(cls, _parent=None):
+        handler = object.__new__(cls)
+        handler._parent = _parent
+        for k, v in cls.__dict__.items():
+            if isinstance(v, type):
+                if issubclass(v, Handler):
+                    setattr(handler, k, v(_parent=handler))
+        return handler
+
+
 class FormHandler(object):
     _validator_error = validino.Invalid
     def __new__(cls, request, **kwargs):
         if request.method == 'GET':
             return cls.GET(request, **kwargs)
         elif request.method == 'POST':
-            data = request.form.to_dict()
+            data = utils.flatten_dict(
+                request.form.to_dict(flat=False))
             try:
                 return cls.POST(request, data=data, **kwargs)
             except cls._validator_error, e:

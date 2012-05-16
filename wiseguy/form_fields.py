@@ -4,6 +4,8 @@ import jinja2 as j2
 import lxml.html
 from lxml.html import builder as html
 
+from wiseguy import utils
+
 _default = object()
 
 def add_errors(context, element, id):
@@ -149,8 +151,7 @@ def _textarea(context, id, label):
             text,
             name=id,
             id=id,
-            rows="4",
-            cols="40"))
+            ))
     add_errors(context, element, id)
     if 'disabled_form' in context:
         element[1].attrib['disabled'] = "disabled"
@@ -162,9 +163,9 @@ def textarea(context, id, label):
     return _textarea(context, id, label)
 
 
-def _editor(context, id, label, script):
+def _editor(context, id, label, script, class_):
     elements = _textarea(context, id, label)
-    elements[1].attrib['class'] = "mceEditor"
+    elements[1].attrib['class'] = class_
     script = html.SCRIPT(
         script,
         type="text/javascript")
@@ -181,7 +182,7 @@ editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
 '''
-    elements = _editor(context, id, label, script)
+    elements = _editor(context, id, label, script, class_="mceEditor")
     return elements
 
 
@@ -204,13 +205,82 @@ CKEDITOR.replace(
     {
         %(options)s});
 ''' % dict(id=id, options=ck_options)
-    elements = _editor(context, id, label, script)
+    elements = _editor(context, id, label, script, class_="ckeditor")
     return elements
 
 
 @j2.contextfunction
 def ckeditor(context, id, label):
     elements = _ckeditor(context, id, label)
+    return html.DIV(*elements)
+
+
+def _wysihtml5(context, id, label):
+    options = {
+        'name': "'foo'",
+        'toolbar': "'toolbar'",
+        'parserRules': "{tags: {strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, span: {}, a: {set_attributes: {target: '_blank',}, check_attributes: {href: 'url'}}}}"}
+    options = ["%s: %s" % (k,v) for (k,v) in options.items()]
+    options = ",\n    ".join(options)
+    script = '''
+new wysihtml5.Editor(
+    '%(id)s',
+    {
+    %(options)s});
+''' % dict(id=id, options=options)
+    elements = _editor(context, id, label, script, class_="wysihtml5")
+    toolbar = _wysihtml5_toolbar(id)
+    return utils.listify(elements[0], toolbar, *elements[1:])
+
+def _wysihtml5_button(name, command):
+    return html.A(name, {"data-wysihtml5-command": command, 'class': "btn"})
+
+def _wysihtml5_toolbar(id):
+    toolbar = html.DIV(
+        {'class': "btn-toolbar", 'id': "toolbar"},
+        html.DIV(
+            {'class': "btn-group"},
+            _wysihtml5_button("Bold", "bold"),
+            _wysihtml5_button("Italic", "Italic"),
+            _wysihtml5_button("Insert Link", "createLink"),
+        html.DIV(
+            {
+                'data-wysihtml5-dialog': "createLink",
+                'style': "display: none;",
+                'class': "modal"},
+            html.DIV(
+                html.H3("Insert Link"),
+                {'class': "modal-header"}),
+            html.DIV(
+                {"class": "modal-form"},
+                html.FIELDSET(
+                    {'class': "control-group"},
+                    html.LABEL(
+                        "Href:",
+                        {'for': id+"-input", "class": "control-label"}),
+                    html.DIV(
+                        {'class': "controls"},
+                        html.INPUT(
+                            {'data-wysihtml5-dialog-field': "href"},
+                            id=id+"-input",
+                            value="http://")))),
+            html.DIV(
+                {"class": "modal-footer"},
+                html.A(
+                    "Save",
+                    {
+                        'data-wysihtml5-dialog-action': "save",
+                        'class': "btn"}),
+                html.A(
+                    "Cancel",
+                    {
+                        'data-wysihtml5-dialog-action': "cancel",
+                        'class': "btn"})))))
+    return toolbar
+
+@j2.contextfunction
+def wysihtml5(context, id, label):
+    elements = _wysihtml5(context, id, label)
     return html.DIV(*elements)
 
 
@@ -269,7 +339,6 @@ def submit(context, id="submit", label="Submit", class_=""):
     element = html.INPUT(
         *args,
         **kwargs)
-    element = lxml.html.tostring(element, pretty_print=True)
     return element
 
 
@@ -302,12 +371,14 @@ class BootstrapFormFields(object):
     @j2.contextfunction
     def password(self, context, id, label):
         "A Bootstrap input element"
-        return _boostrapise(
+        element = _boostrapise(
             _input,
             context=context,
             id=id,
             label=label,
             input_type="password")
+        element.xpath('//input')[0].attrib['value'] = ""
+        return element
 
     @j2.contextfunction
     def select(self, context, id, label, options, disabled=False, blank_option=True):
@@ -366,3 +437,21 @@ class BootstrapFormFields(object):
             context=context,
             id=id,
             label=label)
+
+    @j2.contextfunction
+    def wysihtml5(self, context, id, label):
+        "A Bootstrap tinymce element"
+        return _boostrapise(
+            _wysihtml5,
+            context=context,
+            id=id,
+            label=label)
+
+    @j2.contextfunction
+    def submit(self, context, id="submit", label="Submit", class_="btn-primary"):
+        "A Bootstrap submit element"
+        return submit(
+            context=context,
+            id=id,
+            label=label,
+            class_=class_)

@@ -541,7 +541,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -552,7 +552,7 @@ class TestTextArea(unittest.TestCase):
         context = dict()
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -563,7 +563,7 @@ class TestTextArea(unittest.TestCase):
         context = dict()
         expected = '''
 <div>
-<label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea>
+<label for="foo">Foo:*</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = wrappers.compulsory(
@@ -575,7 +575,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=dict(foo='Flibble Giblets'), errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets</textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo">Flibble Giblets</textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -586,7 +586,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=dict(foo='Flibble Giblets£'), errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo">Flibble Giblets&#163;</textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo">Flibble Giblets&#163;</textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -597,7 +597,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo"></textarea><span class="error">Please enter a foo</span>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea><span class="error">Please enter a foo</span>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -608,7 +608,7 @@ class TestTextArea(unittest.TestCase):
         context = dict(disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled></textarea>
+<label for="foo">Foo:</label><textarea id="foo" name="foo" disabled></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -621,7 +621,7 @@ class TestEditor(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:*</label><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:*</label><textarea id="foo" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
@@ -640,7 +640,7 @@ editor_deselector : "mceNoEditor"
         context = dict(data=None, errors=None)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -657,7 +657,7 @@ CKEDITOR.replace(
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" rows="4" cols="40" name="foo" disabled class="mceEditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea id="foo" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -671,34 +671,63 @@ CKEDITOR.replace(
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+    def test_wysihtml5(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><div class="btn-toolbar" id="toolbar"><div class="btn-group">
+<a data-wysihtml5-command="bold" class="btn">Bold</a><a data-wysihtml5-command="Italic" class="btn">Italic</a><a data-wysihtml5-command="createLink" class="btn">Insert Link</a><div data-wysihtml5-dialog="createLink" style="display: none;" class="modal">
+<div class="modal-header"><h3>Insert Link</h3></div>
+<div class="modal-form"><fieldset class="control-group">
+<label class="control-label" for="foo-input">Href:</label><div class="controls"><input id="foo-input" value="http://" data-wysihtml5-dialog-field="href"></div>
+</fieldset></div>
+<div class="modal-footer">
+<a class="btn" data-wysihtml5-dialog-action="save">Save</a><a class="btn" data-wysihtml5-dialog-action="cancel">Cancel</a>
+</div>
+</div>
+</div></div>
+<textarea id="foo" name="foo" class="wysihtml5"></textarea><script type="text/javascript">
+new wysihtml5.Editor(
+    'foo',
+    {
+    parserRules: {tags: {strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, span: {}, a: {set_attributes: {target: '_blank',}, check_attributes: {href: 'url'}}}},
+    name: 'foo',
+    toolbar: 'toolbar'});
+</script>
+</div>
+        '''.strip()
+        result = form_fields.wysihtml5(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
 
 class TestSubmit(unittest.TestCase):
     def test_plain(self):
         context = dict()
         expected = '''<input type="submit" id="submit" value="Submit">'''
         result = form_fields.submit(context)
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_with_labels(self):
         context = dict()
         expected = '''<input type="submit" id="foo" value="Foo!">'''
         result = form_fields.submit(context, 'foo', "Foo!")
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_bad_value(self):
         context = dict()
         expected = '''<input type="submit" id="foo" value="Foo&amp;&lt;">'''
         result = form_fields.submit(context, 'foo', "Foo&<")
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_with_classes(self):
         context = dict()
         expected = '''<input type="submit" id="submit" value="Submit" class="foo bar">'''
         result = form_fields.submit(context, class_="foo bar")
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_disabled_form(self):
@@ -706,7 +735,7 @@ class TestSubmit(unittest.TestCase):
         expected = '''
 <input disabled type="submit" id="submit" value="Submit" class="foo bar">'''.strip()
         result = form_fields.submit(context, class_="foo bar")
-        result = result.strip()
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
 
@@ -782,7 +811,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         assert expected == result
 
     def test_password(self):
-        context = dict(data=None, errors=None)
+        context = dict(data=dict(foo="blah"), errors=None)
         expected = '''
 <fieldset class="control-group span3">
 <label for="foo" class="control-label">Foo:</label><div class="controls"><input type="password" id="foo" value="" name="foo"></div>
@@ -833,7 +862,7 @@ class TestBootstrapFormFields(unittest.TestCase):
     def test_textarea(self):
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span8">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" rows="4" cols="40" name="foo"></textarea></div>
+<label for="foo" class="control-label">Foo:</label><div class="controls"><textarea id="foo" name="foo"></textarea></div>
 </fieldset>
 '''
         result = wrappers.with_class(
@@ -863,7 +892,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<textarea id="foo" name="foo" class="mceEditor"></textarea><script type="text/javascript">
 tinyMCE.init({
 mode : "textareas",
 theme : "simple",
@@ -886,7 +915,7 @@ editor_deselector : "mceNoEditor"
         context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
-<textarea id="foo" rows="4" cols="40" name="foo" class="mceEditor"></textarea><script type="text/javascript">
+<textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -902,4 +931,45 @@ CKEDITOR.replace(
             "/fieldset",
             "span6")
         result = lxml.html.tostring(result, pretty_print=True)
+        assert expected == result
+
+    def test_wysihtml5(self):
+        context = dict(data=None, errors=None)
+        expected = '''<fieldset class="control-group span6">
+<label for="foo" class="control-label">Foo:*</label><div class="controls">
+<div class="btn-toolbar" id="toolbar"><div class="btn-group">
+<a data-wysihtml5-command="bold" class="btn">Bold</a><a data-wysihtml5-command="Italic" class="btn">Italic</a><a data-wysihtml5-command="createLink" class="btn">Insert Link</a><div data-wysihtml5-dialog="createLink" style="display: none;" class="modal">
+<div class="modal-header"><h3>Insert Link</h3></div>
+<div class="modal-form"><fieldset class="control-group">
+<label class="control-label" for="foo-input">Href:</label><div class="controls"><input id="foo-input" value="http://" data-wysihtml5-dialog-field="href"></div>
+</fieldset></div>
+<div class="modal-footer">
+<a class="btn" data-wysihtml5-dialog-action="save">Save</a><a class="btn" data-wysihtml5-dialog-action="cancel">Cancel</a>
+</div>
+</div>
+</div></div>
+<textarea id="foo" name="foo" class="wysihtml5"></textarea><script type="text/javascript">
+new wysihtml5.Editor(
+    'foo',
+    {
+    parserRules: {tags: {strong: {}, b: {}, i: {}, em: {}, br: {}, p: {}, span: {}, a: {set_attributes: {target: '_blank',}, check_attributes: {href: 'url'}}}},
+    name: 'foo',
+    toolbar: 'toolbar'});
+</script>
+</div>
+</fieldset>
+'''
+        result = wrappers.with_class(
+            wrappers.compulsory(
+                self.bootstrap_form_fields.wysihtml5(context, 'foo', "Foo:")),
+            "/fieldset",
+            "span6")
+        result = lxml.html.tostring(result, pretty_print=True)
+        assert expected == result
+
+    def test_submit(self):
+        context = dict()
+        expected = '''<input type="submit" id="foo" value="Foo!" class="btn">'''
+        result = self.bootstrap_form_fields.submit(context, 'foo', "Foo!", class_="btn")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
