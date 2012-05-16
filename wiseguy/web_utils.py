@@ -98,27 +98,20 @@ def create_render(env):
         return decorate
     return render
 
-
-def create_require(predicate, template=None, response_builder=None, mimetype=u'text/html'):
-    u"""
-    Create a decorator that requires ``predicate(request)`` to evaluate
-    ``True`` before calling the decorated function. If the predicate evalutates
-    ``False`` then either ``response_builder`` is called with the request and returned, or ``template`` is rendered and returned.
+def create_require(predicate, response_builder):
+    u"""Create a decorator that requires ``predicate(request)`` to
+    evaluate ``True`` before calling the decorated function. If the
+    predicate evalutates ``False`` then ``response_builder`` is called
+    with the original function, request and args and kwargs and
+    returned.
     """
-    assert template or response_builder, u"Must specify either a template or response_builder"
-    assert not (template and response_builder), u"Must only specify one of template or response_builder"
     def require(func):
         @wraps(func)
         def decorated(request, *args, **kwargs):
             if predicate(request):
                 return func(request, *args, **kwargs)
-            elif response_builder:
-                return response_builder(request)
             else:
-                return Response(
-                    template.render({u'request': request}),
-                    mimetype=mimetype
-                )
+                return response_builder(func, request, *args, **kwargs)
         return decorated
     return require
 
@@ -135,3 +128,8 @@ class FormHandler(object):
             except cls._validator_error, e:
                 errors = e.unpack_errors()
                 return cls.GET(request, data=data, errors=errors, **kwargs)
+
+
+def render_widget(widget):
+    import lxml.html
+    return lxml.html.tostring(widget)

@@ -6,11 +6,11 @@ from lxml.html import builder as html
 
 _default = object()
 
-def add_errors(context, elements, id):
+def add_errors(context, element, id):
     "Add an error, if present, to the list of elements"
     if context.get('errors', None):
         if context['errors'].get(id, ''):
-            elements.append(
+            element.append(
                 html.SPAN(
                     context['errors'][id],
                     {'class': 'error'}))
@@ -38,20 +38,19 @@ def _boostrapise(func, context, id, class_=None, controls_length=1, **kwargs):
     help = element.xpath("//span[contains(@class, 'error')]")
     if help:
         help[0].attrib['class'] = help[0].attrib['class'] + ' help-inline'
-    element = lxml.html.tostring(element, pretty_print=True)
     return element
 
 
-def _input(context, id, label, compulsory, input_type, value=_default, class_=None):
+def _input(context, id, label, input_type, value=_default, class_=None, extra_attrs=None):
     if value is _default:
         value = unicode((context.get('data', False) or {}).get(id, ''))
-    if compulsory:
-        label = label + "*"
+    if not extra_attrs:
+        extra_attrs = dict()
     if class_:
-        extra_attrs = {'class': class_}
-    else:
-        extra_attrs = {}
-    elements = [
+        extra_attrs['class'] = class_
+    if 'disabled_form' in context:
+        extra_attrs['disabled'] = "disabled"
+    element = html.DIV(
         html.LABEL(
             label,
             {'for': id}),
@@ -60,12 +59,13 @@ def _input(context, id, label, compulsory, input_type, value=_default, class_=No
             type=input_type,
             name=id,
             id=id,
-            value=value)]
-    add_errors(context, elements, id)
-    return elements
+            value=value))
+    add_errors(context, element, id)
+    return element
 
-def _search(context, id, label, compulsory, input_type, value=_default, link_class=None, extra_attrs=None, help=None):
-    elements = _input(context, id, label, compulsory, input_type="text")
+
+def _search(context, id, label, input_type, value=_default, link_class=None, extra_attrs=None, help=None):
+    element = _input(context, id, label, input_type="text")
     if not extra_attrs:
         extra_attrs = dict()
     if link_class:
@@ -74,56 +74,52 @@ def _search(context, id, label, compulsory, input_type, value=_default, link_cla
         "Search",
         extra_attrs,
         href="#")
-    elements.insert(2, link)
+    element.insert(2, link)
     if help:
         help = lxml.html.fromstring(help)
-        elements.insert(3, help)
-    return elements
+        element.insert(3, help)
+    return element
+
 
 @j2.contextfunction
-def input(context, id, label, compulsory=False, class_=None):
+def input(context, id, label, class_=None, extra_attrs=None):
     "A simple input element"
-    elements = _input(context, id, label, compulsory, input_type="text", class_=class_)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return _input(context, id, label, input_type="text", class_=class_)
+
 
 @j2.contextfunction
-def search(context, id, label, compulsory=False, help=None):
+def search(context, id, label, help=None):
     "A basic search element with link"
-    elements = _search(context, id, label, compulsory, input_type="text", help=help)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+    return _search(context, id, label, input_type="text", help=help)
 
-def _checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
-    elements = _input(context, id, label, compulsory, input_type="checkbox", value=value)
+
+def _checkbox(context, id, label, value=_default, disabled=False):
+    elements = _input(context, id, label, input_type="checkbox", value=value)
     data_value = (context.get('data', False) or {}).get(id, '')
     if isinstance(data_value, (list, tuple)):
         if value in data_value:
             elements[1].attrib['checked'] = "checked"
-    if disabled:
+    if disabled or ('disabled_form' in context):
         elements[1].attrib['disabled'] = "disabled"
+    return html.DIV(*elements)
+
+
+@j2.contextfunction
+def checkbox(context, id, label, value=_default, disabled=False):
+    "A simple input element"
+    return _checkbox(context, id, label, value, disabled)
+
+
+@j2.contextfunction
+def password(context, id, label):
+    "A password element.  Won't fill the value even if present in context['data']"
+    elements = _input(context, id, label, input_type="password")
+    elements[1].attrib['value'] = ""
     return elements
 
 
-@j2.contextfunction
-def checkbox(context, id, label, compulsory=False, value=_default, disabled=False):
-    "A simple input element"
-    elements = _checkbox(context, id, label, compulsory, value, disabled)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
-
-
-@j2.contextfunction
-def password(context, id, label, compulsory=False):
-    "A password element.  Won't fill the value even if present in context['data']"
-    elements = _input(context, id, label, compulsory, input_type="password")
-    elements[1].attrib['value'] = ""
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
-
-
-def _datepicker(context, id, label, compulsory):
-    elements = _input(context, id, label, compulsory, input_type="text")
+def _datepicker(context, id, label):
+    elements = _input(context, id, label, input_type="text")
     script = html.SCRIPT(
         '''$(function() {$("#%s").datepicker({dateFormat:'yy-mm-dd'});});''' % id)
     elements.insert(len(elements), script)
@@ -131,23 +127,21 @@ def _datepicker(context, id, label, compulsory):
 
 
 @j2.contextfunction
-def datepicker(context, id, label, compulsory=False):
+def datepicker(context, id, label):
     "A datepicker element that uses JQueryUI"
-    elements = _datepicker(context, id, label, compulsory)
+    elements = _datepicker(context, id, label)
     elements = [lxml.html.tostring(e) for e in elements]
     return '\n'.join(elements)
 
 
-def _textarea(context, id, label, compulsory):
-    if compulsory:
-        label = label + "*"
+def _textarea(context, id, label):
     data = context.get('data', False) or {}
     text = data.get(id, '')
     if isinstance(text, str):
         text = text.decode('utf8')
     else:
         text = unicode(text)
-    elements = [
+    element = html.DIV(
         html.LABEL(
             label,
             {'for': id}),
@@ -156,21 +150,20 @@ def _textarea(context, id, label, compulsory):
             name=id,
             id=id,
             rows="4",
-            cols="40",
-)]
-    add_errors(context, elements, id)
-    return elements
+            cols="40"))
+    add_errors(context, element, id)
+    if 'disabled_form' in context:
+        element[1].attrib['disabled'] = "disabled"
+    return element
 
 
 @j2.contextfunction
-def textarea(context, id, label, compulsory=False):
-    elements = _textarea(context, id, label, compulsory)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+def textarea(context, id, label):
+    return _textarea(context, id, label)
 
 
-def _editor(context, id, label, compulsory, script):
-    elements = _textarea(context, id, label, compulsory)
+def _editor(context, id, label, script):
+    elements = _textarea(context, id, label)
     elements[1].attrib['class'] = "mceEditor"
     script = html.SCRIPT(
         script,
@@ -179,7 +172,7 @@ def _editor(context, id, label, compulsory, script):
     return elements
 
 
-def _tinymce(context, id, label, compulsory):
+def _tinymce(context, id, label):
     script = '''
 tinyMCE.init({
 mode : "textareas",
@@ -188,39 +181,40 @@ editor_selector : "mceEditor",
 editor_deselector : "mceNoEditor"
 });
 '''
-    elements = _editor(context, id, label, compulsory, script)
+    elements = _editor(context, id, label, script)
     return elements
 
 
 @j2.contextfunction
-def tinymce(context, id, label, compulsory=False):
-    elements = _tinymce(context, id, label, compulsory)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+def tinymce(context, id, label):
+    return _tinymce(context, id, label)
 
 
-def _ckeditor(context, id, label, compulsory):
+def _ckeditor(context, id, label):
+    ck_options = {
+        'toolbar': "'Basic'",
+        'customConfig': "''"}
+    if 'disabled_form' in context:
+        ck_options['readOnly'] = "true"
+    ck_options = ["%s: %s" % (k,v) for (k,v) in ck_options.items()]
+    ck_options = ",\n        ".join(ck_options)
     script = '''
 CKEDITOR.replace(
-    '%s',
+    '%(id)s',
     {
-        toolbar: 'Basic',
-        customConfig : ''});
-''' % id
-    elements = _editor(context, id, label, compulsory, script)
+        %(options)s});
+''' % dict(id=id, options=ck_options)
+    elements = _editor(context, id, label, script)
     return elements
 
 
 @j2.contextfunction
-def ckeditor(context, id, label, compulsory=False):
-    elements = _ckeditor(context, id, label, compulsory)
-    elements = [lxml.html.tostring(e) for e in elements]
-    return '\n'.join(elements)
+def ckeditor(context, id, label):
+    elements = _ckeditor(context, id, label)
+    return html.DIV(*elements)
 
 
-def _select(context, id, label, options, compulsory, disabled, blank_option):
-    if compulsory:
-        label = label + "*"
+def _select(context, id, label, options, disabled, blank_option):
     option_elements = []
     selected = unicode((context.get('data', False) or {}).get(id, ''))
     if blank_option:
@@ -238,7 +232,7 @@ def _select(context, id, label, options, compulsory, disabled, blank_option):
         else:
             o = html.OPTION(text, value=value)
         option_elements.append(o)
-    elements = [
+    element = html.DIV(
         html.LABEL(
             label,
             {'for': id}),
@@ -246,27 +240,28 @@ def _select(context, id, label, options, compulsory, disabled, blank_option):
             "\n",
             *option_elements,
             name=id,
-            id=id)]
-    add_errors(context, elements, id)
-    if disabled:
-        elements[1].attrib['disabled'] = "disabled"
-    return elements
+            id=id))
+    add_errors(context, element, id)
+    if disabled or ('disabled_form' in context):
+        element[1].attrib['disabled'] = "disabled"
+    return element
 
 
 @j2.contextfunction
-def select(context, id, label, options, compulsory=False, disabled=False, blank_option=True):
+def select(context, id, label, options, disabled=False, blank_option=True):
     "A select element.  Accepts a list of value, text pairs"
-    elements = _select(context, id, label, options, compulsory, disabled, blank_option)
-    elements = [lxml.html.tostring(e, pretty_print=True) for e in elements]
-    return '\n'.join(elements)
+    return _select(context, id, label, options, disabled, blank_option)
 
 
-def submit(id="submit", label="Submit", class_=""):
+@j2.contextfunction
+def submit(context, id="submit", label="Submit", class_=""):
     "A simple submit button"
     kwargs = dict(
         type="submit",
         id=id,
         value=label)
+    if 'disabled_form' in context:
+        kwargs['disabled'] = 'disabled'
     if class_:
         args = ({'class': class_},)
     else:
@@ -280,51 +275,42 @@ def submit(id="submit", label="Submit", class_=""):
 
 class BootstrapFormFields(object):
     @j2.contextfunction
-    def input(self, context, id, label, compulsory=False, class_=None):
+    def input(self, context, id, label, extra_attrs=None):
         "A Bootstrap input element"
         return _boostrapise(
             _input,
             context=context,
             id=id,
             label=label,
-            compulsory=False,
             input_type="text",
-            class_=class_)
+            extra_attrs=extra_attrs)
 
     @j2.contextfunction
-    def search(self, context, id, label, compulsory=False, class_=None, extra_attrs=None, help=None):
+    def search(self, context, id, label, extra_attrs=None, help=None):
         "A Bootstrap input element"
-        if class_:
-            class_ = " ".join(["search-form image-search-widget", class_])
-        else:
-            class_ = "search-form image-search-widget"
         return _boostrapise(
             _search,
             controls_length=3,
             context=context,
             id=id,
             label=label,
-            compulsory=False,
             input_type="text",
-            class_=class_,
             link_class="btn search",
             extra_attrs=extra_attrs,
             help=help)
 
     @j2.contextfunction
-    def password(self, context, id, label, compulsory=False, class_=None):
+    def password(self, context, id, label):
         "A Bootstrap input element"
         return _boostrapise(
             _input,
             context=context,
             id=id,
             label=label,
-            compulsory=compulsory,
-            input_type="password",
-            class_=class_)
+            input_type="password")
 
     @j2.contextfunction
-    def select(self, context, id, label, options, compulsory=False, disabled=False, blank_option=True, class_=None):
+    def select(self, context, id, label, options, disabled=False, blank_option=True):
         "A Bootstrap input element"
         return _boostrapise(
             _select,
@@ -332,63 +318,51 @@ class BootstrapFormFields(object):
             id=id,
             label=label,
             options=options,
-            compulsory=compulsory,
             disabled=disabled,
-            blank_option=blank_option,
-            class_=class_)
+            blank_option=blank_option)
 
     @j2.contextfunction
-    def checkbox(self, context, id, label, compulsory=False, value=_default, class_=None):
+    def checkbox(self, context, id, label, value=_default):
         "A Bootstrap checkbox element"
         return _boostrapise(
             _checkbox,
             context=context,
             id=id,
             label=label,
-            compulsory=compulsory,
-            value=value,
-            class_=class_)
+            value=value)
 
     @j2.contextfunction
-    def textarea(self, context, id, label, compulsory=False, class_=None):
+    def textarea(self, context, id, label):
         "A Bootstrap textarea element"
         return _boostrapise(
             _textarea,
             context=context,
             id=id,
-            label=label,
-            compulsory=compulsory,
-            class_=class_)
+            label=label)
 
     @j2.contextfunction
-    def datepicker(self, context, id, label, compulsory=False, class_=None):
+    def datepicker(self, context, id, label):
         "A Bootstrap datepicker element"
         return _boostrapise(
             _datepicker,
             context=context,
             id=id,
-            label=label,
-            compulsory=compulsory,
-            class_=class_)
+            label=label)
 
     @j2.contextfunction
-    def tinymce(self, context, id, label, compulsory=False, class_=None):
+    def tinymce(self, context, id, label):
         "A Bootstrap tinymce element"
         return _boostrapise(
             _tinymce,
             context=context,
             id=id,
-            label=label,
-            compulsory=compulsory,
-            class_=class_)
+            label=label)
 
     @j2.contextfunction
-    def ckeditor(self, context, id, label, compulsory=False, class_=None):
+    def ckeditor(self, context, id, label):
         "A Bootstrap tinymce element"
         return _boostrapise(
             _ckeditor,
             context=context,
             id=id,
-            label=label,
-            compulsory=compulsory,
-            class_=class_)
+            label=label)
