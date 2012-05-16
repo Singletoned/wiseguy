@@ -637,13 +637,16 @@ editor_deselector : "mceNoEditor"
         assert expected == result
 
     def test_ckeditor(self):
-        context = dict(data=None, errors=None)
+        context = dict(data=None, errors=None, url=lambda x: x)
         expected = '''
 <div>
 <label for="foo">Foo:</label><textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
+        contentsCss: 'static/css/ckeditor.css',
+        forcePasteAsPlainText: true,
+        disableNativeSpellChecker: false,
         toolbar: 'Basic',
         customConfig: ''});
 </script>
@@ -654,16 +657,19 @@ CKEDITOR.replace(
         assert expected == result
 
     def test_ckeditor_disabled_form(self):
-        context = dict(data=None, errors=None, disabled_form=True)
+        context = dict(data=None, errors=None, url=lambda x: x, disabled_form=True)
         expected = '''
 <div>
 <label for="foo">Foo:</label><textarea id="foo" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
+        contentsCss: 'static/css/ckeditor.css',
+        forcePasteAsPlainText: true,
+        disableNativeSpellChecker: false,
+        customConfig: '',
         readOnly: true,
-        toolbar: 'Basic',
-        customConfig: ''});
+        toolbar: 'Basic'});
 </script>
 </div>
         '''.strip()
@@ -912,13 +918,16 @@ editor_deselector : "mceNoEditor"
         assert expected == result
 
     def test_ckeditor(self):
-        context = dict(data=None, errors=None)
+        context = dict(data=None, errors=None, url=lambda x: x)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
 <textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
+        contentsCss: 'static/css/ckeditor.css',
+        forcePasteAsPlainText: true,
+        disableNativeSpellChecker: false,
         toolbar: 'Basic',
         customConfig: ''});
 </script>

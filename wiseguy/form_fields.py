@@ -194,6 +194,9 @@ def tinymce(context, id, label):
 def _ckeditor(context, id, label):
     ck_options = {
         'toolbar': "'Basic'",
+        'disableNativeSpellChecker': "false",
+        'forcePasteAsPlainText': "true",
+        'contentsCss': "'"+context['url']('static/css/ckeditor.css')+"'",
         'customConfig': "''"}
     if 'disabled_form' in context:
         ck_options['readOnly'] = "true"
