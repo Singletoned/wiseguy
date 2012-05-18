@@ -25,7 +25,7 @@ class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
 parser = lxml.html.HTMLParser()
 parser.set_element_class_lookup(HtmlElementLookup())
 
-def from_string(src):
+def Html(src):
     return lxml.html.fromstring(src, parser=parser)
 
 class HTMLCompiler(pyjade.compiler.Compiler):

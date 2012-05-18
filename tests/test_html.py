@@ -37,7 +37,7 @@ html
     div#body"""
     t = wg.html.jade(template)
     t.insert("title, #title", "Hullo Mr Flibble")
-    t.insert("#body", wg.html.from_string("<span class='bar'>Welcome to my web</span>"))
+    t.insert("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
 
     result = t.to_string().strip()
     expected = '''
