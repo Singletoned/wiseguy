@@ -4,7 +4,7 @@ import unittest
 
 import lxml.html
 
-from wiseguy import form_fields, wrappers
+from wiseguy import form_fields, wrappers, utils
 
 class TestInput(unittest.TestCase):
     def test_plain(self):
@@ -637,43 +637,49 @@ editor_deselector : "mceNoEditor"
         assert expected == result
 
     def test_ckeditor(self):
-        context = dict(data=None, errors=None, url=lambda x: x)
+        context = dict(data=None, errors=None)
         expected = '''
 <div>
 <label for="foo">Foo:</label><textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
-        contentsCss: 'static/css/ckeditor.css',
-        forcePasteAsPlainText: true,
-        disableNativeSpellChecker: false,
         toolbar: 'Basic',
         customConfig: ''});
 </script>
 </div>
         '''.strip()
-        result = form_fields.ckeditor(context, 'foo', "Foo:")
+        result = form_fields.ckeditor(
+            context,
+            'foo',
+            "Foo:",
+            ckeditor_config={
+                'toolbar': "'Basic'",
+                'customConfig': "''"})
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
     def test_ckeditor_disabled_form(self):
-        context = dict(data=None, errors=None, url=lambda x: x, disabled_form=True)
+        context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
 <div>
 <label for="foo">Foo:</label><textarea id="foo" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
-        contentsCss: 'static/css/ckeditor.css',
-        forcePasteAsPlainText: true,
-        disableNativeSpellChecker: false,
-        customConfig: '',
         readOnly: true,
-        toolbar: 'Basic'});
+        toolbar: 'Basic',
+        customConfig: ''});
 </script>
 </div>
         '''.strip()
-        result = form_fields.ckeditor(context, 'foo', "Foo:")
+        result = form_fields.ckeditor(
+            context,
+            'foo',
+            "Foo:",
+            ckeditor_config={
+                'toolbar': "'Basic'",
+                'customConfig': "''"})
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
@@ -746,7 +752,12 @@ class TestSubmit(unittest.TestCase):
 
 
 class TestBootstrapFormFields(unittest.TestCase):
-    bootstrap_form_fields = form_fields.BootstrapFormFields()
+    bootstrap_form_fields = form_fields.BootstrapFormFields(
+        ckeditor_config={
+            'toolbar': "'Basic'",
+            'disableNativeSpellChecker': "false",
+            'forcePasteAsPlainText': "true",
+            'customConfig': "''"})
 
     def test_input(self):
         context = dict(data=None, errors=None)
@@ -918,14 +929,13 @@ editor_deselector : "mceNoEditor"
         assert expected == result
 
     def test_ckeditor(self):
-        context = dict(data=None, errors=None, url=lambda x: x)
+        context = dict(data=None, errors=None)
         expected = '''<fieldset class="control-group span6">
 <label for="foo" class="control-label">Foo:*</label><div class="controls">
 <textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
-        contentsCss: 'static/css/ckeditor.css',
         forcePasteAsPlainText: true,
         disableNativeSpellChecker: false,
         toolbar: 'Basic',

@@ -191,16 +191,10 @@ def tinymce(context, id, label):
     return _tinymce(context, id, label)
 
 
-def _ckeditor(context, id, label):
-    ck_options = {
-        'toolbar': "'Basic'",
-        'disableNativeSpellChecker': "false",
-        'forcePasteAsPlainText': "true",
-        'contentsCss': "'"+context['url']('static/css/ckeditor.css')+"'",
-        'customConfig': "''"}
+def _ckeditor(context, id, label, ckeditor_config):
     if 'disabled_form' in context:
-        ck_options['readOnly'] = "true"
-    ck_options = ["%s: %s" % (k,v) for (k,v) in ck_options.items()]
+        ckeditor_config['readOnly'] = "true"
+    ck_options = ["%s: %s" % (k,v) for (k,v) in ckeditor_config.items()]
     ck_options = ",\n        ".join(ck_options)
     script = '''
 CKEDITOR.replace(
@@ -213,8 +207,8 @@ CKEDITOR.replace(
 
 
 @j2.contextfunction
-def ckeditor(context, id, label):
-    elements = _ckeditor(context, id, label)
+def ckeditor(context, id, label, ckeditor_config=None):
+    elements = _ckeditor(context, id, label, ckeditor_config or dict())
     return html.DIV(*elements)
 
 
@@ -346,6 +340,9 @@ def submit(context, id="submit", label="Submit", class_=""):
 
 
 class BootstrapFormFields(object):
+    def __init__(self, ckeditor_config=None):
+        self.ckeditor_config = ckeditor_config
+
     @j2.contextfunction
     def input(self, context, id, label, extra_attrs=None):
         "A Bootstrap input element"
@@ -439,7 +436,8 @@ class BootstrapFormFields(object):
             _ckeditor,
             context=context,
             id=id,
-            label=label)
+            label=label,
+            ckeditor_config=self.ckeditor_config)
 
     @j2.contextfunction
     def wysihtml5(self, context, id, label):
