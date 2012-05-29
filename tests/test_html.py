@@ -17,13 +17,12 @@ def test_jade():
     d = wg.html.jade("html: body: div#main")
     assert d.tag == "html"
 
-    expected = '''<html><body><div id="main">    </div>  </body></html>'''
+    expected = '''<html><body><div id="main"></div></body></html>'''
     result = d.to_string(pretty=False)
     assert result == expected
 
     expected = '''
-<html><body>
-<div id="main">    </div>  </body></html>'''.strip()
+<html><body><div id="main"></div></body></html>'''.strip()
     result = d.to_string().strip()
     assert result == expected
 
@@ -45,8 +44,8 @@ html
 <head><title>Hullo Mr Flibble</title></head>
 <body>
 <h1 id="title">Hullo Mr Flibble</h1>
-<div id="body">    <span class="bar">Welcome to my web</span>
-</div>  </body>
+<div id="body"><span class="bar">Welcome to my web</span></div>
+</body>
 </html>'''.strip()
     assert expected == result
 
