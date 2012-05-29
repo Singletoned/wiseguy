@@ -49,3 +49,18 @@ html
 </div>  </body>
 </html>'''.strip()
     assert expected == result
+
+def test_normalise_html():
+    t = wg.html.Html('''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
+    result = wg.html.normalise_html(t).strip()
+    expected = '''
+<div class="bar" id="foo" style="bloop">
+Hullo
+<strong>
+World!
+</strong>
+<br>
+The End
+</div>
+'''.strip()
+    assert result == expected

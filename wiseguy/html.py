@@ -55,3 +55,27 @@ def process_jade(src):
     block = parser.parse()
     compiler = HTMLCompiler(block, pretty=False)
     return compiler.compile()
+
+def _render_open_tag(el):
+    return "<%s%s>" % (el.tag, _render_attrs(el))
+
+def _render_close_tag(el):
+    return "</%s>" % (el.tag)
+
+def _render_attrs(el):
+    return "".join([' %s="%s"'%(k, el.attrib[k]) for k in sorted(el.keys())])
+
+def _render_el(el):
+    yield _render_open_tag(el)
+    if el.text:
+        yield el.text
+    for sub_element in el:
+        for line in _render_el(sub_element):
+            yield line
+    if el.tail:
+        yield el.tail
+    if not el.tag in lxml.html.defs.empty_tags:
+        yield _render_close_tag(el)
+
+def normalise_html(el):
+    return "\n".join([item.strip() for item in _render_el(el) if item.strip()])
