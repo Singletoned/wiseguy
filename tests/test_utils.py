@@ -27,6 +27,16 @@ def test_decamelise():
         assert utils.decamelise(data) == expected
         assert type(expected) == type(data)
 
+def test_join():
+    data = iter([None])
+    expected = [None]
+    result = list(utils.join(" ", data))
+    assert result == expected
+
+    data = range(4)
+    expected = [0, " ", 1, " ", 2, " ", 3]
+    result = list(utils.join(" ", data))
+    assert expected == result
 
 def test_mock_object():
     m1 = utils.MockObject(foo=1, bar='flam')
