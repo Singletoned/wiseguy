@@ -5,8 +5,11 @@ import lxml.html
 from lxml.html import builder as html
 
 
-def default_kwargs_filter(context, offset, limit):
-    return  dict(offset=offset, limit=limit)
+def default_kwargs_filter(context, offset, limit, order=None):
+    if order:
+        return dict(offset=offset, limit=limit, order=order)
+    else:
+        return dict(offset=offset, limit=limit)
 
 @j2.contextfunction
 def prev_li(context, item_url, kwargs_filter=default_kwargs_filter):
@@ -16,7 +19,7 @@ def prev_li(context, item_url, kwargs_filter=default_kwargs_filter):
         prev_classes.append('disabled')
     else:
         new_offset = max(0, context['offset']-context['limit'])
-        href_kwargs = kwargs_filter(context, new_offset, context['limit'])
+        href_kwargs = kwargs_filter(context, new_offset, context['limit'], context.get('order', False))
         attrs['href'] = item_url(**href_kwargs)
     prev = html.LI(
         html.A(
@@ -34,7 +37,7 @@ def next_li(context, item_url, kwargs_filter=default_kwargs_filter):
         next_classes.append('disabled')
     else:
         new_offset = context['offset'] + context['limit']
-        href_kwargs = kwargs_filter(context, new_offset, context['limit'])
+        href_kwargs = kwargs_filter(context, new_offset, context['limit'], context.get('order', False))
         attrs['href'] = item_url(**href_kwargs)
     next = html.LI(
         html.A(
@@ -75,10 +78,11 @@ def pagination(context, item_url, kwargs_filter=default_kwargs_filter, class_=No
     total = context['total']
     offset = context['offset']
     limit = context['limit']
+    order = context.get('order', False)
     elements = []
     elements.append(prev)
     for page in page_counter(context):
-        href_kwargs = kwargs_filter(context, page['offset'], page['limit'])
+        href_kwargs = kwargs_filter(context, page['offset'], page['limit'], order=order)
         href = item_url(**href_kwargs)
         if page['active']:
             li_class = {'class': (page['active'] and "active" or "")}

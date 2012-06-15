@@ -12,7 +12,8 @@ item_url = wz.Href('/item_type')
 
 
 class TestPagination(unittest.TestCase):
-    kwargs_filter = staticmethod(lambda context, offset, limit: dict(offset=offset))
+    kwargs_filter = staticmethod(
+        lambda context, offset, limit, order=None: dict(offset=offset))
 
     def test_prev_li_disabled(self):
         context = dict(offset=0, limit=5)
@@ -79,6 +80,22 @@ class TestPagination(unittest.TestCase):
 <li><a href="/item_type?limit=5&amp;offset=15">4</a></li>
 <li><a href="/item_type?limit=5&amp;offset=20">5</a></li>
 <li class="next"><a href="/item_type?limit=5&amp;offset=5">Next &#8594;</a></li>
+</ul></div>
+'''.strip()
+        result = widgets.pagination(context, item_url).strip()
+        assert expected == result
+
+    def test_ordered(self):
+        context = dict(offset=0, total=25, limit=5, order="-flibble", url=url)
+        expected = '''
+<div class="pagination"><ul>
+<li class="prev disabled"><a>&#8592; Previous</a></li>
+<li class="active"><a href="/item_type?limit=5&amp;order=-flibble&amp;offset=0">1</a></li>
+<li><a href="/item_type?limit=5&amp;order=-flibble&amp;offset=5">2</a></li>
+<li><a href="/item_type?limit=5&amp;order=-flibble&amp;offset=10">3</a></li>
+<li><a href="/item_type?limit=5&amp;order=-flibble&amp;offset=15">4</a></li>
+<li><a href="/item_type?limit=5&amp;order=-flibble&amp;offset=20">5</a></li>
+<li class="next"><a href="/item_type?limit=5&amp;order=-flibble&amp;offset=5">Next &#8594;</a></li>
 </ul></div>
 '''.strip()
         result = widgets.pagination(context, item_url).strip()
