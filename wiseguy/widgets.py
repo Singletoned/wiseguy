@@ -19,7 +19,11 @@ def prev_li(context, item_url, kwargs_filter=default_kwargs_filter):
         prev_classes.append('disabled')
     else:
         new_offset = max(0, context['offset']-context['limit'])
-        href_kwargs = kwargs_filter(context, new_offset, context['limit'], context.get('order', False))
+        href_kwargs = kwargs_filter(
+            context=context,
+            offset=new_offset,
+            limit=context['limit'],
+            order=context.get('order', False))
         attrs['href'] = item_url(**href_kwargs)
     prev = html.LI(
         html.A(
@@ -37,7 +41,11 @@ def next_li(context, item_url, kwargs_filter=default_kwargs_filter):
         next_classes.append('disabled')
     else:
         new_offset = context['offset'] + context['limit']
-        href_kwargs = kwargs_filter(context, new_offset, context['limit'], context.get('order', False))
+        href_kwargs = kwargs_filter(
+            context=context,
+            offset=new_offset,
+            limit=context['limit'],
+            order=context.get('order', False))
         attrs['href'] = item_url(**href_kwargs)
     next = html.LI(
         html.A(
@@ -82,7 +90,11 @@ def pagination(context, item_url, kwargs_filter=default_kwargs_filter, class_=No
     elements = []
     elements.append(prev)
     for page in page_counter(context):
-        href_kwargs = kwargs_filter(context, page['offset'], page['limit'], order=order)
+        href_kwargs = kwargs_filter(
+            context=context,
+            offset=page['offset'],
+            limit=page['limit'],
+            order=order)
         href = item_url(**href_kwargs)
         if page['active']:
             li_class = {'class': (page['active'] and "active" or "")}
