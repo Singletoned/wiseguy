@@ -12,7 +12,7 @@ item_url = wz.Href('/item_type')
 
 
 class TestPagination(unittest.TestCase):
-    kwargs_filter = staticmethod(lambda c, **k: dict(offset=k['offset']))
+    kwargs_filter = staticmethod(lambda context, offset, limit: dict(offset=offset))
 
     def test_prev_li_disabled(self):
         context = dict(offset=0, limit=5)
