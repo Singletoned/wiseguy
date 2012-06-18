@@ -4,6 +4,21 @@ import pyjade.ext.html
 
 import lxml.html
 
+inline_tags = set([
+    "a",
+    "abbr",
+    "address",
+    "br",
+    "cite",
+    "code",
+    "del",
+    "details",
+    "command",
+    "em",
+    "i",
+    "img",
+    "ins",
+    "strong"])
 
 class HtmlElement(lxml.html.HtmlElement):
     def to_string(self, pretty=True):
@@ -81,5 +96,25 @@ def _render_el(el):
     if not el.tag in lxml.html.defs.empty_tags:
         yield _render_close_tag(el)
 
+def _inline_content(el):
+    for sub_element in el:
+        if not sub_element.tag in inline_tags:
+            return False
+    else:
+        return True
+
+def _render_el_tidy(el):
+    if not _inline_content(el):
+        for line in _render_el(el):
+            yield line
+    else:
+        yield _render_open_tag(el)
+        yield "  "+"".join(_render_tag_contents(el)).strip()
+        if not el.tag in lxml.html.defs.empty_tags:
+            yield _render_close_tag(el)
+
 def normalise_html(el):
     return "\n".join([item.strip() for item in _render_el(el) if item.strip()])
+
+def tidy_html(el):
+    return "\n".join(_render_el_tidy(el))
