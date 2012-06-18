@@ -65,8 +65,7 @@ def _render_close_tag(el):
 def _render_attrs(el):
     return "".join([' %s="%s"'%(k, el.attrib[k]) for k in sorted(el.keys())])
 
-def _render_el(el):
-    yield _render_open_tag(el)
+def _render_tag_contents(el):
     if el.text:
         yield el.text
     for sub_element in el:
@@ -74,6 +73,11 @@ def _render_el(el):
             yield line
     if el.tail:
         yield el.tail
+
+def _render_el(el):
+    yield _render_open_tag(el)
+    for line in _render_tag_contents(el):
+        yield line
     if not el.tag in lxml.html.defs.empty_tags:
         yield _render_close_tag(el)
 
