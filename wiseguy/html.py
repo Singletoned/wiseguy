@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import pyjade.ext.html
+import re
 
+import pyjade.ext.html
 import lxml.html
+
+
+whitespace_re = re.compile("\s+")
 
 inline_tags = set([
     "a",
@@ -18,7 +22,11 @@ inline_tags = set([
     "i",
     "img",
     "ins",
-    "strong"])
+    "label",
+    "strong",
+    "title",
+    "legend"
+])
 
 class HtmlElement(lxml.html.HtmlElement):
     def to_string(self, pretty=True):
@@ -80,38 +88,67 @@ def _render_close_tag(el):
 def _render_attrs(el):
     return "".join([' %s="%s"'%(k, el.attrib[k]) for k in sorted(el.keys())])
 
-def _render_tag_contents(el):
+def _render_content(el):
     if el.text:
         yield el.text
     for sub_element in el:
-        for line in _render_el(sub_element):
+        for line in _render_el_tidy(sub_element):
             yield line
+
+def _render_el(el, indent_level=1):
+    yield _render_open_tag(el)
+    if el.text:
+        yield el.text
+    for sub_element in el:
+        for line in _render_el(sub_element, indent_level=indent_level+1):
+            yield line
+    if not el.tag in lxml.html.defs.empty_tags:
+        yield _render_close_tag(el)
     if el.tail:
         yield el.tail
 
-def _render_el(el):
-    yield _render_open_tag(el)
-    for line in _render_tag_contents(el):
-        yield line
-    if not el.tag in lxml.html.defs.empty_tags:
-        yield _render_close_tag(el)
-
-def _inline_content(el):
+def has_inline_content(el):
     for sub_element in el:
         if not sub_element.tag in inline_tags:
             return False
     else:
         return True
 
-def _render_el_tidy(el):
-    if not _inline_content(el):
-        for line in _render_el(el):
-            yield line
+def is_empty(el):
+    if (not el.text) and (not el.getchildren()):
+        return True
+    else:
+        return False
+
+def _render_inline_tag(el):
+    lines = _render_el(el)
+    lines = [line.replace('\n', '') for line in lines]
+    yield whitespace_re.sub(' ', "".join(lines))
+
+def _render_block_tag(el, indent_level=0):
+    indent = "  " * (indent_level+1)
+    if is_empty(el):
+        if not el.tag in lxml.html.defs.empty_tags:
+            yield _render_open_tag(el) + _render_close_tag(el)
+        else:
+            yield _render_open_tag(el)
     else:
         yield _render_open_tag(el)
-        yield "  "+"".join(_render_tag_contents(el)).strip()
+        if has_inline_content(el):
+            yield indent+"".join(_render_content(el)).strip()
+        else:
+            for line in _render_content(el):
+                yield indent + line
         if not el.tag in lxml.html.defs.empty_tags:
             yield _render_close_tag(el)
+
+def _render_el_tidy(el, indent_level=1):
+    if el.tag in inline_tags:
+        yield _render_inline_tag(el).next()
+    else:
+        for line in _render_block_tag(el):
+            if line.strip():
+                yield line
 
 def normalise_html(el):
     return "\n".join([item.strip() for item in _render_el(el) if item.strip()])
