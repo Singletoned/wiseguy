@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pyjade
+import pyjade.ext.html
 
 import lxml.html
 
@@ -53,7 +53,7 @@ def jade(src):
 def process_jade(src):
     parser = pyjade.parser.Parser(src)
     block = parser.parse()
-    compiler = HTMLCompiler(block, pretty=False)
+    compiler = pyjade.ext.html.HTMLCompiler(block, pretty=False)
     return compiler.compile()
 
 def _render_open_tag(el):
