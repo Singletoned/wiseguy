@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import unittest
+
 import wiseguy as wg
 import wiseguy.html_tidy
 import wiseguy.html
 
 
-def test_normalise_html():
-    t = wg.html.Html('''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
-    result = wg.html_tidy.normalise_html(t).strip()
-    expected = '''
+class Test_normalise_html(unittest.TestCase):
+    def test_normalise_html(self):
+        t = wg.html.Html('''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
+        result = wg.html_tidy.normalise_html(t).strip()
+        expected = '''
 <div class="bar" id="foo" style="bloop">
 Hullo
 <strong>
@@ -18,75 +21,86 @@ World!
 The End
 </div>
 '''.strip()
-    assert result == expected
+        assert result == expected
 
-def test_render_inline_tag():
-    data = '''
+
+class Test_render_inline_tag(unittest.TestCase):
+    def test_span(self):
+        data = '''
 <span>Hullo 
 <strong>World
 </strong>! 
 <br>The End</span>'''
-    result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
-    expected = '''<span>Hullo <strong>World</strong>! <br>The End</span>'''.strip()
-    assert result == expected
+        result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
+        expected = '''<span>Hullo <strong>World</strong>! <br>The End</span>'''.strip()
+        assert result == expected
 
-    data = '''
+    def test_span_in_para(self):
+        data = '''
 <p><span>Hullo 
-<strong>
- World
+<strong> 
+World
 </strong>! 
 <br>The End</span>
 
 </p>'''
-    result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
-    expected = '''<p><span>Hullo <strong> World</strong>! <br>The End</span></p>'''.strip()
-    assert result == expected
+        result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
+        expected = '''<p><span>Hullo <strong> World</strong>! <br>The End</span></p>'''.strip()
+        assert result == expected
 
-def test_render_block_tag():
-    data = '''<div></div>'''
-    result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-    expected = '''
+
+class Test_render_block_tag(unittest.TestCase):
+    def test_empty_tag(self):
+        data = '''<div></div>'''
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        expected = '''
 <div></div>
 '''.strip()
-    assert result == expected
+        assert result == expected
 
-    data = '''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>'''
-    result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-    expected = '''
+    def test_with_tail(self):
+        data = '''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>'''
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        expected = '''
 <div class="bar" id="foo" style="bloop">
   Hullo <strong>World!</strong><br>The End
 </div>
 '''.strip()
-    assert result == expected
+        assert result == expected
 
-    data = '''
+    def test_with_inline_tag(self):
+        data = '''
 <html lang="en">
 <head>
 <title>
 A Form
 </title> </head> <body></body>
     '''.strip()
-    result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-    expected = '''
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        expected = '''
 <html lang="en">
   <head>
     <title>A Form</title>
   </head>
   <body></body>
 </html>'''.strip()
-    assert result == expected
+        assert result == expected
 
-def test_tidy_html():
-    t = wg.html.Html('''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
-    result = wg.html_tidy.tidy_html(t).strip()
-    expected = '''
+
+class Test_tidy_html(unittest.TestCase):
+    def test_fragment(self):
+        t = wg.html.Html(
+'''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
+        result = wg.html_tidy.tidy_html(t).strip()
+        expected = '''
 <div class="bar" id="foo" style="bloop">
   Hullo <strong>World!</strong><br>The End
 </div>
 '''.strip()
-    assert result == expected
+        assert result == expected
 
-    t = wg.html.Html(
+    def test_document(self):
+        t = wg.html.Html(
 '''
 <html lang="en">
 <head>
@@ -106,9 +120,9 @@ Name:
 </label>
 <input id="name">
 </div>''')
-    result = wg.html_tidy.tidy_html(t).strip()
+        result = wg.html_tidy.tidy_html(t).strip()
 
-    expected = '''
+        expected = '''
 <html lang="en">
   <head>
     <title>A Form</title>
@@ -125,4 +139,4 @@ Name:
     </form>
   </body>
 </html>'''.strip()
-    assert result == expected
+        assert result == expected
