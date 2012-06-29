@@ -23,6 +23,7 @@ inline_tags = set([
     "ins",
     "label",
     "strong",
+    "span",
     "title",
     "legend"
 ])
@@ -38,7 +39,7 @@ def _render_attrs(el):
 
 def _render_content(el):
     if el.text:
-        yield el.text
+        yield el.text.encode('ascii', 'xmlcharrefreplace')
     for sub_element in el:
         for line in _render_el_tidy(sub_element):
             yield line
@@ -46,14 +47,14 @@ def _render_content(el):
 def _render_el(el, indent_level=1):
     yield _render_open_tag(el)
     if el.text:
-        yield el.text
+        yield el.text.encode('ascii', 'xmlcharrefreplace')
     for sub_element in el:
         for line in _render_el(sub_element, indent_level=indent_level+1):
             yield line
     if not el.tag in lxml.html.defs.empty_tags:
         yield _render_close_tag(el)
     if el.tail:
-        yield el.tail
+        yield el.tail.encode('ascii', 'xmlcharrefreplace')
 
 def has_inline_content(el):
     for sub_element in el:
