@@ -37,6 +37,17 @@ The End
         result = wg.html_tidy.normalise_html(t).strip()
         assert result == expected
 
+    def test_empty_tag_with_tail(self):
+        t = wg.html.Html('''<p>Hello<img>World</p>''')
+        expected= '''
+<p>
+Hello
+<img>
+World
+</p>'''.strip()
+        result = wg.html_tidy.normalise_html(t).strip()
+        assert result == expected
+
 
 class Test_render_inline_tag(unittest.TestCase):
     def test_span(self):
@@ -117,6 +128,14 @@ A Form
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
         assert result == expected
 
+    def test_render_empty_tag_with_tail(self):
+        data = '''<div>Hello<img>World'''
+        expected= '''
+<div>
+  Hello<img>World
+</div>'''.strip()
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        assert result == expected
 
 class Test_tidy_html(unittest.TestCase):
     def test_fragment(self):
