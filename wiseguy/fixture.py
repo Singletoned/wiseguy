@@ -256,6 +256,12 @@ class MongoTester(object):
     def count(self):
         return self.collection.count()
 
+    def all(self):
+        return self.collection.find()
+
+    def find_one(self, **kwargs):
+        return self.collection.find_one(kwargs)
+
 class FixtureMeta(type):
     def __new__(meta, class_name, bases, class_dict):
         fixture = type.__new__(meta, class_name, bases, class_dict)
@@ -492,8 +498,9 @@ class MongoLoader(BaseLoader):
 
     def delete_data(self, data_added):
         session = self.session_factory()
-        for entity_class in data_added:
-            session[entity_class.__name__].remove()
+        for collection_name in session.collection_names():
+            if not collection_name == 'system.indexes':
+                session.drop_collection(collection_name)
 
     def restore_data(self, data):
         pass
