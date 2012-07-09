@@ -387,12 +387,16 @@ class Fixture(object):
             keep_constraints=keep_constraints)
         return self
 
+    def _add_tester_class(self, key):
+        entity_class = self._loader.session_factory.classes[key]
+        tester_class = self._loader._make_tester_class(entity_class, self.session)
+        setattr(self, entity_class.__name__, tester_class(self.session))
+
     def __getattr__(self, key):
         if key in self.__dict__:
             return self.__dict__[key]
         elif (hasattr(self._loader.session_factory, 'classes')) and (key in self._loader.session_factory.classes) and hasattr(self, 'session'):
-            entity_class = self._loader.session_factory.classes[key]
-            self._add_tester_class(entity_class, self.session)
+            self._add_tester_class(key)
             return getattr(self, key)
         else:
             raise AttributeError
