@@ -46,15 +46,15 @@ class HTMLCompiler(pyjade.compiler.Compiler):
         self.buf.append("".join([''' %s="%s"''' % (k,v) for (k,v) in params.items()]))
 
 
-def jade(src):
-    text = process_jade(src)
+def jade(src, context=None):
+    text = process_jade(src, context=context)
     el = lxml.html.fromstring(text, parser=parser)
     return el
 
-def process_jade(src):
+def process_jade(src, context=None):
     parser = pyjade.parser.Parser(src)
     block = parser.parse()
-    compiler = pyjade.ext.html.HTMLCompiler(block, pretty=False)
+    compiler = pyjade.ext.html.HTMLCompiler(block, pretty=False, context=context)
     return compiler.compile()
 
 def add_generator(elem, item):
