@@ -60,6 +60,7 @@ def test_HTMLBuilder():
     assert expected == result
 
 def test_HtmlElement():
+    h = wg.html.HtmlBuilder()
     data = [
         wg.html.Html("<p>One</p>"),
         wg.html.Html("<p>Two</p>"),
@@ -71,6 +72,6 @@ def test_HtmlElement():
 <br><p>Three</p>
 </div>
     '''.strip()
-    result = wg.html.DIV(
+    result = h.DIV(
         wg.html.Html("<br>").join(data)).to_string().strip()
     assert expected == result
