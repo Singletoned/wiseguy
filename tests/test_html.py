@@ -58,3 +58,19 @@ def test_HTMLBuilder():
     result = [el.tag for el in element]
     expected = ["p", "br", "span"]
     assert expected == result
+
+def test_HtmlElement():
+    data = [
+        wg.html.Html("<p>One</p>"),
+        wg.html.Html("<p>Two</p>"),
+        wg.html.Html("<p>Three</p>")]
+    expected = '''
+<div>
+<p>One</p>
+<br><p>Two</p>
+<br><p>Three</p>
+</div>
+    '''.strip()
+    result = wg.html.DIV(
+        wg.html.Html("<br>").join(data)).to_string().strip()
+    assert expected == result
