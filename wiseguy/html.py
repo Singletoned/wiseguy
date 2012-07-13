@@ -65,8 +65,13 @@ def add_generator(elem, item):
         else:
             elem.append(i)
 
-HTMLBuilder = lxml.builder.ElementMaker(
+_HTMLBuilder = lxml.builder.ElementMaker(
     makeelement=parser.makeelement,
     typemap={
         int: lambda e, i: str(i),
         types.GeneratorType: add_generator})
+
+class HtmlBuilder(object):
+    def __getattr__(self, key):
+        return getattr(_HTMLBuilder, key.lower())
+

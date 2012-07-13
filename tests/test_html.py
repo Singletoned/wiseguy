@@ -51,10 +51,10 @@ html
 
 def test_HTMLBuilder():
     def gen_elements():
-        yield wg.html.HTMLBuilder.p()
-        yield (wg.html.HTMLBuilder.br(), wg.html.HTMLBuilder.span())
+        yield wg.html._HTMLBuilder.p()
+        yield (wg.html._HTMLBuilder.br(), wg.html._HTMLBuilder.span())
 
-    element = wg.html.HTMLBuilder.div(gen_elements())
+    element = wg.html._HTMLBuilder.div(gen_elements())
     result = [el.tag for el in element]
     expected = ["p", "br", "span"]
     assert expected == result
