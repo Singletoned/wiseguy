@@ -19,6 +19,11 @@ class HtmlElement(lxml.html.HtmlElement):
             for el in elements:
                 el.append(text_or_el)
 
+    def replace(self, path, new_el):
+        elements = self.cssselect(path)
+        for el in elements:
+            super(lxml.html.HtmlElement, el.getparent()).replace(el, new_el)
+
 class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
     def lookup(self, node_type, document, namespace, name):
         return HtmlElement

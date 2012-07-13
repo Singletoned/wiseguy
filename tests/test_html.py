@@ -55,6 +55,24 @@ html
 </html>'''.strip()
     assert expected == result
 
+def test_template_replace():
+    template = """
+html
+  body
+    h1#title placeholder text
+    div#body"""
+    t = wg.html.jade(template)
+    t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
+    t.replace("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
+
+    result = t.to_string().strip()
+    expected = '''
+<html><body>
+<h1 id="title">Hullo Mr Flibble</h1>
+<span class="bar">Welcome to my web</span>
+</body></html>'''.strip()
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()
