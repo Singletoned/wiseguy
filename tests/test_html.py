@@ -32,7 +32,7 @@ html
   head
     title
   body
-    h1#title | placeholder text
+    h1#title placeholder text
     div#body"""
     t = wg.html.jade(template)
     t.insert("title, #title", "Hullo Mr Flibble")
