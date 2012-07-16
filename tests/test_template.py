@@ -22,7 +22,7 @@ html
     rules=[
         wiseguy.template.Rule(
             "head",
-            lambda head, template: template.insert("head", wiseguy.html.Html("flibble"))),
+            lambda head, template: template.insert("head title", "flibble")),
         wiseguy.template.Rule(
             "body",
             lambda head, template: template.insert("body div", wiseguy.html.Html("Wibble"))),
@@ -51,4 +51,21 @@ html
     assert html == expected
 
     assert len(template.rules['head']) == 1
+    assert len(template.rules['body']) == 0
+
+    context = dict(body=None, head=None)
+    template.apply(context)
+
+    html = template.template.to_string().strip()
+    expected = """
+<html>
+<head><title>flibble</title></head>
+<body><div>
+<p>Wibble</p>
+<p>Wobble</p>
+</div></body>
+</html>""".strip()
+    assert html == expected
+
+    assert len(template.rules['head']) == 0
     assert len(template.rules['body']) == 0
