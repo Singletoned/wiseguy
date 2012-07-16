@@ -18,5 +18,6 @@ class Template(object):
     def apply(self, context):
         for key in self.rules.iterkeys():
             if key in context:
-                for rule in self.rules[key]:
+                while self.rules[key]:
+                    rule = self.rules[key].pop(0)
                     rule(context[key], self.template)

@@ -49,3 +49,6 @@ html
 </div></body>
 </html>""".strip()
     assert html == expected
+
+    assert len(template.rules['head']) == 1
+    assert len(template.rules['body']) == 0
