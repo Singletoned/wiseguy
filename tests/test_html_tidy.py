@@ -81,6 +81,13 @@ World
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
         assert result == expected
 
+    def test_comment(self):
+        data = '''
+<p><!-- Flibble -->This is not a comment</p>'''
+        expected = '''<p>This is not a comment</p>'''
+        result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
+        assert result == expected
+
 class Test_render_block_tag(unittest.TestCase):
     def test_empty_tag(self):
         data = '''<div></div>'''
@@ -172,6 +179,16 @@ A Form
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
         assert result == expected
 
+    def test_comment(self):
+        data = '''
+<p><!-- Flibble -->This is not a comment</p>'''
+        expected = '''
+<p>
+  This is not a comment
+</p>'''.strip()
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        assert result == expected
+
 class Test_tidy_html(unittest.TestCase):
     def test_fragment(self):
         t = wg.html.Html(
@@ -197,6 +214,7 @@ A Form
 <form>
 <fieldset>
 <legend>
+<!-- Not the legend of King Arthur! -->
 Your Information
 </legend>
 <div class="control-group">
