@@ -33,7 +33,7 @@ class BaseApp(object):
             if not isinstance(res, wz.BaseResponse):
                 template_name, mimetype, values = res
                 values = dict(request=req, **values)
-                res = self.env.render(template_name, mimetype, values)
+                res = self.env.get_response(template_name, values, mimetype)
         except wz.exceptions.HTTPException, e:
             res = e
         res = res(environ, start_response)
@@ -44,8 +44,29 @@ class JinjaEnv(object):
         self.env = env
         self.globals = env.globals
 
-    def render(self, template_name, mimetype, values):
-        body = self.env.get_template(template_name).render(values)
+    def render(self, template_name, context):
+        return self.env.get_template(template_name).render(context)
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
+        res = wz.Response(body, mimetype=mimetype)
+        return res
+
+class LxmlEnv(object):
+    def __init__(self, env, global_context=None):
+        self.env = env
+        if not global_context:
+            global_context = dict()
+        self.globals = global_context
+
+    def render(self, template_name, context):
+        local_context = dict(self.globals)
+        local_context.update(context)
+        html = getattr(self.env, template_name)(local_context)
+        return html.to_string()
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
         res = wz.Response(body, mimetype=mimetype)
         return res
 
