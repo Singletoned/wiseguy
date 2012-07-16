@@ -33,7 +33,7 @@ class BaseApp(object):
             if not isinstance(res, wz.BaseResponse):
                 template_name, mimetype, values = res
                 values = dict(request=req, **values)
-                res = self.env.render(template_name, mimetype, values)
+                res = self.env.get_response(template_name, values, mimetype)
         except wz.exceptions.HTTPException, e:
             res = e
         res = res(environ, start_response)
@@ -44,8 +44,11 @@ class JinjaEnv(object):
         self.env = env
         self.globals = env.globals
 
-    def render(self, template_name, mimetype, values):
-        body = self.env.get_template(template_name).render(values)
+    def render(self, template_name, context):
+        return self.env.get_template(template_name).render(context)
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
         res = wz.Response(body, mimetype=mimetype)
         return res
 

@@ -101,7 +101,11 @@ def test_JinjaEnv():
     env = wu.JinjaEnv(
         j2.Environment(
             loader=j2.DictLoader(dict(bar="Foo Page {{foo_var}}"))))
-    response = env.render("bar", "text/html", dict(foo_var="flibble"))
+
+    html = env.render("bar", dict(foo_var="flangit"))
+    assert html == "Foo Page flangit"
+
+    response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data == "Foo Page flibble"
 
 def test_render():
