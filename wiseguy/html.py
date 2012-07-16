@@ -5,6 +5,7 @@ import types
 import pyjade.ext.html
 import lxml.html
 
+import wiseguy.utils
 
 class HtmlElement(lxml.html.HtmlElement):
     def to_string(self, pretty=True):
@@ -23,6 +24,8 @@ class HtmlElement(lxml.html.HtmlElement):
         elements = self.cssselect(path)
         for el in elements:
             super(lxml.html.HtmlElement, el.getparent()).replace(el, new_el)
+
+    join = wiseguy.utils.join
 
 class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
     def lookup(self, node_type, document, namespace, name):
