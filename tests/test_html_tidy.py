@@ -137,6 +137,17 @@ A Form
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
         assert result == expected
 
+    def test_image(self):
+        data = '''
+<p>Pre-image<img>Post-image</p>'''
+        expected = '''
+<p>
+  Pre-image<img>Post-image
+</p>
+'''.strip()
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        assert result == expected
+
 class Test_tidy_html(unittest.TestCase):
     def test_fragment(self):
         t = wg.html.Html(
