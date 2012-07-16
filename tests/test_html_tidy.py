@@ -137,6 +137,30 @@ A Form
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
         assert result == expected
 
+    def test_render_non_empty_block_tag_with_tail(self):
+        data = '''<div>Hello<div>Mr</div>Flibble</div>'''
+        expected= '''
+<div>
+  Hello
+  <div>
+    Mr
+  </div>
+  Flibble
+</div>'''.strip()
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        assert result == expected
+
+    def test_render_empty_block_tag_with_tail(self):
+        data = '''<div>Hello<div></div>World</div>'''
+        expected= '''
+<div>
+  Hello
+  <div></div>
+  World
+</div>'''.strip()
+        result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
+        assert result == expected
+
     def test_image(self):
         data = '''
 <p>Pre-image<img>Post-image</p>'''

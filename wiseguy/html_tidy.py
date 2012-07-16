@@ -90,6 +90,8 @@ def _render_block_tag(el, indent_level=0):
                 yield indent + line
         if not el.tag in lxml.html.defs.empty_tags:
             yield _render_close_tag(el)
+    if el.tail:
+        yield "  "*indent_level + el.tail
 
 def _render_el_tidy(el, indent_level=1):
     if el.tag in inline_tags:
