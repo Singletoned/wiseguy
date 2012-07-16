@@ -34,3 +34,18 @@ html
     assert template.rules
     assert len(template.rules['head']) == 1
     assert len(template.rules['body']) == 2
+
+    context = dict(body=None)
+
+    template.apply(context)
+
+    html = template.template.to_string().strip()
+    expected = """
+<html>
+<head><title></title></head>
+<body><div>
+<p>Wibble</p>
+<p>Wobble</p>
+</div></body>
+</html>""".strip()
+    assert html == expected

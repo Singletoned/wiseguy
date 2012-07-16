@@ -14,3 +14,9 @@ class Template(object):
         self.rules = collections.defaultdict(list)
         for rule in rules:
             self.rules[rule.key].append(rule.transform)
+
+    def apply(self, context):
+        for key in self.rules.iterkeys():
+            if key in context:
+                for rule in self.rules[key]:
+                    rule(context[key], self.template)
