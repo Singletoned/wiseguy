@@ -69,3 +69,15 @@ html
 
     assert len(template.rules['head']) == 0
     assert len(template.rules['body']) == 0
+
+def test_bound_template():
+    template_set = set()
+    Template = wiseguy.template.bound_template(template_set.add)
+
+    template_1 = Template(wiseguy.html.jade("html"), [])
+    template_2 = Template(wiseguy.html.jade("html"), [])
+    template_3 = Template(wiseguy.html.jade("html"), [])
+
+    assert template_1 in template_set
+    assert template_2 in template_set
+    assert template_3 in template_set

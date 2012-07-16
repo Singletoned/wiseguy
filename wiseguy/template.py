@@ -21,3 +21,10 @@ class Template(object):
                 while self.rules[key]:
                     rule = self.rules[key].pop(0)
                     rule(context[key], self.template)
+
+def bound_template(adder_func):
+    class BoundTemplate(Template):
+        def __init__(self, template, rules):
+            adder_func(self)
+            super(BoundTemplate, self).__init__(template, rules)
+    return BoundTemplate
