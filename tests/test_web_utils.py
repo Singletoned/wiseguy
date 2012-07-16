@@ -97,6 +97,13 @@ def test_make_url_map():
     assert adapter.match('/blammo/foo') == ("foo", {})
     assert url_map.converters['flibble'] == flibble_conv
 
+def test_JinjaEnv():
+    env = wu.JinjaEnv(
+        j2.Environment(
+            loader=j2.DictLoader(dict(bar="Foo Page {{foo_var}}"))))
+    response = env.render("bar", "text/html", dict(foo_var="flibble"))
+    assert response.data == "Foo Page flibble"
+
 def test_render():
     foo = lambda x: x
     mock_request = object()
