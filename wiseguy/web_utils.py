@@ -52,6 +52,24 @@ class JinjaEnv(object):
         res = wz.Response(body, mimetype=mimetype)
         return res
 
+class LxmlEnv(object):
+    def __init__(self, env, global_context=None):
+        self.env = env
+        if not global_context:
+            global_context = dict()
+        self.globals = global_context
+
+    def render(self, template_name, context):
+        local_context = dict(self.globals)
+        local_context.update(context)
+        html = getattr(self.env, template_name)(local_context)
+        return html.to_string()
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
+        res = wz.Response(body, mimetype=mimetype)
+        return res
+
 def make_url_map(mountpoint, sub_url_map):
     url_map = wz.routing.Map([
         wz.routing.Submount(
