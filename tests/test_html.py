@@ -13,6 +13,12 @@ def test_process_jade():
     result = wg.html.process_jade(d)
     assert expected == result
 
+    # Test that jade works with context
+    d = "div#foo.bar= foo"
+    expected = '''<div id="foo" class="bar">flibble</div>'''
+    result = wg.html.process_jade(d, context=dict(foo="flibble"))
+    assert expected == result
+
 def test_jade():
     d = wg.html.jade("html: body: div#main")
     assert d.tag == "html"
@@ -32,7 +38,7 @@ html
   head
     title
   body
-    h1#title | placeholder text
+    h1#title placeholder text
     div#body"""
     t = wg.html.jade(template)
     t.insert("title, #title", "Hullo Mr Flibble")
@@ -49,6 +55,24 @@ html
 </html>'''.strip()
     assert expected == result
 
+def test_template_replace():
+    template = """
+html
+  body
+    h1#title placeholder text
+    div#body"""
+    t = wg.html.jade(template)
+    t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
+    t.replace("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
+
+    result = t.to_string().strip()
+    expected = '''
+<html><body>
+<h1 id="title">Hullo Mr Flibble</h1>
+<span class="bar">Welcome to my web</span>
+</body></html>'''.strip()
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()
@@ -57,4 +81,21 @@ def test_HTMLBuilder():
     element = wg.html._HTMLBuilder.div(gen_elements())
     result = [el.tag for el in element]
     expected = ["p", "br", "span"]
+    assert expected == result
+
+def test_HtmlElement():
+    h = wg.html.HtmlBuilder()
+    data = [
+        wg.html.Html("<p>One</p>"),
+        wg.html.Html("<p>Two</p>"),
+        wg.html.Html("<p>Three</p>")]
+    expected = '''
+<div>
+<p>One</p>
+<br><p>Two</p>
+<br><p>Three</p>
+</div>
+    '''.strip()
+    result = h.DIV(
+        wg.html.Html("<br>").join(data)).to_string().strip()
     assert expected == result
