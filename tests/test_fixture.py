@@ -549,3 +549,11 @@ def test_from_dict():
         article = fixture._item_from_dict(article, data)
         for key in ['stub', 'name', 'body']:
             assert getattr(article, key) == data[key]
+
+def test_SQLAlchemyTester():
+    schema.with_empty_db()
+    class EmptyFixture(fixture.Fixture):
+        pass
+
+    with EmptyFixture(sa_loader) as tester:
+        assert tester.Article.count() == 0
