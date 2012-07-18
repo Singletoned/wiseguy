@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import types
+
 import pyjade.ext.html
 import lxml.html
 
@@ -54,3 +56,22 @@ def process_jade(src):
     block = parser.parse()
     compiler = pyjade.ext.html.HTMLCompiler(block, pretty=False)
     return compiler.compile()
+
+def add_generator(elem, item):
+    for i in item:
+        if isinstance(i, (types.ListType, types.TupleType)):
+            for sub_i in i:
+                elem.append(sub_i)
+        else:
+            elem.append(i)
+
+_HTMLBuilder = lxml.builder.ElementMaker(
+    makeelement=parser.makeelement,
+    typemap={
+        int: lambda e, i: str(i),
+        types.GeneratorType: add_generator})
+
+class HtmlBuilder(object):
+    def __getattr__(self, key):
+        return getattr(_HTMLBuilder, key.lower())
+
