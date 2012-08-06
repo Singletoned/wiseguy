@@ -111,8 +111,7 @@ def test_JinjaEnv():
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
-                bar=lambda context: utils.MockObject(
-                    to_string=lambda:"Foo Page %s"%context['foo_var'])))
+                bar=lambda context: "Foo Page %s"%context['foo_var']))
 
     html = env.render("bar", dict(foo_var="flangit"))
     assert html == "Foo Page flangit"
