@@ -25,17 +25,17 @@ html
             lambda head, template: template.insert("head title", "flibble")),
         wiseguy.template.Rule(
             "body",
-            lambda head, template: template.insert("body div", wiseguy.html.Html("Wibble"))),
+            lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
         wiseguy.template.Rule(
             "body",
-            lambda head, template: template.insert("body div", wiseguy.html.Html("Wobble"))),
+            lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),
 ])
     assert template.template
     assert template.rules
     assert len(template.rules['head']) == 1
     assert len(template.rules['body']) == 2
 
-    context = dict(body=None)
+    context = dict(body="Foo")
 
     template.apply(context)
 
@@ -44,8 +44,8 @@ html
 <html>
 <head><title></title></head>
 <body><div>
-<p>Wibble</p>
-<p>Wobble</p>
+<p>Wibble, Foo</p>
+<p>Wobble, Foo</p>
 </div></body>
 </html>""".strip()
     assert html == expected
@@ -53,7 +53,7 @@ html
     assert len(template.rules['head']) == 1
     assert len(template.rules['body']) == 0
 
-    context = dict(body=None, head=None)
+    context = dict(body="Bar", head=None)
     template.apply(context)
 
     html = template.template.to_string().strip()
@@ -61,14 +61,56 @@ html
 <html>
 <head><title>flibble</title></head>
 <body><div>
-<p>Wibble</p>
-<p>Wobble</p>
+<p>Wibble, Foo</p>
+<p>Wobble, Foo</p>
 </div></body>
 </html>""".strip()
     assert html == expected
 
     assert len(template.rules['head']) == 0
     assert len(template.rules['body']) == 0
+
+def test_Template_multiple_renderings():
+    template = wiseguy.template.Template(
+        wiseguy.html.jade(
+'''
+html
+  head
+    title
+  body
+   div'''),
+    rules=[
+        wiseguy.template.Rule(
+            "head",
+            lambda head, template: template.insert("head title", "flibble")),
+        wiseguy.template.Rule(
+            "body",
+            lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+        wiseguy.template.Rule(
+            "body",
+            lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))])
+    html = template(body="Foo").strip()
+    expected = """
+<html>
+<head><title></title></head>
+<body><div>
+<p>Wibble, Foo</p>
+<p>Wobble, Foo</p>
+</div></body>
+</html>""".strip()
+    assert html == expected
+
+    html = template(body="Bar").strip()
+    expected = """
+<html>
+<head><title></title></head>
+<body><div>
+<p>Wibble, Bar</p>
+<p>Wobble, Bar</p>
+</div></body>
+</html>""".strip()
+    assert html == expected
+
 
 def test_bound_template():
     template_set = set()
