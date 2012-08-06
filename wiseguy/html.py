@@ -3,7 +3,7 @@
 import types
 
 import pyjade.ext.html
-import lxml.html
+import lxml.html, lxml.builder
 
 import wiseguy.utils
 
