@@ -39,7 +39,7 @@ def _create_item(cls, **kwargs):
     return item
 
 def _item_to_dict(item, **kwargs):
-    column_names = [c.name for c in item._sa_class_manager.mapper.columns]
+    column_names = [c.name for c in item._sa_class_manager.mapper.columns if not c.name.startswith("%")]
     d = dict([(k, getattr(item, k)) for k in column_names])
     for key, value in kwargs.items():
         d[key] = value
