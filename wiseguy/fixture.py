@@ -248,6 +248,9 @@ class SQLAlchemyTester(object):
     def filter(self, *args, **kwargs):
         return self.query.filter(*args, **kwargs)
 
+    def find_one(self, **kwargs):
+        return self.filter_by(**kwargs).one()
+
 class MongoTester(object):
     def __init__(self, session):
         self.session = session
