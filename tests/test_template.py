@@ -7,7 +7,7 @@ def test_Rule():
     r = wiseguy.template.Rule(
         "head",
         lambda context: "do something")
-    assert r.key == "head"
+    assert r.key == set(["head"])
     assert r.transform("foo") == "do something"
 
 def test_Template():
@@ -32,8 +32,8 @@ html
 ])
     assert template.template
     assert template.rules
-    assert len(template.rules['head']) == 1
-    assert len(template.rules['body']) == 2
+    assert len(template.rules[frozenset(['head'])]) == 1
+    assert len(template.rules[frozenset(['body'])]) == 2
 
     context = dict(body="Foo")
 
@@ -50,8 +50,8 @@ html
 </html>""".strip()
     assert html == expected
 
-    assert len(template.rules['head']) == 1
-    assert len(template.rules['body']) == 0
+    assert len(template.rules[frozenset(['head'])]) == 1
+    assert len(template.rules[frozenset(['body'])]) == 0
 
     context = dict(body="Bar", head=None)
     template.apply(context)
@@ -97,8 +97,8 @@ html
 <html>
 <head><title>flibble</title></head>
 <body><div>
-<p>Wibble, flimble</p>
 <p>flamble, flimble</p>
+<p>Wibble, flimble</p>
 </div></body>
 </html>""".strip()
     assert html == expected
