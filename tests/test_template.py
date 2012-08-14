@@ -70,6 +70,40 @@ html
     assert len(template.rules['head']) == 0
     assert len(template.rules['body']) == 0
 
+def test_Template_multi_rule():
+    template = wiseguy.template.Template(
+        wiseguy.html.jade(
+'''
+html
+  head
+    title
+  body
+   div'''),
+    rules=[
+        wiseguy.template.Rule(
+            "head",
+            lambda head, template: template.insert("head title", "flibble")),
+        wiseguy.template.Rule(
+            "body",
+            lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+        wiseguy.template.Rule(
+            ("head", "body"),
+            lambda head, body, template: template.insert(
+                "body div",
+                wiseguy.html.Html("%s, %s"%(head, body))))])
+    template.apply(dict(head="flamble"))
+    html = template(body="flimble").strip()
+    expected = """
+<html>
+<head><title>flibble</title></head>
+<body><div>
+<p>Wibble, flimble</p>
+<p>flamble, flimble</p>
+</div></body>
+</html>""".strip()
+    assert html == expected
+
+
 def test_Template_multiple_renderings():
     template = wiseguy.template.Template(
         wiseguy.html.jade(

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import collections, copy
+import collections, copy, functools
 
 import lxml.html
 
@@ -16,9 +16,32 @@ class Template(object):
         for rule in rules:
             self.rules[rule.key].append(rule.transform)
 
+    def _pop_keys(self, key, context):
+        if isinstance(key, tuple):
+            kwargs = dict([(k, context[k]) for k in key])
+        else:
+            kwargs = dict([(key, context[key])])
+        while self.rules[key]:
+            rule = self.rules[key].pop(0)
+            rule(template=self.template, **kwargs)
+
     def apply(self, context):
-        for key in self.rules.iterkeys():
-            if key in context:
+        completed_keys = []
+        for key in self.rules.keys():
+            if isinstance(key, tuple):
+                key_set = set(key)
+                ctx_keys = set(context.iterkeys())
+                shared_keys = key_set & ctx_keys
+                if shared_keys:
+                    if key_set <= ctx_keys:
+                        self._pop_keys(key, context)
+                    else:
+                        kwargs = dict([(k, context[k]) for k in shared_keys])
+                        different_keys = key_set - ctx_keys
+                        self.rules[tuple(different_keys)] = [
+                            functools.partial(r, **kwargs)
+                            for r in self.rules[key]]
+            elif key in context:
                 while self.rules[key]:
                     rule = self.rules[key].pop(0)
                     rule(context[key], self.template)
