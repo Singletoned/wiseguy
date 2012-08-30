@@ -11,6 +11,15 @@ import jinja2
 from wiseguy import form_fields, utils
 
 
+def _do_dispatch(app, req):
+    try:
+        endpoint_name, kwargs = req.map_adapter.match()
+        endpoint = app.url_map.views[endpoint_name]
+        res = endpoint(req, **kwargs)
+    except wz.exceptions.HTTPException, e:
+        res = e.get_response(req.environ)
+    return res
+
 class BaseApp(object):
     def __init__(self, config, url_map, env, request_class=wz.Request):
         self.config = config
@@ -27,18 +36,12 @@ class BaseApp(object):
         req = self._request_class(environ)
         req.app = self
         req.map_adapter = self.url_map.bind_to_environ(environ)
-        try:
-            endpoint_name, kwargs = req.map_adapter.match()
-            endpoint = self.url_map.views[endpoint_name]
-            res = endpoint(req, **kwargs)
-            if not isinstance(res, wz.BaseResponse):
-                template_name, mimetype, values = res
-                values = dict(request=req, **values)
-                res = self.env.get_response(template_name, values, mimetype)
-        except wz.exceptions.HTTPException, e:
-            res = e
-        res = res(environ, start_response)
-        return wz.ClosingIterator(res)
+        res = _do_dispatch(self, req)
+        if not isinstance(res, wz.BaseResponse):
+            template_name, mimetype, values = res
+            values = dict(request=req, **values)
+            res = self.env.get_response(template_name, values, mimetype)
+        return res(environ, start_response)
 
 class JinjaEnv(object):
     def __init__(self, env):
