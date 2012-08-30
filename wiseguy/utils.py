@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import difflib, pprint, re
+import difflib, pprint, re, copy
 
 import werkzeug as wz
 
@@ -52,6 +52,15 @@ def decamelise(s):
         lambda m: m.group(1) + "_" + m.group(2).lower(), s)
     s = s.lower()
     return s
+
+def join(joiner, iterable):
+    iterable = iter(iterable)
+    next_item = iterable.next()
+    for queued_item in iterable:
+        yield next_item
+        yield copy.deepcopy(joiner)
+        next_item = queued_item
+    yield next_item
 
 
 class MockObject(object):

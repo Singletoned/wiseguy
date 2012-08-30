@@ -19,10 +19,9 @@ class BaseApp(object):
         self._request_class = request_class
         self.env.globals.update(
             dict(url=self.mountpoint))
-        self.url_map = wz.routing.Map([
-            wz.routing.Submount(
-                self.mountpoint(),
-                url_map.iter_rules())])
+        self.url_map = make_url_map(
+            self.mountpoint(),
+            url_map)
 
     def __call__(self, environ, start_response):
         req = self._request_class(environ)
@@ -34,12 +33,42 @@ class BaseApp(object):
             if not isinstance(res, wz.BaseResponse):
                 template_name, mimetype, values = res
                 values = dict(request=req, **values)
-                body = self.env.get_template(template_name).render(values)
-                res = wz.Response(body, mimetype=mimetype)
+                res = self.env.get_response(template_name, values, mimetype)
         except wz.exceptions.HTTPException, e:
             res = e
         res = res(environ, start_response)
         return wz.ClosingIterator(res)
+
+class JinjaEnv(object):
+    def __init__(self, env):
+        self.env = env
+        self.globals = env.globals
+
+    def render(self, template_name, context):
+        return self.env.get_template(template_name).render(context)
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
+        res = wz.Response(body, mimetype=mimetype)
+        return res
+
+class LxmlEnv(object):
+    def __init__(self, env, global_context=None):
+        self.env = env
+        if not global_context:
+            global_context = dict()
+        self.globals = global_context
+
+    def render(self, template_name, context):
+        local_context = dict(self.globals)
+        local_context.update(context)
+        html = getattr(self.env, template_name)(local_context)
+        return html.to_string()
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
+        res = wz.Response(body, mimetype=mimetype)
+        return res
 
 def make_url_map(mountpoint, sub_url_map):
     url_map = wz.routing.Map([

@@ -40,6 +40,10 @@ mapper(Article, article_table)
 mapper(Comment, comment_table)
 
 classes = [Article, Comment]
+Session.classes = dict(
+    Article=Article,
+    Comment=Comment)
+
 
 def with_empty_db():
     Session.close_all()

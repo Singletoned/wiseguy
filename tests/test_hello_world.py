@@ -11,9 +11,10 @@ url_map = wiseguy.web_utils.UrlMap()
 def index(request):
     return dict(greeting="Hello", name="World")
 
-env = jinja2.Environment(
-    loader=jinja2.DictLoader(
-        {'index.html': "<p>{{greeting}}, {{name}}!</p>"}))
+env = wiseguy.web_utils.JinjaEnv(
+    jinja2.Environment(
+        loader=jinja2.DictLoader(
+            {'index.html': "<p>{{greeting}}, {{name}}!</p>"})))
 
 application = wiseguy.web_utils.BaseApp(
     config=dict(),

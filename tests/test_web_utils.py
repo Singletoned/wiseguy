@@ -28,9 +28,10 @@ def test_base_app():
         wz.routing.Rule('/wrong', endpoint=lambda request: wz.redirect(request.url('/baz'))),
         wz.routing.Rule('/config', endpoint=lambda request: wz.Response(request.app.config['mountpoint'])),
         ])
-    env = j2.Environment(
-        loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
-        extensions=['jinja2.ext.i18n'])
+    env = wu.JinjaEnv(
+        j2.Environment(
+            loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
+            extensions=['jinja2.ext.i18n']))
 
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
@@ -95,6 +96,29 @@ def test_make_url_map():
     assert adapter.match('/blammo/') == (".", {})
     assert adapter.match('/blammo/foo') == ("foo", {})
     assert url_map.converters['flibble'] == flibble_conv
+
+def test_JinjaEnv():
+    env = wu.JinjaEnv(
+        j2.Environment(
+            loader=j2.DictLoader(dict(bar="Foo Page {{foo_var}}"))))
+
+    html = env.render("bar", dict(foo_var="flangit"))
+    assert html == "Foo Page flangit"
+
+    response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
+    assert response.data == "Foo Page flibble"
+
+def test_LxmlEnv():
+    env = wu.LxmlEnv(
+            utils.MockObject(
+                bar=lambda context: utils.MockObject(
+                    to_string=lambda:"Foo Page %s"%context['foo_var'])))
+
+    html = env.render("bar", dict(foo_var="flangit"))
+    assert html == "Foo Page flangit"
+
+    response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
+    assert response.data == "Foo Page flibble"
 
 def test_render():
     foo = lambda x: x

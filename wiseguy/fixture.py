@@ -39,7 +39,7 @@ def _create_item(cls, **kwargs):
     return item
 
 def _item_to_dict(item, **kwargs):
-    column_names = [c.name for c in item._sa_class_manager.mapper.columns]
+    column_names = [c.name for c in item._sa_class_manager.mapper.columns if not c.name.startswith("%")]
     d = dict([(k, getattr(item, k)) for k in column_names])
     for key, value in kwargs.items():
         d[key] = value
@@ -248,6 +248,9 @@ class SQLAlchemyTester(object):
     def filter(self, *args, **kwargs):
         return self.query.filter(*args, **kwargs)
 
+    def find_one(self, **kwargs):
+        return self.filter_by(**kwargs).one()
+
 class MongoTester(object):
     def __init__(self, session):
         self.session = session
@@ -255,6 +258,12 @@ class MongoTester(object):
 
     def count(self):
         return self.collection.count()
+
+    def all(self):
+        return self.collection.find()
+
+    def find_one(self, **kwargs):
+        return self.collection.find_one(kwargs)
 
 class FixtureMeta(type):
     def __new__(meta, class_name, bases, class_dict):
@@ -381,12 +390,16 @@ class Fixture(object):
             keep_constraints=keep_constraints)
         return self
 
+    def _add_tester_class(self, key):
+        entity_class = self._loader.session_factory.classes[key]
+        tester_class = self._loader._make_tester_class(entity_class, self.session)
+        setattr(self, entity_class.__name__, tester_class(self.session))
+
     def __getattr__(self, key):
         if key in self.__dict__:
             return self.__dict__[key]
         elif (hasattr(self._loader.session_factory, 'classes')) and (key in self._loader.session_factory.classes) and hasattr(self, 'session'):
-            entity_class = self._loader.session_factory.classes[key]
-            self._add_tester_class(entity_class, self.session)
+            self._add_tester_class(key)
             return getattr(self, key)
         else:
             raise AttributeError
@@ -492,8 +505,9 @@ class MongoLoader(BaseLoader):
 
     def delete_data(self, data_added):
         session = self.session_factory()
-        for entity_class in data_added:
-            session[entity_class.__name__].remove()
+        for collection_name in session.collection_names():
+            if not collection_name == 'system.indexes':
+                session.drop_collection(collection_name)
 
     def restore_data(self, data):
         pass
