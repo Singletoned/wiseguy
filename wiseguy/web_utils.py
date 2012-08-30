@@ -28,7 +28,8 @@ class BaseApp(object):
         req.app = self
         req.map_adapter = self.url_map.bind_to_environ(environ)
         try:
-            endpoint, kwargs = req.map_adapter.match()
+            endpoint_name, kwargs = req.map_adapter.match()
+            endpoint = self.url_map.views[endpoint_name]
             res = endpoint(req, **kwargs)
             if not isinstance(res, wz.BaseResponse):
                 template_name, mimetype, values = res
@@ -71,10 +72,11 @@ class LxmlEnv(object):
         return res
 
 def make_url_map(mountpoint, sub_url_map):
-    url_map = wz.routing.Map([
+    url_map = UrlMap([
         wz.routing.Submount(
             mountpoint,
             sub_url_map.iter_rules())],
+        views=sub_url_map.views,
         converters=sub_url_map.converters)
     return url_map
 
@@ -111,15 +113,27 @@ def make_client_env(var_dir, client, extra_globals=None):
 
 
 class UrlMap(wz.routing.Map):
+    def __init__(self, rules=None, views=None, *args, **kwargs):
+        if not views:
+            views = dict()
+        self.views = views
+        super(UrlMap, self).__init__(rules, *args, **kwargs)
+
     def expose(self, rule, methods=['GET'], **kw):
         def decorate(f):
-            kw['endpoint'] = f
+            if f.__name__ == "<lambda>":
+                func_name = repr(f)
+            else:
+                func_name = f.__name__
+            self.views[func_name] = f
+            kw['endpoint'] = func_name
             self.add(wz.routing.Rule(rule, methods=methods, **kw))
             return f
         return decorate
 
     def expose_submount(self, path):
         def decorate(f):
+            self.views.update(f.url_map.views)
             self.add(
                 wz.routing.Submount(
                     path,

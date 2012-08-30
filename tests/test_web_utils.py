@@ -21,13 +21,13 @@ def test_base_app():
             super(self.__class__, self).__init__(environ)
             self.url = wz.Href("/submount")
 
-    url_map = wz.routing.Map([
-        wz.routing.Rule('/', endpoint=lambda r: wz.Response("Index")),
-        wz.routing.Rule('/foo', endpoint=lambda r: wz.Response("Foo Page")),
-        wz.routing.Rule('/bar', endpoint=lambda r: ('bar', 'text/html', {'bar_var': "flumble"})),
-        wz.routing.Rule('/wrong', endpoint=lambda request: wz.redirect(request.url('/baz'))),
-        wz.routing.Rule('/config', endpoint=lambda request: wz.Response(request.app.config['mountpoint'])),
-        ])
+    url_map = wu.UrlMap()
+    url_map.expose('/')(lambda r: wz.Response("Index"))
+    url_map.expose('/foo')(lambda r: wz.Response("Foo Page"))
+    url_map.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
+    url_map.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
+    url_map.expose('/config')(lambda request: wz.Response(request.app.config['mountpoint']))
+
     env = wu.JinjaEnv(
         j2.Environment(
             loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
@@ -162,17 +162,23 @@ def test_UrlMap():
     assert post_and_get.__doc__ == u"This is the post_and_get function"
     assert post_and_get.__name__ == "post_and_get"
 
-    def check_url(_url, _method, _endpoint, _response):
+    lambda_func = url_map.expose('/test_lambda')(lambda request: "This is a lambda")
+    assert lambda_func.__name__ == "<lambda>"
+
+    def check_url(_url, _method, _endpoint_name, _response):
         urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
-        endpoint, kwargs = urls.match()
-        assert endpoint == _endpoint, u"Should have chosen the correct function"
+        endpoint_name, kwargs = urls.match()
+        if _endpoint_name:
+            assert endpoint_name == _endpoint_name, u"Should have chosen the correct function"
+        endpoint = url_map.views[endpoint_name]
         res = endpoint("p1", **kwargs)
         assert res == _response
 
-    check_url(u"/test", u"GET", get, u"GET p1")
-    check_url(u"/test", u"POST", post, u"POST p1")
-    check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
-    check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
+    check_url(u"/test", u"GET", 'get', u"GET p1")
+    check_url(u"/test", u"POST", 'post', u"POST p1")
+    check_url(u"/test_both", u"GET", 'post_and_get', u"GET POST p1")
+    check_url(u"/test_both", u"POST", 'post_and_get', u"GET POST p1")
+    check_url(u"/test_lambda", u"GET", '', u"This is a lambda")
 
 
 def test_UUIDConverter():
@@ -353,12 +359,14 @@ def test_url_map_submount():
             return "Hullo"
 
     environ = wz.test.create_environ('/flibble')
-    endpoint, kwargs = FooController.url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = FooController.url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
     environ = wz.test.create_environ('/foo/flibble')
-    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
@@ -371,7 +379,8 @@ def test_url_map_submount():
             return "Hullo"
 
     environ = wz.test.create_environ('/flibble')
-    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
@@ -388,7 +397,8 @@ def test_url_map_submount():
         pass
 
     environ = wz.test.create_environ('/flooble/flibble')
-    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
