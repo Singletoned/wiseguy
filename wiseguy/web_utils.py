@@ -131,11 +131,11 @@ class UrlMap(wz.routing.Map):
     def expose(self, rule, methods=['GET'], **kw):
         def decorate(func):
             if func.__name__ == "<lambda>":
-                func_name = repr(func)
+                endpoint = repr(func)
             else:
-                func_name = func.__name__
-            self.views[func_name] = func
-            kw['endpoint'] = func_name
+                endpoint = func.__name__
+            self.views[endpoint] = func
+            kw['endpoint'] = endpoint
             self.add(wz.routing.Rule(rule, methods=methods, **kw))
             return func
         return decorate
