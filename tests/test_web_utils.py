@@ -167,6 +167,12 @@ def test_UrlMap():
     lambda_func = url_map.expose('/test_lambda')(lambda request: "This is a lambda")
     assert lambda_func.__name__ == "<lambda>"
 
+    class FooClass(object):
+        def __call__(self, request):
+            return "This is a callable object"
+
+    url_map.expose(u"/test_callable", endpoint="callable")(FooClass())
+
     def check_url(_url, _method, _endpoint_name, _response):
         urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
         endpoint_name, kwargs = urls.match()
@@ -181,6 +187,7 @@ def test_UrlMap():
     check_url(u"/test_both", u"GET", 'post_and_get', u"GET POST p1")
     check_url(u"/test_both", u"POST", 'post_and_get', u"GET POST p1")
     check_url(u"/test_lambda", u"GET", '', u"This is a lambda")
+    check_url(u"/test_callable", u"GET", '', u"This is a callable object")
 
 
 def test_UUIDConverter():
