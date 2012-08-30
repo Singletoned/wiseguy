@@ -77,7 +77,7 @@ def test_base_app():
     assert "/submount/baz" in response
 
 def test_base_app_minimal():
-    url_map = wz.routing.Map()
+    url_map = wu.UrlMap()
     env = j2.Environment()
     application = wu.BaseApp(
         config=dict(),
@@ -86,7 +86,7 @@ def test_base_app_minimal():
 
 def test_make_url_map():
     flibble_conv = lambda: "flibble"
-    sub_url_map = wz.routing.Map(
+    sub_url_map = wu.UrlMap(
         [
             wz.routing.Rule('/', endpoint="."),
             wz.routing.Rule('/foo', endpoint="foo")],
