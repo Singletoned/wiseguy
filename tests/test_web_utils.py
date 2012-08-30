@@ -268,6 +268,24 @@ def test_make_client_env():
     assert not "flibble" in result
     check_result(result)
 
+def test_Controller():
+    class FooController(wu.Controller):
+        url_map = wu.UrlMap()
+
+        @url_map.expose(u"/")
+        def index(request):
+            return "This is the Index"
+
+        @url_map.expose(u"/bar")
+        def bar(request):
+            return "This is the bar controller"
+
+    foo_controller = FooController()
+
+    req = wz.Request.from_values(path="/", base_url="http://example.com/foo")
+
+    res = foo_controller(req)
+    assert res == "This is the Index"
 
 class TestFormHandler(unittest.TestCase):
     class FooForm(wu.FormHandler):
