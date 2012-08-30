@@ -135,51 +135,44 @@ def test_render():
     response = wrapped_foo(mock_request)
     assert response is test_response
 
-def test_create_expose():
-    def do_test(url_map, expose):
-        @expose(u"/test")
-        def get(param1):
-            u"This is the get function"
-            return "GET " + param1
+def test_UrlMap():
+    url_map = wu.UrlMap()
 
-        assert get.__doc__ == u"This is the get function"
-        assert get.__name__ == "get"
+    @url_map.expose(u"/test")
+    def get(param1):
+        u"This is the get function"
+        return "GET " + param1
 
-        @expose(u"/test", methods=[u"POST"])
-        def post(param1):
-            u"This is the post function"
-            return "POST " + param1
+    assert get.__doc__ == u"This is the get function"
+    assert get.__name__ == "get"
 
-        assert post.__doc__ == u"This is the post function"
-        assert post.__name__ == "post"
+    @url_map.expose(u"/test", methods=[u"POST"])
+    def post(param1):
+        u"This is the post function"
+        return "POST " + param1
 
-        @expose(u"/test_both", methods=[u"GET", "POST"])
-        def post_and_get(param1):
-            u"This is the post_and_get function"
-            return "GET POST " + param1
+    assert post.__doc__ == u"This is the post function"
+    assert post.__name__ == "post"
 
-        assert post_and_get.__doc__ == u"This is the post_and_get function"
-        assert post_and_get.__name__ == "post_and_get"
+    @url_map.expose(u"/test_both", methods=[u"GET", "POST"])
+    def post_and_get(param1):
+        u"This is the post_and_get function"
+        return "GET POST " + param1
 
-        def check_url(_url, _method, _endpoint, _response):
-            urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
-            endpoint, kwargs = urls.match()
-            assert endpoint == _endpoint, u"Should have chosen the correct function"
-            res = endpoint("p1", **kwargs)
-            assert res == _response
+    assert post_and_get.__doc__ == u"This is the post_and_get function"
+    assert post_and_get.__name__ == "post_and_get"
 
-        check_url(u"/test", u"GET", get, u"GET p1")
-        check_url(u"/test", u"POST", post, u"POST p1")
-        check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
-        check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
+    def check_url(_url, _method, _endpoint, _response):
+        urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
+        endpoint, kwargs = urls.match()
+        assert endpoint == _endpoint, u"Should have chosen the correct function"
+        res = endpoint("p1", **kwargs)
+        assert res == _response
 
-    url_map_1 = wz.routing.Map()
-    expose_1 = wu.create_expose(url_map_1)
-    url_map_2 = wu.UrlMap()
-    expose_2 = url_map_2.expose
-
-    yield do_test, url_map_1, expose_1
-    yield do_test, url_map_2, expose_2
+    check_url(u"/test", u"GET", get, u"GET p1")
+    check_url(u"/test", u"POST", post, u"POST p1")
+    check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
+    check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
 
 
 def test_UUIDConverter():

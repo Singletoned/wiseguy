@@ -109,15 +109,6 @@ def make_client_env(var_dir, client, extra_globals=None):
         env.globals.update(extra_globals)
     return env
 
-def create_expose(url_map):
-    def expose(rule, methods=['GET'], **kw):
-        def decorate(f):
-            kw['endpoint'] = f
-            url_map.add(wz.routing.Rule(rule, methods=methods, **kw))
-            return f
-        return decorate
-    return expose
-
 
 class UrlMap(wz.routing.Map):
     def expose(self, rule, methods=['GET'], **kw):
