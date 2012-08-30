@@ -11,6 +11,14 @@ import jinja2
 from wiseguy import form_fields, utils
 
 
+def wsgi_wrapper(app, request_class=wz.Request):
+    def application(environ, start_response):
+        req = request_class(environ)
+        res = app(req)
+        res = res(environ, start_response)
+        return res
+    return application
+
 def _do_dispatch(app, req):
     try:
         endpoint_name, kwargs = req.map_adapter.match()
@@ -21,27 +29,25 @@ def _do_dispatch(app, req):
     return res
 
 class BaseApp(object):
-    def __init__(self, config, url_map, env, request_class=wz.Request):
+    def __init__(self, config, url_map, env):
         self.config = config
         self.env = env
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
-        self._request_class = request_class
         self.env.globals.update(
             dict(url=self.mountpoint))
         self.url_map = make_url_map(
             self.mountpoint(),
             url_map)
 
-    def __call__(self, environ, start_response):
-        req = self._request_class(environ)
+    def __call__(self, req):
         req.app = self
-        req.map_adapter = self.url_map.bind_to_environ(environ)
+        req.map_adapter = self.url_map.bind_to_environ(req.environ)
         res = _do_dispatch(self, req)
         if not isinstance(res, wz.BaseResponse):
             template_name, mimetype, values = res
             values = dict(request=req, **values)
             res = self.env.get_response(template_name, values, mimetype)
-        return res(environ, start_response)
+        return res
 
 class JinjaEnv(object):
     def __init__(self, env):

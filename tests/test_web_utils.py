@@ -36,7 +36,9 @@ def test_base_app():
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
         url_map=url_map,
-        env=env,
+        env=env)
+    wsgi_app = wu.wsgi_wrapper(
+        app,
         request_class=TestRequest)
 
     assert app.mountpoint() == u"/submount"
@@ -49,29 +51,29 @@ def test_base_app():
         assert rule.rule.startswith('/submount')
 
     environ = wz.test.create_environ('/submount/')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Index"]
 
     environ = wz.test.create_environ('/submount')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     response = list(response)[0]
     assert "Redirecting..." in response
     assert "/submount/" in response
 
     environ = wz.test.create_environ('/submount/foo')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Foo Page"]
 
     environ = wz.test.create_environ('/submount/bar')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Bar Page flumble"]
 
     environ = wz.test.create_environ('/submount/config')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["/submount"]
 
     environ = wz.test.create_environ('/submount/wrong')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     response = list(response)[0]
     assert "Redirecting..." in response
     assert "/submount/baz" in response
