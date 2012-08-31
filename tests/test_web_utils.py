@@ -14,6 +14,14 @@ from wiseguy import web_utils as wu, utils
 
 var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
+def test_do_dispatch():
+    req = wz.Request.from_values(path="/foo/bar")
+    url_map = wu.UrlMap()
+    url_map.expose('/foo/bar')(lambda r: "Foo Bar")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
+    app = utils.MockObject(url_map=url_map)
+    res = wu._do_dispatch(app, req)
+    assert res == "Foo Bar"
 
 def test_base_app():
     class TestRequest(wz.BaseRequest):
