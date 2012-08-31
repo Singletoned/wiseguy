@@ -15,13 +15,30 @@ from wiseguy import web_utils as wu, utils
 var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
 def test_do_dispatch():
-    req = wz.Request.from_values(path="/foo/bar")
     url_map = wu.UrlMap()
     url_map.expose('/foo/bar')(lambda r: "Foo Bar")
-    req.map_adapter = url_map.bind_to_environ(req.environ)
+    url_map.expose('/foo/<path:path_info>')(lambda r: ("Foo Bar Baz", r))
+    url_map.expose('/foo/flibble/<path:path_info>')(lambda r: ("Foo Flibble Wibble Dibble", r))
     app = utils.MockObject(url_map=url_map)
+
+    req = wz.Request.from_values(path="/foo/bar")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
     res = wu._do_dispatch(app, req)
     assert res == "Foo Bar"
+
+    req = wz.Request.from_values(path="/foo/bar/baz")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
+    (res, r) = wu._do_dispatch(app, req)
+    assert res == "Foo Bar Baz"
+    assert r.environ["SCRIPT_NAME"] == "/foo"
+    assert r.environ["PATH_INFO"] == "/bar/baz"
+
+    req = wz.Request.from_values(path="/foo/flibble/wibble/dibble")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
+    (res, r) = wu._do_dispatch(app, req)
+    assert res == "Foo Flibble Wibble Dibble"
+    assert r.environ["SCRIPT_NAME"] == "/foo/flibble"
+    assert r.environ["PATH_INFO"] == "/wibble/dibble"
 
 def test_base_app():
     class TestRequest(wz.BaseRequest):

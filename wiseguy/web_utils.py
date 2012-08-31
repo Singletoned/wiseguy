@@ -21,8 +21,15 @@ def wsgi_wrapper(app, request_class=wz.Request):
 
 def _do_dispatch(app, req):
     try:
-        endpoint_name, kwargs = req.map_adapter.match()
-        endpoint = app.url_map.views[endpoint_name]
+        rule, kwargs = req.map_adapter.match(return_rule=True)
+        if kwargs.has_key('path_info'):
+            path_info = kwargs.pop('path_info')
+            if not path_info.startswith("/"):
+                path_info = "/" + path_info
+            while path_info != req.environ['PATH_INFO']:
+                popped = wz.wsgi.pop_path_info(req.environ)
+                assert popped
+        endpoint = app.url_map.views[rule.endpoint]
         res = endpoint(req, **kwargs)
     except wz.exceptions.HTTPException, e:
         res = e.get_response(req.environ)
