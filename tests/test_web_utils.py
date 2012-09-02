@@ -16,15 +16,17 @@ var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
 def test_do_dispatch():
     url_map = wu.UrlMap()
-    url_map.expose('/foo/bar')(lambda r: "Foo Bar")
+    url_map.expose('/foo/bar')(lambda r: ("Foo Bar", r))
     url_map.expose('/foo/<path:path_info>')(lambda r: ("Foo Bar Baz", r))
     url_map.expose('/foo/flibble/<path:path_info>')(lambda r: ("Foo Flibble Wibble Dibble", r))
     app = utils.MockObject(url_map=url_map)
 
     req = wz.Request.from_values(path="/foo/bar")
     req.map_adapter = url_map.bind_to_environ(req.environ)
-    res = wu._do_dispatch(app, req)
+    (res, r) = wu._do_dispatch(app, req)
     assert res == "Foo Bar"
+    assert r.environ["SCRIPT_NAME"] == "/foo/bar"
+    assert r.environ["PATH_INFO"] == ""
 
     req = wz.Request.from_values(path="/foo/bar/baz")
     req.map_adapter = url_map.bind_to_environ(req.environ)

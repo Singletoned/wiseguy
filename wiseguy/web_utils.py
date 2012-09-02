@@ -29,6 +29,9 @@ def _do_dispatch(app, req):
             while path_info != req.environ['PATH_INFO']:
                 popped = wz.wsgi.pop_path_info(req.environ)
                 assert popped
+        else:
+            while req.environ['PATH_INFO']:
+                wz.wsgi.pop_path_info(req.environ)
         endpoint = app.url_map.views[rule.endpoint]
         res = endpoint(req, **kwargs)
     except wz.exceptions.HTTPException, e:
