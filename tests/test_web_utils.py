@@ -301,15 +301,18 @@ def test_Controller():
 
         @url_map.expose(u"/")
         def index(request):
+            assert request.foo
             return "This is the Index"
 
         @url_map.expose(u"/bar")
         def bar(request):
+            assert request.foo
             return "This is the bar controller"
 
     foo_controller = FooController()
 
     req = wz.Request.from_values(path="/", base_url="http://example.com/foo")
+    req.foo = True
 
     res = foo_controller(req)
     assert res == "This is the Index"

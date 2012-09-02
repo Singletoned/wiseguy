@@ -223,9 +223,8 @@ def create_require(predicate, response_builder):
     return require
 
 class Controller(object):
-    def __call__(self, old_request):
-        request = wz.Request(old_request.environ)
-        request.map_adapter =self.url_map.bind_to_environ(old_request.environ)
+    def __call__(self, request):
+        request.map_adapter =self.url_map.bind_to_environ(request.environ)
         res = _do_dispatch(self, request)
         return res
 
