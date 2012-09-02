@@ -69,6 +69,9 @@ class JinjaEnv(object):
         res = wz.Response(body, mimetype=mimetype)
         return res
 
+    def from_string(self, text):
+        return self.env.from_string(text)
+
 class LxmlEnv(object):
     def __init__(self, env, global_context=None):
         self.env = env

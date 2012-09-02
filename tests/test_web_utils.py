@@ -135,6 +135,8 @@ def test_JinjaEnv():
     response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data == "Foo Page flibble"
 
+    assert env.from_string("foo").render() == "foo"
+
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
