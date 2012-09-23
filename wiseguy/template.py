@@ -14,6 +14,9 @@ class Rule(object):
         self.applied = False
         self.context = dict()
 
+    def __repr__(self):
+        return "<Rule %s>" % self.keys
+
     def apply(self, context):
         for key in list(self.keys):
             if key in context:
