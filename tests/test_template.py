@@ -32,8 +32,8 @@ html
 ])
     assert template.template
     assert template.rules
-    assert len(template.rules[frozenset(['head'])]) == 1
-    assert len(template.rules[frozenset(['body'])]) == 2
+    assert len(template.rules) == 3
+    assert len(template.applied_rules) == 0
 
     context = dict(body="Foo")
 
@@ -50,8 +50,8 @@ html
 </html>""".strip()
     assert html == expected
 
-    assert len(template.rules[frozenset(['head'])]) == 1
-    assert len(template.rules[frozenset(['body'])]) == 0
+    assert len(template.rules) == 1
+    assert len(template.applied_rules) == 2
 
     context = dict(body="Bar", head=None)
     template.apply(context)
@@ -67,8 +67,8 @@ html
 </html>""".strip()
     assert html == expected
 
-    assert len(template.rules['head']) == 0
-    assert len(template.rules['body']) == 0
+    assert len(template.rules) == 0
+    assert len(template.applied_rules) == 3
 
 def test_Template_multi_rule():
     template = wiseguy.template.Template(
@@ -97,8 +97,8 @@ html
 <html>
 <head><title>flibble</title></head>
 <body><div>
-<p>flamble, flimble</p>
 <p>Wibble, flimble</p>
+<p>flamble, flimble</p>
 </div></body>
 </html>""".strip()
     assert html == expected

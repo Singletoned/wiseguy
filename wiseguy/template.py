@@ -7,17 +7,26 @@ import lxml.html
 class Rule(object):
     def __init__(self, keys, transform):
         if isinstance(keys, basestring):
-            self.keys = frozenset([keys])
+            self.keys = set([keys])
         else:
-            self.keys = frozenset(keys)
+            self.keys = set(keys)
         self.transform = transform
+        self.applied = False
+        self.context = dict()
+
+    def apply(self, context):
+        for key in list(self.keys):
+            if key in context:
+                self.context[key] = context[key]
+                self.keys.remove(key)
+        if not self.keys:
+            self.applied = True
 
 class Template(object):
     def __init__(self, template, rules):
         self.template = template
-        self.rules = collections.defaultdict(list)
-        for rule in rules:
-            self.rules[rule.keys].append(rule.transform)
+        self.rules = rules
+        self.applied_rules = []
 
     def _pop_keys(self, key, context):
         kwargs = dict([(k, context[k]) for k in key])
@@ -26,24 +35,17 @@ class Template(object):
             rule(template=self.template, **kwargs)
 
     def apply(self, context):
-        completed_keys = []
-        for key in self.rules.keys():
-            ctx_keys = set(context.iterkeys())
-            shared_keys = key & ctx_keys
-            if shared_keys:
-                if key <= ctx_keys:
-                    self._pop_keys(key, context)
-                else:
-                    kwargs = dict([(k, context[k]) for k in shared_keys])
-                    different_keys = key - ctx_keys
-                    self.rules[tuple(different_keys)] = [
-                        functools.partial(r, **kwargs)
-                        for r in self.rules[key]]
+        for rule in list(self.rules):
+            rule.apply(context)
+            if rule.applied:
+                rule.transform(template=self.template, **rule.context)
+                self.rules.remove(rule)
+                self.applied_rules.append(rule)
 
     def copy(self):
         return Template(
             copy.deepcopy(self.template),
-            [Rule(key, transform) for key in self.rules.iterkeys() for transform in self.rules[key]])
+            copy.deepcopy(self.rules))
 
     def __call__(self, **kwargs):
         template = self.copy()
