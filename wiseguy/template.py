@@ -5,11 +5,11 @@ import collections, copy, functools
 import lxml.html
 
 class Rule(object):
-    def __init__(self, key, transform):
-        if isinstance(key, basestring):
-            self.key = frozenset([key])
+    def __init__(self, keys, transform):
+        if isinstance(keys, basestring):
+            self.keys = frozenset([keys])
         else:
-            self.key = frozenset(key)
+            self.keys = frozenset(keys)
         self.transform = transform
 
 class Template(object):
@@ -17,7 +17,7 @@ class Template(object):
         self.template = template
         self.rules = collections.defaultdict(list)
         for rule in rules:
-            self.rules[rule.key].append(rule.transform)
+            self.rules[rule.keys].append(rule.transform)
 
     def _pop_keys(self, key, context):
         kwargs = dict([(k, context[k]) for k in key])

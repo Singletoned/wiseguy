@@ -7,7 +7,7 @@ def test_Rule():
     r = wiseguy.template.Rule(
         "head",
         lambda context: "do something")
-    assert r.key == set(["head"])
+    assert r.keys == set(["head"])
     assert r.transform("foo") == "do something"
 
 def test_Template():
