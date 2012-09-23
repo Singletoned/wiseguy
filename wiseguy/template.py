@@ -50,10 +50,14 @@ class Template(object):
             copy.deepcopy(self.template),
             copy.deepcopy(self.rules))
 
-    def __call__(self, **kwargs):
+    def render_lxml(self, **kwargs):
         template = self.copy()
         template.apply(kwargs)
-        return lxml.html.tostring(template.template, pretty_print=True)
+        return template.template
+
+    def __call__(self, **kwargs):
+        html = self.render_lxml(**kwargs)
+        return lxml.html.tostring(html, pretty_print=True)
 
 def bound_template(adder_func):
     class BoundTemplate(Template):
