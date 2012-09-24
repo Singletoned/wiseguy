@@ -168,3 +168,28 @@ def test_bound_template():
     assert template_1 in template_set
     assert template_2 in template_set
     assert template_3 in template_set
+
+
+def test_register_template():
+    template_dict = {}
+
+    @wiseguy.template.register(template_dict)
+    class template_1(wiseguy.template.Template):
+        template = wiseguy.html.jade("html")
+        rules = []
+
+    @wiseguy.template.register(template_dict)
+    class template_2(wiseguy.template.Template):
+        template = wiseguy.html.jade("html")
+        rules = []
+
+    class template_3(wiseguy.template.Template):
+        template = wiseguy.html.jade("html")
+        rules = []
+
+    assert template_1 in template_dict.values()
+    assert "template_1" in template_dict.keys()
+    assert template_2 in template_dict.values()
+    assert "template_2" in template_dict.keys()
+    assert template_3 not in template_dict.values()
+    assert "template_3" not in template_dict.keys()

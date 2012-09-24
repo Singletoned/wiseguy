@@ -76,3 +76,9 @@ def bound_template(adder_func):
         __metaclass__ = BoundTemplateMeta
 
     return BoundTemplate
+
+def register(collection):
+    def _register(func):
+        collection[func.__name__] = func
+        return func
+    return _register
