@@ -11,25 +11,26 @@ def test_Rule():
     assert r.transform("foo") == "do something"
 
 def test_Template():
-    template = wiseguy.template.Template(
-        wiseguy.html.jade(
+    class template(wiseguy.template.Template):
+        template = wiseguy.html.jade(
 '''
 html
   head
     title
   body
-   div'''),
-    rules=[
-        wiseguy.template.Rule(
-            "head",
-            lambda head, template: template.insert("head title", "flibble")),
-        wiseguy.template.Rule(
-            "body",
-            lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
-        wiseguy.template.Rule(
-            "body",
-            lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),
-])
+   div''')
+
+        rules = [
+            wiseguy.template.Rule(
+                "head",
+                lambda head, template: template.insert("head title", "flibble")),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
+
     assert template.template
     assert template.rules
     assert len(template.rules) == 3
@@ -71,26 +72,27 @@ html
     assert len(template.applied_rules) == 3
 
 def test_Template_multi_rule():
-    template = wiseguy.template.Template(
-        wiseguy.html.jade(
+    class template(wiseguy.template.Template):
+        template = wiseguy.html.jade(
 '''
 html
   head
     title
   body
-   div'''),
-    rules=[
-        wiseguy.template.Rule(
-            "head",
-            lambda head, template: template.insert("head title", "flibble")),
-        wiseguy.template.Rule(
-            "body",
-            lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
-        wiseguy.template.Rule(
-            ("head", "body"),
-            lambda head, body, template: template.insert(
-                "body div",
-                wiseguy.html.Html("%s, %s"%(head, body))))])
+   div''')
+        rules=[
+            wiseguy.template.Rule(
+                "head",
+                lambda head, template: template.insert("head title", "flibble")),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+            wiseguy.template.Rule(
+                ("head", "body"),
+                lambda head, body, template: template.insert(
+                    "body div",
+                    wiseguy.html.Html("%s, %s"%(head, body))))]
+
     template.apply(dict(head="flamble"))
     html = template(body="flimble").strip()
     expected = """
@@ -105,24 +107,25 @@ html
 
 
 def test_Template_multiple_renderings():
-    template = wiseguy.template.Template(
-        wiseguy.html.jade(
+    class template(wiseguy.template.Template):
+        template = wiseguy.html.jade(
 '''
 html
   head
     title
   body
-   div'''),
-    rules=[
-        wiseguy.template.Rule(
-            "head",
-            lambda head, template: template.insert("head title", "flibble")),
-        wiseguy.template.Rule(
-            "body",
-            lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
-        wiseguy.template.Rule(
-            "body",
-            lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))])
+   div''')
+        rules = [
+            wiseguy.template.Rule(
+                "head",
+                lambda head, template: template.insert("head title", "flibble")),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
+
     html = template(body="Foo").strip()
     expected = """
 <html>
@@ -148,11 +151,19 @@ html
 
 def test_bound_template():
     template_set = set()
-    Template = wiseguy.template.bound_template(template_set.add)
+    BoundTemplate = wiseguy.template.bound_template(template_set.add)
 
-    template_1 = Template(wiseguy.html.jade("html"), [])
-    template_2 = Template(wiseguy.html.jade("html"), [])
-    template_3 = Template(wiseguy.html.jade("html"), [])
+    class template_1(BoundTemplate):
+        template = wiseguy.html.jade("html")
+        rules = []
+
+    class template_2(BoundTemplate):
+        template = wiseguy.html.jade("html")
+        rules = []
+
+    class template_3(BoundTemplate):
+        template = wiseguy.html.jade("html")
+        rules = []
 
     assert template_1 in template_set
     assert template_2 in template_set

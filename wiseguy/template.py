@@ -25,11 +25,8 @@ class Rule(object):
         if not self.keys:
             self.applied = True
 
-class Template(object):
-    def __init__(self, template, rules):
-        self.template = template
-        self.rules = rules
-        self.applied_rules = []
+class TemplateMeta(type):
+    applied_rules = []
 
     def _pop_keys(self, key, context):
         kwargs = dict([(k, context[k]) for k in key])
@@ -46,9 +43,12 @@ class Template(object):
                 self.applied_rules.append(rule)
 
     def copy(self):
-        return Template(
-            copy.deepcopy(self.template),
-            copy.deepcopy(self.rules))
+        return TemplateMeta(
+            'Template',
+            (Template,),
+            dict(
+                template=copy.deepcopy(self.template),
+                rules=copy.deepcopy(self.rules)))
 
     def render_lxml(self, **kwargs):
         template = self.copy()
@@ -59,9 +59,20 @@ class Template(object):
         html = self.render_lxml(**kwargs)
         return lxml.html.tostring(html, pretty_print=True)
 
+
+class Template(object):
+    __metaclass__ = TemplateMeta
+
+class Fragment(Template):
+    def __call__(self, **kwargs):
+        return self.render_lxml(**kwargs)
+
 def bound_template(adder_func):
+    class BoundTemplateMeta(TemplateMeta):
+        def __init__(cls, cls_name, bases, cls_dict):
+            adder_func(cls)
+
     class BoundTemplate(Template):
-        def __init__(self, template, rules):
-            adder_func(self)
-            super(BoundTemplate, self).__init__(template, rules)
+        __metaclass__ = BoundTemplateMeta
+
     return BoundTemplate
