@@ -63,9 +63,12 @@ class TemplateMeta(type):
 class Template(object):
     __metaclass__ = TemplateMeta
 
-class Fragment(Template):
-    def __call__(self, **kwargs):
-        return self.render_lxml(**kwargs)
+class FragmentMeta(TemplateMeta):
+    def __call__(self, context):
+        return self.render_lxml(**context)
+
+class Fragment(object):
+    __metaclass__ = FragmentMeta
 
 def bound_template(adder_func):
     class BoundTemplateMeta(TemplateMeta):

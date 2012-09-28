@@ -170,6 +170,49 @@ def test_bound_template():
     assert template_3 in template_set
 
 
+def test_Fragment():
+    class fragment(wiseguy.template.Fragment):
+        template = wiseguy.html.jade(
+'''
+html
+  head
+    title
+  body
+   div''')
+        rules = [
+            wiseguy.template.Rule(
+                "head",
+                lambda head, template: template.insert("head title", "flibble")),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+            wiseguy.template.Rule(
+                "body",
+                lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
+
+    html = fragment(dict(body="Foo")).to_string().strip()
+    expected = """
+<html>
+<head><title></title></head>
+<body><div>
+<p>Wibble, Foo</p>
+<p>Wobble, Foo</p>
+</div></body>
+</html>""".strip()
+    assert html == expected
+
+    html = fragment(dict(body="Bar")).to_string().strip()
+    expected = """
+<html>
+<head><title></title></head>
+<body><div>
+<p>Wibble, Bar</p>
+<p>Wobble, Bar</p>
+</div></body>
+</html>""".strip()
+    assert html == expected
+
+
 def test_register_template():
     template_dict = {}
 
