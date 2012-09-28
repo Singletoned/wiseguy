@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import collections, copy, functools
+import collections, copy, functools, contextlib
 
 import lxml.html
 
@@ -85,3 +85,14 @@ def register(collection):
         collection[func.__name__] = func
         return func
     return _register
+
+
+# Utils
+
+def extends(func):
+    def _decorator(wrapped_func):
+        @contextlib.wraps(wrapped_func)
+        def _inner(*args, **kwargs):
+            return func(**wrapped_func(*args, **kwargs))
+        return _inner
+    return _decorator

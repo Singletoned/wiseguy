@@ -236,3 +236,15 @@ def test_register_template():
     assert "template_2" in template_dict.keys()
     assert template_3 not in template_dict.values()
     assert "template_3" not in template_dict.keys()
+
+
+def test_extends():
+    def extension(foo, bar):
+        assert foo == "flamble"
+        assert bar == "flibble"
+
+    @wiseguy.template.extends(extension)
+    def my_func(foo, bar="flibble"):
+        return dict(foo=foo, bar=bar)
+
+    my_func(foo="flamble")
