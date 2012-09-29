@@ -213,6 +213,42 @@ html
     assert html == expected
 
 
+def test_SubTemplate():
+    class master(wiseguy.template.SubTemplate):
+        class flibble(wiseguy.template.Fragment):
+            template = wiseguy.html.jade("""div: p""")
+            rules = [wiseguy.template.Rule(
+                "p_content",
+                lambda template, p_content: template.insert("p", p_content))]
+
+        class flamble(wiseguy.template.Fragment):
+            template = wiseguy.html.jade("""p: span""")
+            rules = [wiseguy.template.Rule(
+                "span_content",
+                lambda template, span_content: template.insert("span", span_content))]
+
+    result = master(dict())
+    assert len(result) == 2
+    assert result['flibble'].to_string() == "<div><p></p></div>\n"
+    assert result['flamble'].to_string() == "<p><span></span></p>\n"
+
+    result = master(dict(p_content="flip flap"))
+    assert len(result) == 2
+    assert result['flibble'].to_string() == "<div><p>flip flap</p></div>\n"
+    assert result['flamble'].to_string() == "<p><span></span></p>\n"
+
+    result = master(dict(span_content="flim flam"))
+    assert len(result) == 2
+    assert result['flibble'].to_string() == "<div><p></p></div>\n"
+    assert result['flamble'].to_string() == "<p><span>flim flam</span></p>\n"
+
+    result = master(dict(p_content="flip flap", span_content="flim flam"))
+    assert len(result) == 2
+    assert result['flibble'].to_string() == "<div><p>flip flap</p></div>\n"
+    assert result['flamble'].to_string() == "<p><span>flim flam</span></p>\n"
+
+
+
 def test_register_template():
     template_dict = {}
 
