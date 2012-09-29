@@ -55,7 +55,7 @@ class TemplateMeta(type):
         template.apply(kwargs)
         return template.template
 
-    def __call__(self, **kwargs):
+    def __call__(self, kwargs):
         html = self.render_lxml(**kwargs)
         return lxml.html.tostring(html, pretty_print=True)
 
@@ -105,6 +105,6 @@ def extends(func):
     def _decorator(wrapped_func):
         @contextlib.wraps(wrapped_func)
         def _inner(*args, **kwargs):
-            return func(**wrapped_func(*args, **kwargs))
+            return func(wrapped_func(*args, **kwargs))
         return _inner
     return _decorator

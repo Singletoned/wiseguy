@@ -94,7 +94,7 @@ html
                     wiseguy.html.Html("%s, %s"%(head, body))))]
 
     template.apply(dict(head="flamble"))
-    html = template(body="flimble").strip()
+    html = template(dict(body="flimble")).strip()
     expected = """
 <html>
 <head><title>flibble</title></head>
@@ -126,7 +126,7 @@ html
                 "body",
                 lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
 
-    html = template(body="Foo").strip()
+    html = template(dict(body="Foo")).strip()
     expected = """
 <html>
 <head><title></title></head>
@@ -137,7 +137,7 @@ html
 </html>""".strip()
     assert html == expected
 
-    html = template(body="Bar").strip()
+    html = template(dict(body="Bar")).strip()
     expected = """
 <html>
 <head><title></title></head>
@@ -275,9 +275,9 @@ def test_register_template():
 
 
 def test_extends():
-    def extension(foo, bar):
-        assert foo == "flamble"
-        assert bar == "flibble"
+    def extension(context):
+        assert context['foo'] == "flamble"
+        assert context['bar'] == "flibble"
 
     @wiseguy.template.extends(extension)
     def my_func(foo, bar="flibble"):
