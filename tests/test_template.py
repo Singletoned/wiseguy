@@ -275,12 +275,28 @@ def test_register_template():
 
 
 def test_extends():
-    def extension(context):
-        assert context['foo'] == "flamble"
-        assert context['bar'] == "flibble"
+    class master(wiseguy.template.Template):
+        template = wiseguy.html.jade('''
+html
+  head
+  body''')
+        transforms = [
+            wiseguy.template.Transform(
+                "main_body",
+                lambda template, main_body: template.insert("body", main_body))]
 
-    @wiseguy.template.extends(extension)
-    def my_func(foo, bar="flibble"):
-        return dict(foo=foo, bar=bar)
+    @wiseguy.template.extends(master)
+    class index(wiseguy.template.SubTemplate):
+        class main_body(wiseguy.template.Fragment):
+            template = wiseguy.html.jade('''
+div
+  p''')
+            transforms = [
+                wiseguy.template.Transform(
+                    "flibble",
+                    lambda template, flibble: template.insert("p", flibble))]
 
-    my_func(foo="flamble")
+    assert len(index.transforms) == 1
+    result = index(dict())
+    expected = "<html>\n<head></head>\n<body><div><p></p></div></body>\n</html>\n"
+    assert expected == result

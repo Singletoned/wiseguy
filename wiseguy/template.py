@@ -63,20 +63,28 @@ class TemplateMeta(type):
 class Template(object):
     __metaclass__ = TemplateMeta
 
+
 class FragmentMeta(TemplateMeta):
     def __call__(self, context):
         return self.render_lxml(**context)
 
+
 class Fragment(object):
     __metaclass__ = FragmentMeta
+
 
 class SubTemplateMeta(TemplateMeta):
     def __init__(self, cls_name, bases, cls_dict):
         self.keys = [k for k in cls_dict if not k.startswith("_")]
+        self.transforms = []
+        for value in cls_dict.itervalues():
+            if hasattr(value, 'transforms'):
+                self.transforms.extend(value.transforms)
 
     def __call__(self, context):
         return dict(
             (k, getattr(self, k).render_lxml(**context)) for k in self.keys)
+
 
 class SubTemplate(object):
     __metaclass__ = SubTemplateMeta
@@ -101,10 +109,12 @@ def register(collection):
 
 # Utils
 
-def extends(func):
-    def _decorator(wrapped_func):
-        @contextlib.wraps(wrapped_func)
-        def _inner(*args, **kwargs):
-            return func(wrapped_func(*args, **kwargs))
-        return _inner
+def extends(template):
+    def _decorator(wrapped_template):
+        new_template = template.copy()
+        new_template.apply(
+            wrapped_template(dict()))
+        new_template.transforms.extend(
+            wrapped_template.transforms)
+        return new_template
     return _decorator
