@@ -4,7 +4,7 @@ import collections, copy, functools, contextlib
 
 import lxml.html
 
-class Rule(object):
+class Transform(object):
     def __init__(self, keys, transform):
         if isinstance(keys, basestring):
             self.keys = set([keys])
@@ -15,7 +15,7 @@ class Rule(object):
         self.context = dict()
 
     def __repr__(self):
-        return "<Rule %s>" % self.keys
+        return "<Transform %s>" % self.keys
 
     def apply(self, context):
         for key in list(self.keys):
@@ -26,21 +26,21 @@ class Rule(object):
             self.applied = True
 
 class TemplateMeta(type):
-    applied_rules = []
+    applied_transforms = []
 
     def _pop_keys(self, key, context):
         kwargs = dict([(k, context[k]) for k in key])
-        while self.rules[key]:
-            rule = self.rules[key].pop(0)
-            rule(template=self.template, **kwargs)
+        while self.transforms[key]:
+            transform = self.transforms[key].pop(0)
+            transform(template=self.template, **kwargs)
 
     def apply(self, context):
-        for rule in list(self.rules):
-            rule.apply(context)
-            if rule.applied:
-                rule.transform(template=self.template, **rule.context)
-                self.rules.remove(rule)
-                self.applied_rules.append(rule)
+        for transform in list(self.transforms):
+            transform.apply(context)
+            if transform.applied:
+                transform.transform(template=self.template, **transform.context)
+                self.transforms.remove(transform)
+                self.applied_transforms.append(transform)
 
     def copy(self):
         return TemplateMeta(
@@ -48,7 +48,7 @@ class TemplateMeta(type):
             (Template,),
             dict(
                 template=copy.deepcopy(self.template),
-                rules=copy.deepcopy(self.rules)))
+                transforms=copy.deepcopy(self.transforms)))
 
     def render_lxml(self, **kwargs):
         template = self.copy()
