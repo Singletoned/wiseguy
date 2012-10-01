@@ -5,12 +5,12 @@ import collections, copy, functools, contextlib
 import lxml.html
 
 class Transform(object):
-    def __init__(self, keys, transform):
+    def __init__(self, keys, action):
         if isinstance(keys, basestring):
             self.keys = set([keys])
         else:
             self.keys = set(keys)
-        self.transform = transform
+        self.action = action
         self.applied = False
         self.context = dict()
 
@@ -28,17 +28,11 @@ class Transform(object):
 class TemplateMeta(type):
     applied_transforms = []
 
-    def _pop_keys(self, key, context):
-        kwargs = dict([(k, context[k]) for k in key])
-        while self.transforms[key]:
-            transform = self.transforms[key].pop(0)
-            transform(template=self.template, **kwargs)
-
     def apply(self, context):
         for transform in list(self.transforms):
             transform.apply(context)
             if transform.applied:
-                transform.transform(template=self.template, **transform.context)
+                transform.action(template=self.template, **transform.context)
                 self.transforms.remove(transform)
                 self.applied_transforms.append(transform)
 

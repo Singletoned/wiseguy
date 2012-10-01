@@ -8,7 +8,7 @@ def test_Transform():
         "head",
         lambda context: "do something")
     assert r.keys == set(["head"])
-    assert r.transform("foo") == "do something"
+    assert r.action("foo") == "do something"
 
 def test_Template():
     class template(wiseguy.template.Template):
