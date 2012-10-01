@@ -34,7 +34,7 @@ class TemplateMeta(type):
         for transform in list(self.transforms):
             transform.apply(context)
             if transform.applied:
-                transform.action(template=self.template, **transform.context)
+                transform.action(element=self.element, **transform.context)
                 self.transforms.remove(transform)
                 self.applied_transforms.append(transform)
 
@@ -43,13 +43,13 @@ class TemplateMeta(type):
             'Template',
             (Template,),
             dict(
-                template=copy.deepcopy(self.template),
+                element=copy.deepcopy(self.element),
                 transforms=copy.deepcopy(self.transforms)))
 
     def render_lxml(self, **kwargs):
         template = self.copy()
         template.apply(kwargs)
-        return template.template
+        return template.element
 
     def __call__(self, kwargs):
         html = self.render_lxml(**kwargs)

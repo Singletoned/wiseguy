@@ -12,7 +12,7 @@ def test_Transform():
 
 def test_Template():
     class template(wiseguy.template.Template):
-        template = wiseguy.html.jade(
+        element = wiseguy.html.jade(
 '''
 html
   head
@@ -23,15 +23,15 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "head",
-                lambda head, template: template.insert("head title", "flibble")),
+                lambda head, element: element.insert("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
 
-    assert template.template
+    assert template.element
     assert template.transforms
     assert len(template.transforms) == 3
     assert len(template.applied_transforms) == 0
@@ -40,7 +40,7 @@ html
 
     template.apply(context)
 
-    html = template.template.to_string().strip()
+    html = template.element.to_string().strip()
     expected = """
 <html>
 <head><title></title></head>
@@ -57,7 +57,7 @@ html
     context = dict(body="Bar", head=None)
     template.apply(context)
 
-    html = template.template.to_string().strip()
+    html = template.element.to_string().strip()
     expected = """
 <html>
 <head><title>flibble</title></head>
@@ -73,7 +73,7 @@ html
 
 def test_Template_multi_transform():
     class template(wiseguy.template.Template):
-        template = wiseguy.html.jade(
+        element = wiseguy.html.jade(
 '''
 html
   head
@@ -83,13 +83,13 @@ html
         transforms=[
             wiseguy.template.Transform(
                 "head",
-                lambda head, template: template.insert("head title", "flibble")),
+                lambda head, element: element.insert("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 ("head", "body"),
-                lambda head, body, template: template.insert(
+                lambda head, body, element: element.insert(
                     "body div",
                     wiseguy.html.Html("%s, %s"%(head, body))))]
 
@@ -108,7 +108,7 @@ html
 
 def test_Template_multiple_renderings():
     class template(wiseguy.template.Template):
-        template = wiseguy.html.jade(
+        element = wiseguy.html.jade(
 '''
 html
   head
@@ -118,13 +118,13 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "head",
-                lambda head, template: template.insert("head title", "flibble")),
+                lambda head, element: element.insert("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
 
     html = template(dict(body="Foo")).strip()
     expected = """
@@ -154,15 +154,15 @@ def test_bound_template():
     BoundTemplate = wiseguy.template.bound_template(template_set.add)
 
     class template_1(BoundTemplate):
-        template = wiseguy.html.jade("html")
+        element = wiseguy.html.jade("html")
         transforms = []
 
     class template_2(BoundTemplate):
-        template = wiseguy.html.jade("html")
+        element = wiseguy.html.jade("html")
         transforms = []
 
     class template_3(BoundTemplate):
-        template = wiseguy.html.jade("html")
+        element = wiseguy.html.jade("html")
         transforms = []
 
     assert template_1 in template_set
@@ -172,7 +172,7 @@ def test_bound_template():
 
 def test_Fragment():
     class fragment(wiseguy.template.Fragment):
-        template = wiseguy.html.jade(
+        element = wiseguy.html.jade(
 '''
 html
   head
@@ -182,13 +182,13 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "head",
-                lambda head, template: template.insert("head title", "flibble")),
+                lambda head, element: element.insert("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 "body",
-                lambda body, template: template.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
+                lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
 
     html = fragment(dict(body="Foo")).to_string().strip()
     expected = """
@@ -216,16 +216,16 @@ html
 def test_SubTemplate():
     class master(wiseguy.template.SubTemplate):
         class flibble(wiseguy.template.Fragment):
-            template = wiseguy.html.jade("""div: p""")
+            element = wiseguy.html.jade("""div: p""")
             transforms = [wiseguy.template.Transform(
                 "p_content",
-                lambda template, p_content: template.insert("p", p_content))]
+                lambda element, p_content: element.insert("p", p_content))]
 
         class flamble(wiseguy.template.Fragment):
-            template = wiseguy.html.jade("""p: span""")
+            element = wiseguy.html.jade("""p: span""")
             transforms = [wiseguy.template.Transform(
                 "span_content",
-                lambda template, span_content: template.insert("span", span_content))]
+                lambda element, span_content: element.insert("span", span_content))]
 
     result = master(dict())
     assert len(result) == 2
@@ -254,16 +254,16 @@ def test_register_template():
 
     @wiseguy.template.register(template_dict)
     class template_1(wiseguy.template.Template):
-        template = wiseguy.html.jade("html")
+        element = wiseguy.html.jade("html")
         transforms = []
 
     @wiseguy.template.register(template_dict)
     class template_2(wiseguy.template.Template):
-        template = wiseguy.html.jade("html")
+        element = wiseguy.html.jade("html")
         transforms = []
 
     class template_3(wiseguy.template.Template):
-        template = wiseguy.html.jade("html")
+        element = wiseguy.html.jade("html")
         transforms = []
 
     assert template_1 in template_dict.values()
@@ -276,25 +276,25 @@ def test_register_template():
 
 def test_extends():
     class master(wiseguy.template.Template):
-        template = wiseguy.html.jade('''
+        element = wiseguy.html.jade('''
 html
   head
   body''')
         transforms = [
             wiseguy.template.Transform(
                 "main_body",
-                lambda template, main_body: template.insert("body", main_body))]
+                lambda element, main_body: element.insert("body", main_body))]
 
     @wiseguy.template.extends(master)
     class index(wiseguy.template.SubTemplate):
         class main_body(wiseguy.template.Fragment):
-            template = wiseguy.html.jade('''
+            element = wiseguy.html.jade('''
 div
   p''')
             transforms = [
                 wiseguy.template.Transform(
                     "flibble",
-                    lambda template, flibble: template.insert("p", flibble))]
+                    lambda element, flibble: element.insert("p", flibble))]
 
     assert len(index.transforms) == 1
     result = index(dict())
