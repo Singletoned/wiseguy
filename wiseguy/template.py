@@ -4,6 +4,7 @@ import collections, copy, functools, contextlib
 
 import lxml.html
 
+
 class Transform(object):
     def __init__(self, keys, action):
         if isinstance(keys, basestring):
@@ -24,6 +25,7 @@ class Transform(object):
                 self.keys.remove(key)
         if not self.keys:
             self.applied = True
+
 
 class TemplateMeta(type):
     applied_transforms = []
