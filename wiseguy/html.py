@@ -55,7 +55,11 @@ class HTMLCompiler(pyjade.compiler.Compiler):
 
 
 def jade(src, context=None):
-    text = process_jade(src, context=context)
+    import wiseguy.jade_mixins
+    new_context = dict(wiseguy.jade_mixins.mixins)
+    if context:
+        new_context.update(context)
+    text = process_jade(src, context=new_context)
     el = lxml.html.fromstring(text, parser=parser)
     return el
 
