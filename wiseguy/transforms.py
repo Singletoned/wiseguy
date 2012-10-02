@@ -11,10 +11,21 @@ def stylesheet(href):
             'type': "text/css",
             'href': href})
 
+def script(href):
+    return ht.SCRIPT({'src': href})
+
 def add_stylesheet(href):
     return Transform(
         "url",
         lambda element, url: element.insert(
             "head",
             stylesheet(
+                url(href))))
+
+def add_script(href):
+    return Transform(
+        "url",
+        lambda element, url: element.insert(
+            "head",
+            script(
                 url(href))))
