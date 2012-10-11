@@ -3,7 +3,7 @@
 import types
 
 import pyjade.ext.html
-import lxml.html
+import lxml.html, lxml.builder
 
 import wiseguy.utils
 
@@ -37,32 +37,24 @@ parser.set_element_class_lookup(HtmlElementLookup())
 def Html(src):
     return lxml.html.fromstring(src, parser=parser)
 
-class HTMLCompiler(pyjade.compiler.Compiler):
-    def attributes(self, attrs):
-        return " ".join(['''%s="%s"''' % (k,v) for (k,v) in attrs.items()])
-
-    def visitAttributes(self, attrs):
-        classes = []
-        params = dict()
-        for attr in attrs:
-            if attr['name'] == 'class':
-                classes.append(attr['val'].strip("'"))
-            else:
-                params[attr['name']] = attr['val'].strip("'")
-        if classes:
-            params['class'] = " ".join(classes)
-        self.buf.append("".join([''' %s="%s"''' % (k,v) for (k,v) in params.items()]))
-
+class JadeCompiler(pyjade.ext.html.HTMLCompiler):
+    def __init__(self, node, **options):
+        super(pyjade.ext.html.HTMLCompiler, self).__init__(node, **options)
+        self.global_context = options.get('context', {})
 
 def jade(src, context=None):
-    text = process_jade(src, context=context)
+    import wiseguy.jade_mixins
+    new_context = dict(wiseguy.jade_mixins.mixins)
+    if context:
+        new_context.update(context)
+    text = process_jade(src, context=new_context)
     el = lxml.html.fromstring(text, parser=parser)
     return el
 
 def process_jade(src, context=None):
     parser = pyjade.parser.Parser(src)
     block = parser.parse()
-    compiler = pyjade.ext.html.HTMLCompiler(block, pretty=False, context=context)
+    compiler = JadeCompiler(block, pretty=False, context=context)
     return compiler.compile()
 
 def add_generator(elem, item):

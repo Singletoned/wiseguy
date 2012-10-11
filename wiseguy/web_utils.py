@@ -63,7 +63,7 @@ class LxmlEnv(object):
         local_context = dict(self.globals)
         local_context.update(context)
         html = getattr(self.env, template_name)(local_context)
-        return html.to_string()
+        return html
 
     def get_response(self, template_name, context, mimetype="text/html"):
         body = self.render(template_name, context)
