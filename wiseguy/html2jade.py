@@ -4,10 +4,11 @@ import wiseguy.html
 
 
 def render_el(el):
-    if el.text:
-        yield " ".join([el.tag, el.text])
-    else:
-        yield el.tag
+    parts = []
+    parts.append(el.tag)
+    if el.text and el.text.strip():
+        parts.append(" "+el.text)
+    yield "".join(parts)
     for sub_el in el:
         for line in render_el(sub_el):
             yield "  " + line
