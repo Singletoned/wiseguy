@@ -4,7 +4,10 @@ import wiseguy.html
 
 
 def render_el(el):
-    yield el.tag
+    if el.text:
+        yield " ".join([el.tag, el.text])
+    else:
+        yield el.tag
 
 def html2jade(text):
     html = wiseguy.html.Html(text)
