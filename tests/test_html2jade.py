@@ -3,8 +3,19 @@
 from wiseguy import html2jade
 
 
+data = (
+    (
+        '''<p>Hello</p>''',
+        '''p Hello'''),
+    (
+        '''<div><p>Hello</p><p>World</p></div>''',
+        '''
+div
+  p Hello
+  p World'''.strip()),
+)
+
 def test_simple():
-    html = '''<p>Hello</p>'''
-    expected = '''p Hello'''
-    result = html2jade.html2jade(html)
-    assert result == expected
+    for (html, expected) in data:
+        result = html2jade.html2jade(html)
+        assert result == expected

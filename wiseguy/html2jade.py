@@ -8,6 +8,9 @@ def render_el(el):
         yield " ".join([el.tag, el.text])
     else:
         yield el.tag
+    for sub_el in el:
+        for line in render_el(sub_el):
+            yield "  " + line
 
 def html2jade(text):
     html = wiseguy.html.Html(text)
