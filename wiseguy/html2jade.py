@@ -3,6 +3,19 @@
 import wiseguy.html
 
 
+handled_attributes = set(['class', 'id'])
+
+def make_attribute_pairs(el, attributes):
+    for attr in attributes:
+        yield '%s="%s"' % (attr, el.attrib[attr])
+
+def make_attributes(el):
+    attributes = set(el.attrib) - handled_attributes
+    if attributes:
+        yield "("
+        yield ", ".join(make_attribute_pairs(el, attributes))
+        yield ")"
+
 def render_tag(el):
     yield el.tag
     if el.attrib.has_key('id'):
@@ -10,6 +23,8 @@ def render_tag(el):
     if el.attrib.has_key('class'):
         for cls in el.attrib['class'].split():
             yield "." + cls.strip()
+    for item in make_attributes(el):
+        yield item
     if el.text and el.text.strip():
         yield " " + el.text
 
