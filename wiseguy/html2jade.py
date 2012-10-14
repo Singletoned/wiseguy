@@ -6,6 +6,8 @@ import wiseguy.html
 def render_el(el):
     parts = []
     parts.append(el.tag)
+    if el.attrib.has_key('class'):
+        parts.append("."+el.attrib['class'].strip())
     if el.text and el.text.strip():
         parts.append(" "+el.text)
     yield "".join(parts)
