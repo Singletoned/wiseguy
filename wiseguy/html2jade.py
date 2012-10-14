@@ -3,17 +3,18 @@
 import wiseguy.html
 
 
-def render_el(el):
-    parts = []
-    parts.append(el.tag)
+def render_tag(el):
+    yield el.tag
     if el.attrib.has_key('id'):
-        parts.append("#"+el.attrib['id'].strip())
+        yield "#" + el.attrib['id'].strip()
     if el.attrib.has_key('class'):
         for cls in el.attrib['class'].split():
-            parts.append("."+cls.strip())
+            yield "." + cls.strip()
     if el.text and el.text.strip():
-        parts.append(" "+el.text)
-    yield "".join(parts)
+        yield " " + el.text
+
+def render_el(el):
+    yield "".join(render_tag(el))
     for sub_el in el:
         for line in render_el(sub_el):
             yield "  " + line
