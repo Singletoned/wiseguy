@@ -26,7 +26,7 @@ def render_tag(el):
     for item in make_attributes(el):
         yield item
     if el.text and el.text.strip():
-        yield " " + el.text
+        yield " " + el.text.strip()
 
 def render_el(el):
     yield "".join(render_tag(el))
