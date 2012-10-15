@@ -84,7 +84,7 @@ World
     def test_comment(self):
         data = '''
 <p><!-- Flibble -->This is not a comment</p>'''
-        expected = '''<p>This is not a comment</p>'''
+        expected = '''<p><!-- Flibble -->This is not a comment</p>'''
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
         assert result == expected
 
@@ -184,6 +184,7 @@ A Form
 <p><!-- Flibble -->This is not a comment</p>'''
         expected = '''
 <p>
+  <!-- Flibble -->
   This is not a comment
 </p>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
@@ -192,25 +193,26 @@ A Form
 class Test_tidy_html(unittest.TestCase):
     def test_fragment(self):
         t = wg.html.Html(
-'''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
+u'''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End£</div>''')
         result = wg.html_tidy.tidy_html(t).strip()
         expected = '''
 <div class="bar" id="foo" style="bloop">
-  Hullo <strong>World!</strong><br>The End
+  Hullo <strong>World!</strong><br>The End&#163;
 </div>
 '''.strip()
         assert result == expected
 
     def test_document(self):
         t = wg.html.Html(
-'''
+u'''
 <html lang="en">
 <head>
 <title>
-A Form
+A Form£
 </title>
 </head>
 <body>
+<!-- And thus it begins... -->
 <form>
 <fieldset>
 <legend>
@@ -228,12 +230,13 @@ Name:
         expected = '''
 <html lang="en">
   <head>
-    <title>A Form</title>
+    <title>A Form&#163;</title>
   </head>
   <body>
+    <!-- And thus it begins... -->
     <form>
       <fieldset>
-        <legend>Your Information</legend>
+        <legend><!-- Not the legend of King Arthur! -->Your Information</legend>
         <div class="control-group">
           <label class="control-label" for="name">Name:</label>
           <input id="name">
