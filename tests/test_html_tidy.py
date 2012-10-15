@@ -84,7 +84,7 @@ World
     def test_comment(self):
         data = '''
 <p><!-- Flibble -->This is not a comment</p>'''
-        expected = '''<p>This is not a comment</p>'''
+        expected = '''<p><!-- Flibble -->This is not a comment</p>'''
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
         assert result == expected
 
@@ -184,6 +184,7 @@ A Form
 <p><!-- Flibble -->This is not a comment</p>'''
         expected = '''
 <p>
+  <!-- Flibble -->
   This is not a comment
 </p>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
@@ -211,6 +212,7 @@ A Form
 </title>
 </head>
 <body>
+<!-- And thus it begins... -->
 <form>
 <fieldset>
 <legend>
@@ -231,9 +233,10 @@ Name:
     <title>A Form</title>
   </head>
   <body>
+    <!-- And thus it begins... -->
     <form>
       <fieldset>
-        <legend>Your Information</legend>
+        <legend><!-- Not the legend of King Arthur! -->Your Information</legend>
         <div class="control-group">
           <label class="control-label" for="name">Name:</label>
           <input id="name">

@@ -45,7 +45,9 @@ def _render_content(el):
             yield line
 
 def _render_el(el, indent_level=1):
-    if not isinstance(el, lxml.html.HtmlComment):
+    if isinstance(el, lxml.html.HtmlComment):
+        yield str(el)
+    else:
         yield _render_open_tag(el)
         if el.text:
             yield el.text.encode('ascii', 'xmlcharrefreplace')
@@ -84,7 +86,9 @@ def _render_block_tag(el, indent_level=0):
         else:
             yield _render_open_tag(el)
     else:
-        if not isinstance(el, lxml.html.HtmlComment):
+        if isinstance(el, lxml.html.HtmlComment):
+            yield str(el)
+        else:
             yield _render_open_tag(el)
             if has_inline_content(el):
                 yield indent+"".join(_render_content(el)).strip()
