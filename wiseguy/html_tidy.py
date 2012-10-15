@@ -112,4 +112,4 @@ def normalise_html(el):
     return "\n".join([item.strip() for item in _render_el(el) if item.strip()])
 
 def tidy_html(el):
-    return "\n".join(_render_el_tidy(el))
+    return u"\n".join(_render_el_tidy(el))

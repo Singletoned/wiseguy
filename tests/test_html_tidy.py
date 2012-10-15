@@ -193,22 +193,22 @@ A Form
 class Test_tidy_html(unittest.TestCase):
     def test_fragment(self):
         t = wg.html.Html(
-'''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>''')
+u'''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End£</div>''')
         result = wg.html_tidy.tidy_html(t).strip()
         expected = '''
 <div class="bar" id="foo" style="bloop">
-  Hullo <strong>World!</strong><br>The End
+  Hullo <strong>World!</strong><br>The End&#163;
 </div>
 '''.strip()
         assert result == expected
 
     def test_document(self):
         t = wg.html.Html(
-'''
+u'''
 <html lang="en">
 <head>
 <title>
-A Form
+A Form£
 </title>
 </head>
 <body>
@@ -230,7 +230,7 @@ Name:
         expected = '''
 <html lang="en">
   <head>
-    <title>A Form</title>
+    <title>A Form&#163;</title>
   </head>
   <body>
     <!-- And thus it begins... -->
