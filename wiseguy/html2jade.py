@@ -39,6 +39,8 @@ def render_el(el):
     for sub_el in el:
         for line in render_el(sub_el):
             yield "  " + line
+    if el.tail and el.tail.strip():
+        yield "  | %s" % el.tail.strip()
 
 def html2jade(text):
     html = wiseguy.html.Html(text)
