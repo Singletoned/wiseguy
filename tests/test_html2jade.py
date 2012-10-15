@@ -12,8 +12,8 @@ case_names = set(f.namebase for f in html2jade_dir.files())
 
 def test_simple():
     def do_test(case_name):
-        html = html2jade_dir.child("%s.html"%case_name).text()
-        expected = html2jade_dir.child("%s.jade"%case_name).text().strip()
+        html = html2jade_dir.child("%s.html"%case_name).text('utf8')
+        expected = html2jade_dir.child("%s.jade"%case_name).text('utf8').strip()
         result = html2jade.html2jade(html)
         assert result == expected
 
