@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import lxml.html
+
 import wiseguy.html
 
 
@@ -29,7 +31,11 @@ def render_tag(el):
         yield " " + el.text.strip()
 
 def render_el(el):
-    yield "".join(render_tag(el))
+    if isinstance(el, lxml.html.HtmlComment):
+        for line in el.text.strip().split("\n"):
+            yield "// " + line.strip()
+    else:
+        yield "".join(render_tag(el))
     for sub_el in el:
         for line in render_el(sub_el):
             yield "  " + line
