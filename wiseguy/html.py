@@ -25,6 +25,11 @@ class HtmlElement(lxml.html.HtmlElement):
         for el in elements:
             super(lxml.html.HtmlElement, el.getparent()).replace(el, new_el)
 
+    def set_attr(self, path, attr, value):
+        elements = self.cssselect(path)
+        for el in elements:
+            el.attrib[attr] = value
+
     join = wiseguy.utils.join
 
 class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
