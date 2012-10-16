@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.2.6.1'
+version = '0.2.7'
 
 setup(
     name='wiseguy',
@@ -15,7 +15,7 @@ setup(
     author_email='singletoned@gmail.com',
     url='http://singletoned.net',
     license='',
-    scripts=["bin/parse_jade.py"],
+    scripts=["wiseguy/scripts/parse_jade.py", "wiseguy/scripts/html2jade.py"],
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,

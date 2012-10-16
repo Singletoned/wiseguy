@@ -34,7 +34,10 @@ class HtmlElement(lxml.html.HtmlElement):
 
 class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
     def lookup(self, node_type, document, namespace, name):
-        return HtmlElement
+        if node_type == 'comment':
+            return lxml.html.HtmlComment
+        else:
+            return HtmlElement
 
 parser = lxml.html.HTMLParser()
 parser.set_element_class_lookup(HtmlElementLookup())
