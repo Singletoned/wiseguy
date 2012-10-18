@@ -41,10 +41,14 @@ def test_fix_urls():
 html
   head
     link(href="/static/blueprint.css", type="text/css")
+    link(href="../static/blueprint.css", type="text/css")
     script(src="/static/jquery.css")
+    script(src="../static/jquery.css")
   body
     p
-      a(href="/a_link.html")
+      a(href="/a_link.html?foo=bar")
+      a(href="http://example.com?foo=bar")
+    form(method="POST", action="/form_handler")
     form(method="POST", action="form_handler")
 ''')
 
@@ -56,10 +60,12 @@ html
 <html>
 <head>
 <link href="/mountpoint/static/blueprint.css" type="text/css">
-<script src="/mountpoint/static/jquery.css"></script>
+<link href="../static/blueprint.css" type="text/css">
+<script src="/mountpoint/static/jquery.css"></script><script src="../static/jquery.css"></script>
 </head>
 <body>
-<p><a href="/mountpoint/a_link.html"></a></p>
+<p><a href="/mountpoint/a_link.html?foo=bar"></a><a href="http://example.com?foo=bar"></a></p>
+<form method="POST" action="/mountpoint/form_handler"></form>
 <form method="POST" action="form_handler"></form>
 </body>
 </html>

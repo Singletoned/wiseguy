@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import urlparse
+
 import cssselect
 css = cssselect.HTMLTranslator().css_to_xpath
 
@@ -44,8 +46,17 @@ def _fix_urls(element, url):
     for (tag, attr) in _url_fixable_tags:
         path = css("%s[%s]" % (tag, attr))
         for el in element.xpath(path):
-            if el.attrib[attr].startswith("/"):
-                el.attrib[attr] = url(el.attrib[attr])
+            value = el.attrib[attr]
+            parts = urlparse.urlparse(value)
+            if (not parts.netloc) and (parts.path.startswith("/")):
+                new_url = urlparse.urlunparse((
+                    parts.scheme,
+                    parts.netloc,
+                    url(parts.path),
+                    parts.params,
+                    parts.query,
+                    parts.fragment))
+                el.attrib[attr] = new_url
 
 def fix_urls():
     return Transform(
