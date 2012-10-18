@@ -39,7 +39,8 @@ _url_fixable_tags = set([
     ("link", "href"),
     ("script", "src"),
     ("a", "href"),
-    ("form", "action")
+    ("form", "action"),
+    ("img", "src"),
 ])
 
 def _fix_urls(element, url):
