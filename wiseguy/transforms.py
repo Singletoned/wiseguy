@@ -21,19 +21,17 @@ def script(href):
 
 def add_stylesheet(href):
     return Transform(
-        "url",
-        lambda element, url: element.insert(
+        [],
+        lambda element: element.insert(
             "head",
-            stylesheet(
-                url(href))))
+            stylesheet(href)))
 
 def add_script(href):
     return Transform(
-        "url",
-        lambda element, url: element.insert(
+        [],
+        lambda element: element.insert(
             "head",
-            script(
-                url(href))))
+            script(href)))
 
 _url_fixable_tags = set([
     ("link", "href"),
