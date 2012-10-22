@@ -41,7 +41,10 @@ def render_el(el):
         for line in render_el(sub_el):
             yield u"  " + line
     if el.tail and el.tail.strip():
-        yield u"  | %s" % el.tail.strip()
+        if el.tag in lxml.html.defs.empty_tags:
+            yield u"| %s" % el.tail.strip()
+        else:
+            yield u"  | %s" % el.tail.strip()
 
 def html2jade(text):
     html = wiseguy.html.Html(text)
