@@ -308,3 +308,11 @@ def test_set_attr():
     result = element.normalise()
     expected = wiseguy.html.jade('div: a.foo(href="wibble")').normalise()
     assert result == expected
+
+def test_set_text():
+    element = wiseguy.html.jade("div: a.foo")
+    set_text = wiseguy.template.set_text(".foo", lambda bar: bar)
+    set_text(element, bar="wibble")
+    result = element.normalise()
+    expected = wiseguy.html.jade('div: a.foo wibble').normalise()
+    assert result == expected

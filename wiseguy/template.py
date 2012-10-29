@@ -122,3 +122,9 @@ def set_attr(path, attr, content_func):
             attr,
             content_func(**kwargs))
     return _set_attr
+
+def set_text(path, content_func):
+    def _set_text(element, **kwargs):
+        for el in element.cssselect(path):
+            el.text = content_func(**kwargs)
+    return _set_text
