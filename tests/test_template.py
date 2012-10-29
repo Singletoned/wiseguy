@@ -300,3 +300,11 @@ div
     result = index(dict())
     expected = "<html>\n<head></head>\n<body><div><p></p></div></body>\n</html>\n"
     assert expected == result
+
+def test_set_attr():
+    element = wiseguy.html.jade("div: a.foo")
+    set_attr = wiseguy.template.set_attr(".foo", "href", lambda bar: bar)
+    set_attr(element, bar="wibble")
+    result = element.normalise()
+    expected = wiseguy.html.jade('div: a.foo(href="wibble")').normalise()
+    assert result == expected

@@ -114,3 +114,11 @@ def extends(template):
             wrapped_template.transforms)
         return new_template
     return _decorator
+
+def set_attr(path, attr, content_func):
+    def _set_attr(element, **kwargs):
+        element.set_attr(
+            path,
+            attr,
+            content_func(**kwargs))
+    return _set_attr
