@@ -6,10 +6,15 @@ import pyjade.ext.html
 import lxml.html, lxml.builder
 
 import wiseguy.utils
+import wiseguy.html_tidy
+
 
 class HtmlElement(lxml.html.HtmlElement):
     def to_string(self, pretty=True):
         return lxml.html.tostring(self, pretty_print=pretty)
+
+    def normalise(self):
+        return wiseguy.html_tidy.normalise_html(self)
 
     def insert(self, path, text_or_el):
         elements = self.cssselect(path)
