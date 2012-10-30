@@ -14,6 +14,33 @@ from wiseguy import web_utils as wu, utils
 
 var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
+def test_do_dispatch():
+    url_map = wu.UrlMap()
+    url_map.expose('/foo/bar')(lambda r: ("Foo Bar", r))
+    url_map.expose('/foo/<path:path_info>')(lambda r: ("Foo Bar Baz", r))
+    url_map.expose('/foo/flibble/<path:path_info>')(lambda r: ("Foo Flibble Wibble Dibble", r))
+    app = utils.MockObject(url_map=url_map)
+
+    req = wz.Request.from_values(path="/foo/bar")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
+    (res, r) = wu._do_dispatch(app, req)
+    assert res == "Foo Bar"
+    assert r.environ["SCRIPT_NAME"] == "/foo/bar"
+    assert r.environ["PATH_INFO"] == ""
+
+    req = wz.Request.from_values(path="/foo/bar/baz")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
+    (res, r) = wu._do_dispatch(app, req)
+    assert res == "Foo Bar Baz"
+    assert r.environ["SCRIPT_NAME"] == "/foo"
+    assert r.environ["PATH_INFO"] == "/bar/baz"
+
+    req = wz.Request.from_values(path="/foo/flibble/wibble/dibble")
+    req.map_adapter = url_map.bind_to_environ(req.environ)
+    (res, r) = wu._do_dispatch(app, req)
+    assert res == "Foo Flibble Wibble Dibble"
+    assert r.environ["SCRIPT_NAME"] == "/foo/flibble"
+    assert r.environ["PATH_INFO"] == "/wibble/dibble"
 
 def test_base_app():
     class TestRequest(wz.BaseRequest):
@@ -21,13 +48,13 @@ def test_base_app():
             super(self.__class__, self).__init__(environ)
             self.url = wz.Href("/submount")
 
-    url_map = wz.routing.Map([
-        wz.routing.Rule('/', endpoint=lambda r: wz.Response("Index")),
-        wz.routing.Rule('/foo', endpoint=lambda r: wz.Response("Foo Page")),
-        wz.routing.Rule('/bar', endpoint=lambda r: ('bar', 'text/html', {'bar_var': "flumble"})),
-        wz.routing.Rule('/wrong', endpoint=lambda request: wz.redirect(request.url('/baz'))),
-        wz.routing.Rule('/config', endpoint=lambda request: wz.Response(request.app.config['mountpoint'])),
-        ])
+    url_map = wu.UrlMap()
+    url_map.expose('/')(lambda r: wz.Response("Index"))
+    url_map.expose('/foo')(lambda r: wz.Response("Foo Page"))
+    url_map.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
+    url_map.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
+    url_map.expose('/config')(lambda request: wz.Response(request.app.config['mountpoint']))
+
     env = wu.JinjaEnv(
         j2.Environment(
             loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
@@ -36,7 +63,9 @@ def test_base_app():
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
         url_map=url_map,
-        env=env,
+        env=env)
+    wsgi_app = wu.wsgi_wrapper(
+        app,
         request_class=TestRequest)
 
     assert app.mountpoint() == u"/submount"
@@ -49,35 +78,35 @@ def test_base_app():
         assert rule.rule.startswith('/submount')
 
     environ = wz.test.create_environ('/submount/')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Index"]
 
     environ = wz.test.create_environ('/submount')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     response = list(response)[0]
     assert "Redirecting..." in response
     assert "/submount/" in response
 
     environ = wz.test.create_environ('/submount/foo')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Foo Page"]
 
     environ = wz.test.create_environ('/submount/bar')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Bar Page flumble"]
 
     environ = wz.test.create_environ('/submount/config')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["/submount"]
 
     environ = wz.test.create_environ('/submount/wrong')
-    response = app(environ, lambda s, h: s)
+    response = wsgi_app(environ, lambda s, h: s)
     response = list(response)[0]
     assert "Redirecting..." in response
     assert "/submount/baz" in response
 
 def test_base_app_minimal():
-    url_map = wz.routing.Map()
+    url_map = wu.UrlMap()
     env = j2.Environment()
     application = wu.BaseApp(
         config=dict(),
@@ -86,7 +115,7 @@ def test_base_app_minimal():
 
 def test_make_url_map():
     flibble_conv = lambda: "flibble"
-    sub_url_map = wz.routing.Map(
+    sub_url_map = wu.UrlMap(
         [
             wz.routing.Rule('/', endpoint="."),
             wz.routing.Rule('/foo', endpoint="foo")],
@@ -107,6 +136,8 @@ def test_JinjaEnv():
 
     response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data == "Foo Page flibble"
+
+    assert env.from_string("foo").render() == "foo"
 
 def test_LxmlEnv():
     env = wu.LxmlEnv(
@@ -135,51 +166,57 @@ def test_render():
     response = wrapped_foo(mock_request)
     assert response is test_response
 
-def test_create_expose():
-    def do_test(url_map, expose):
-        @expose(u"/test")
-        def get(param1):
-            u"This is the get function"
-            return "GET " + param1
+def test_UrlMap():
+    url_map = wu.UrlMap()
 
-        assert get.__doc__ == u"This is the get function"
-        assert get.__name__ == "get"
+    @url_map.expose(u"/test")
+    def get(param1):
+        u"This is the get function"
+        return "GET " + param1
 
-        @expose(u"/test", methods=[u"POST"])
-        def post(param1):
-            u"This is the post function"
-            return "POST " + param1
+    assert get.__doc__ == u"This is the get function"
+    assert get.__name__ == "get"
 
-        assert post.__doc__ == u"This is the post function"
-        assert post.__name__ == "post"
+    @url_map.expose(u"/test", methods=[u"POST"])
+    def post(param1):
+        u"This is the post function"
+        return "POST " + param1
 
-        @expose(u"/test_both", methods=[u"GET", "POST"])
-        def post_and_get(param1):
-            u"This is the post_and_get function"
-            return "GET POST " + param1
+    assert post.__doc__ == u"This is the post function"
+    assert post.__name__ == "post"
 
-        assert post_and_get.__doc__ == u"This is the post_and_get function"
-        assert post_and_get.__name__ == "post_and_get"
+    @url_map.expose(u"/test_both", methods=[u"GET", "POST"])
+    def post_and_get(param1):
+        u"This is the post_and_get function"
+        return "GET POST " + param1
 
-        def check_url(_url, _method, _endpoint, _response):
-            urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
-            endpoint, kwargs = urls.match()
-            assert endpoint == _endpoint, u"Should have chosen the correct function"
-            res = endpoint("p1", **kwargs)
-            assert res == _response
+    assert post_and_get.__doc__ == u"This is the post_and_get function"
+    assert post_and_get.__name__ == "post_and_get"
 
-        check_url(u"/test", u"GET", get, u"GET p1")
-        check_url(u"/test", u"POST", post, u"POST p1")
-        check_url(u"/test_both", u"GET", post_and_get, u"GET POST p1")
-        check_url(u"/test_both", u"POST", post_and_get, u"GET POST p1")
+    lambda_func = url_map.expose('/test_lambda')(lambda request: "This is a lambda")
+    assert lambda_func.__name__ == "<lambda>"
 
-    url_map_1 = wz.routing.Map()
-    expose_1 = wu.create_expose(url_map_1)
-    url_map_2 = wu.UrlMap()
-    expose_2 = url_map_2.expose
+    class FooClass(object):
+        def __call__(self, request):
+            return "This is a callable object"
 
-    yield do_test, url_map_1, expose_1
-    yield do_test, url_map_2, expose_2
+    url_map.expose(u"/test_callable", endpoint="callable")(FooClass())
+
+    def check_url(_url, _method, _endpoint_name, _response):
+        urls = url_map.bind_to_environ(utils.MockEnv(_url, _method))
+        endpoint_name, kwargs = urls.match()
+        if _endpoint_name:
+            assert endpoint_name == _endpoint_name, u"Should have chosen the correct function"
+        endpoint = url_map.views[endpoint_name]
+        res = endpoint("p1", **kwargs)
+        assert res == _response
+
+    check_url(u"/test", u"GET", 'get', u"GET p1")
+    check_url(u"/test", u"POST", 'post', u"POST p1")
+    check_url(u"/test_both", u"GET", 'post_and_get', u"GET POST p1")
+    check_url(u"/test_both", u"POST", 'post_and_get', u"GET POST p1")
+    check_url(u"/test_lambda", u"GET", '', u"This is a lambda")
+    check_url(u"/test_callable", u"GET", '', u"This is a callable object")
 
 
 def test_UUIDConverter():
@@ -260,6 +297,27 @@ def test_make_client_env():
     assert not "flibble" in result
     check_result(result)
 
+def test_Controller():
+    class FooController(wu.Controller):
+        url_map = wu.UrlMap()
+
+        @url_map.expose(u"/")
+        def index(request):
+            assert request.foo
+            return "This is the Index"
+
+        @url_map.expose(u"/bar")
+        def bar(request):
+            assert request.foo
+            return "This is the bar controller"
+
+    foo_controller = FooController()
+
+    req = wz.Request.from_values(path="/", base_url="http://example.com/foo")
+    req.foo = True
+
+    res = foo_controller(req)
+    assert res == "This is the Index"
 
 class TestFormHandler(unittest.TestCase):
     class FooForm(wu.FormHandler):
@@ -360,12 +418,14 @@ def test_url_map_submount():
             return "Hullo"
 
     environ = wz.test.create_environ('/flibble')
-    endpoint, kwargs = FooController.url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = FooController.url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
     environ = wz.test.create_environ('/foo/flibble')
-    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
@@ -378,7 +438,8 @@ def test_url_map_submount():
             return "Hullo"
 
     environ = wz.test.create_environ('/flibble')
-    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
@@ -395,7 +456,8 @@ def test_url_map_submount():
         pass
 
     environ = wz.test.create_environ('/flooble/flibble')
-    endpoint, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint_name, kwargs = url_map.bind_to_environ(environ).match()
+    endpoint = url_map.views[endpoint_name]
     result = endpoint(**kwargs)
     assert result == "Hullo"
 

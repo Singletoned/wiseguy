@@ -20,6 +20,7 @@ application = wiseguy.web_utils.BaseApp(
     config=dict(),
     url_map=url_map,
     env=env)
+application = wiseguy.web_utils.wsgi_wrapper(application)
 
 def test_hello_world():
     import testino
