@@ -46,13 +46,13 @@ class TemplateMeta(type):
                 element=copy.deepcopy(self.element),
                 transforms=copy.deepcopy(self.transforms)))
 
-    def render_lxml(self, **kwargs):
+    def render_lxml(self, kwargs):
         template = self.copy()
         template.apply(kwargs)
         return template.element
 
     def __call__(self, kwargs):
-        html = self.render_lxml(**kwargs)
+        html = self.render_lxml(kwargs)
         return lxml.html.tostring(html, pretty_print=True)
 
 
@@ -62,7 +62,7 @@ class Template(object):
 
 class FragmentMeta(TemplateMeta):
     def __call__(self, context):
-        return self.render_lxml(**context)
+        return self.render_lxml(context)
 
 
 class Fragment(object):
@@ -79,7 +79,7 @@ class SubTemplateMeta(TemplateMeta):
 
     def __call__(self, context):
         return dict(
-            (k, getattr(self, k).render_lxml(**context)) for k in self.keys)
+            (k, getattr(self, k).render_lxml(context)) for k in self.keys)
 
 
 class SubTemplate(object):
