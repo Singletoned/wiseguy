@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import lxml.etree
+
 import wiseguy.html
+
+
+Comment = lxml.etree.Comment
 
 builder = wiseguy.html.HtmlBuilder()
 

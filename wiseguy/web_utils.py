@@ -11,33 +11,53 @@ import jinja2
 from wiseguy import form_fields, utils
 
 
+def wsgi_wrapper(app, request_class=wz.Request):
+    def application(environ, start_response):
+        req = request_class(environ)
+        res = app(req)
+        res = res(environ, start_response)
+        return res
+    return application
+
+def _do_dispatch(app, req):
+    try:
+        rule, kwargs = req.map_adapter.match(return_rule=True)
+        if kwargs.has_key('path_info'):
+            path_info = kwargs.pop('path_info')
+            if not path_info.startswith("/"):
+                path_info = "/" + path_info
+            while path_info != req.environ['PATH_INFO']:
+                popped = wz.wsgi.pop_path_info(req.environ)
+                assert popped
+        else:
+            while req.environ['PATH_INFO']:
+                wz.wsgi.pop_path_info(req.environ)
+        endpoint = app.url_map.views[rule.endpoint]
+        res = endpoint(req, **kwargs)
+    except wz.exceptions.HTTPException, e:
+        res = e.get_response(req.environ)
+    return res
+
 class BaseApp(object):
-    def __init__(self, config, url_map, env, request_class=wz.Request):
+    def __init__(self, config, url_map, env):
         self.config = config
         self.env = env
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
-        self._request_class = request_class
         self.env.globals.update(
             dict(url=self.mountpoint))
         self.url_map = make_url_map(
             self.mountpoint(),
             url_map)
 
-    def __call__(self, environ, start_response):
-        req = self._request_class(environ)
+    def __call__(self, req):
         req.app = self
-        req.map_adapter = self.url_map.bind_to_environ(environ)
-        try:
-            endpoint, kwargs = req.map_adapter.match()
-            res = endpoint(req, **kwargs)
-            if not isinstance(res, wz.BaseResponse):
-                template_name, mimetype, values = res
-                values = dict(request=req, **values)
-                res = self.env.get_response(template_name, values, mimetype)
-        except wz.exceptions.HTTPException, e:
-            res = e
-        res = res(environ, start_response)
-        return wz.ClosingIterator(res)
+        req.map_adapter = self.url_map.bind_to_environ(req.environ)
+        res = _do_dispatch(self, req)
+        if not isinstance(res, wz.BaseResponse):
+            template_name, mimetype, values = res
+            values = dict(request=req, **values)
+            res = self.env.get_response(template_name, values, mimetype)
+        return res
 
 class JinjaEnv(object):
     def __init__(self, env):
@@ -51,6 +71,9 @@ class JinjaEnv(object):
         body = self.render(template_name, context)
         res = wz.Response(body, mimetype=mimetype)
         return res
+
+    def from_string(self, text):
+        return self.env.from_string(text)
 
 class LxmlEnv(object):
     def __init__(self, env, global_context=None):
@@ -71,10 +94,11 @@ class LxmlEnv(object):
         return res
 
 def make_url_map(mountpoint, sub_url_map):
-    url_map = wz.routing.Map([
+    url_map = UrlMap([
         wz.routing.Submount(
             mountpoint,
             sub_url_map.iter_rules())],
+        views=sub_url_map.views,
         converters=sub_url_map.converters)
     return url_map
 
@@ -109,26 +133,32 @@ def make_client_env(var_dir, client, extra_globals=None):
         env.globals.update(extra_globals)
     return env
 
-def create_expose(url_map):
-    def expose(rule, methods=['GET'], **kw):
-        def decorate(f):
-            kw['endpoint'] = f
-            url_map.add(wz.routing.Rule(rule, methods=methods, **kw))
-            return f
-        return decorate
-    return expose
-
 
 class UrlMap(wz.routing.Map):
+    def __init__(self, rules=None, views=None, *args, **kwargs):
+        if not views:
+            views = dict()
+        self.views = views
+        super(UrlMap, self).__init__(rules, *args, **kwargs)
+
     def expose(self, rule, methods=['GET'], **kw):
-        def decorate(f):
-            kw['endpoint'] = f
+        def decorate(func):
+            if not kw.has_key('endpoint'):
+                if func.__name__ == "<lambda>":
+                    endpoint = repr(func)
+                else:
+                    endpoint = func.__name__
+                kw['endpoint'] = endpoint
+            else:
+                endpoint = kw['endpoint']
+            self.views[endpoint] = func
             self.add(wz.routing.Rule(rule, methods=methods, **kw))
-            return f
+            return func
         return decorate
 
     def expose_submount(self, path):
         def decorate(f):
+            self.views.update(f.url_map.views)
             self.add(
                 wz.routing.Submount(
                     path,
@@ -195,6 +225,11 @@ def create_require(predicate, response_builder):
         return decorated
     return require
 
+class Controller(object):
+    def __call__(self, request):
+        request.map_adapter =self.url_map.bind_to_environ(request.environ)
+        res = _do_dispatch(self, request)
+        return res
 
 class Handler(object):
     def __new__(cls, _parent=None):
