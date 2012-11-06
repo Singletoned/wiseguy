@@ -131,3 +131,10 @@ def set_text(path, content_func):
         for el in element.cssselect(path):
             el.text = content_func(**kwargs)
     return _set_text
+
+def replace(path, content_func):
+    def _replace(element, **kwargs):
+        element.replace(
+            path,
+            content_func(**kwargs))
+    return _replace

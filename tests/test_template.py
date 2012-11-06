@@ -316,3 +316,11 @@ def test_set_text():
     result = element.normalise()
     expected = wiseguy.html.jade('div: a.foo wibble').normalise()
     assert result == expected
+
+def test_replace():
+    element = wiseguy.html.jade("div: a.foo")
+    replace = wiseguy.template.replace(".foo", lambda bar: wiseguy.html.jade("div %s"%bar))
+    replace(element, bar="wibble")
+    result = element.normalise()
+    expected = wiseguy.html.jade('div: div wibble').normalise()
+    assert result == expected
