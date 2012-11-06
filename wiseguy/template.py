@@ -51,9 +51,12 @@ class TemplateMeta(type):
         template.apply(kwargs)
         return template.element
 
-    def __call__(self, kwargs):
+    def render(self, kwargs):
         html = self.render_lxml(kwargs)
         return lxml.html.tostring(html, pretty_print=True)
+
+    def __call__(self, kwargs):
+        return self.render_lxml(kwargs)
 
 
 class Template(object):
@@ -79,7 +82,7 @@ class SubTemplateMeta(TemplateMeta):
 
     def __call__(self, context):
         return dict(
-            (k, getattr(self, k).render_lxml(context)) for k in self.keys)
+            (k, getattr(self, k)(context)) for k in self.keys)
 
 
 class SubTemplate(object):

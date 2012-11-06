@@ -94,7 +94,7 @@ html
                     wiseguy.html.Html("%s, %s"%(head, body))))]
 
     template.apply(dict(head="flamble"))
-    html = template(dict(body="flimble")).strip()
+    html = template.render(dict(body="flimble")).strip()
     expected = """
 <html>
 <head><title>flibble</title></head>
@@ -126,7 +126,7 @@ html
                 "body",
                 lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
 
-    html = template(dict(body="Foo")).strip()
+    html = template.render(dict(body="Foo")).strip()
     expected = """
 <html>
 <head><title></title></head>
@@ -137,7 +137,7 @@ html
 </html>""".strip()
     assert html == expected
 
-    html = template(dict(body="Bar")).strip()
+    html = template.render(dict(body="Bar")).strip()
     expected = """
 <html>
 <head><title></title></head>
@@ -297,7 +297,7 @@ div
                     lambda element, flibble: element.insert("p", flibble))]
 
     assert len(index.transforms) == 1
-    result = index(dict())
+    result = index.render(dict())
     expected = "<html>\n<head></head>\n<body><div><p></p></div></body>\n</html>\n"
     assert expected == result
 
