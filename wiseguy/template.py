@@ -138,3 +138,10 @@ def replace(path, content_func):
             path,
             content_func(**kwargs))
     return _replace
+
+def insert(path, content_func):
+    def _insert(element, **kwargs):
+        element.insert(
+            path,
+            content_func(**kwargs))
+    return _insert
