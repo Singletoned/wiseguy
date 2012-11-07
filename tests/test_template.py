@@ -39,6 +39,7 @@ html
     context = dict(body="Foo")
 
     template.apply(context)
+    assert template.keys() == set(["head"])
 
     html = template.element.to_string().strip()
     expected = """
@@ -56,6 +57,7 @@ html
 
     context = dict(body="Bar", head=None)
     template.apply(context)
+    assert template.keys() == set()
 
     html = template.element.to_string().strip()
     expected = """
@@ -94,6 +96,8 @@ html
                     wiseguy.html.Html("%s, %s"%(head, body))))]
 
     template.apply(dict(head="flamble"))
+    assert template.keys() == set(["body"])
+
     html = template.render(dict(body="flimble")).strip()
     expected = """
 <html>
@@ -127,6 +131,7 @@ html
                 lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
 
     html = template.render(dict(body="Foo")).strip()
+    assert template.keys() == set(["body", "head"])
     expected = """
 <html>
 <head><title></title></head>
@@ -138,6 +143,7 @@ html
     assert html == expected
 
     html = template.render(dict(body="Bar")).strip()
+    assert template.keys() == set(["body", "head"])
     expected = """
 <html>
 <head><title></title></head>

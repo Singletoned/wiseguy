@@ -30,6 +30,12 @@ class Transform(object):
 class TemplateMeta(type):
     applied_transforms = []
 
+    def keys(self):
+        keys = set()
+        for transform in self.transforms:
+            keys = keys | transform.keys
+        return keys
+
     def apply(self, context):
         for transform in list(self.transforms):
             transform.apply(context)
