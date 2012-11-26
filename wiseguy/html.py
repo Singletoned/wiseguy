@@ -25,10 +25,16 @@ class HtmlElement(lxml.html.HtmlElement):
             for el in elements:
                 el.append(text_or_el)
 
-    def replace(self, path, new_el):
+    def replace(self, path, text_or_el):
         elements = self.cssselect(path)
-        for el in elements:
-            super(lxml.html.HtmlElement, el.getparent()).replace(el, new_el)
+        if isinstance(text_or_el, (str, unicode)):
+            for el in elements:
+                parent = el.getparent()
+                parent.text = (parent.text or '') + text_or_el
+                parent.remove(el)
+        else:
+            for el in elements:
+                super(lxml.html.HtmlElement, el.getparent()).replace(el, text_or_el)
 
     def set_attr(self, path, attr, value):
         elements = self.cssselect(path)

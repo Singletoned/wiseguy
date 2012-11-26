@@ -30,6 +30,12 @@ class Transform(object):
 class TemplateMeta(type):
     applied_transforms = []
 
+    def keys(self):
+        keys = set()
+        for transform in self.transforms:
+            keys = keys | transform.keys
+        return keys
+
     def apply(self, context):
         for transform in list(self.transforms):
             transform.apply(context)
@@ -51,9 +57,12 @@ class TemplateMeta(type):
         template.apply(kwargs)
         return template.element
 
-    def __call__(self, kwargs):
+    def render(self, kwargs):
         html = self.render_lxml(kwargs)
         return lxml.html.tostring(html, pretty_print=True)
+
+    def __call__(self, kwargs):
+        return self.render_lxml(kwargs)
 
 
 class Template(object):
@@ -79,7 +88,7 @@ class SubTemplateMeta(TemplateMeta):
 
     def __call__(self, context):
         return dict(
-            (k, getattr(self, k).render_lxml(context)) for k in self.keys)
+            (k, getattr(self, k)(context)) for k in self.keys)
 
 
 class SubTemplate(object):
@@ -128,3 +137,17 @@ def set_text(path, content_func):
         for el in element.cssselect(path):
             el.text = content_func(**kwargs)
     return _set_text
+
+def replace(path, content_func):
+    def _replace(element, **kwargs):
+        element.replace(
+            path,
+            content_func(**kwargs))
+    return _replace
+
+def insert(path, content_func):
+    def _insert(element, **kwargs):
+        element.insert(
+            path,
+            content_func(**kwargs))
+    return _insert

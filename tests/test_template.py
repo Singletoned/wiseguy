@@ -39,6 +39,7 @@ html
     context = dict(body="Foo")
 
     template.apply(context)
+    assert template.keys() == set(["head"])
 
     html = template.element.to_string().strip()
     expected = """
@@ -56,6 +57,7 @@ html
 
     context = dict(body="Bar", head=None)
     template.apply(context)
+    assert template.keys() == set()
 
     html = template.element.to_string().strip()
     expected = """
@@ -94,7 +96,9 @@ html
                     wiseguy.html.Html("%s, %s"%(head, body))))]
 
     template.apply(dict(head="flamble"))
-    html = template(dict(body="flimble")).strip()
+    assert template.keys() == set(["body"])
+
+    html = template.render(dict(body="flimble")).strip()
     expected = """
 <html>
 <head><title>flibble</title></head>
@@ -126,7 +130,8 @@ html
                 "body",
                 lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
 
-    html = template(dict(body="Foo")).strip()
+    html = template.render(dict(body="Foo")).strip()
+    assert template.keys() == set(["body", "head"])
     expected = """
 <html>
 <head><title></title></head>
@@ -137,7 +142,8 @@ html
 </html>""".strip()
     assert html == expected
 
-    html = template(dict(body="Bar")).strip()
+    html = template.render(dict(body="Bar")).strip()
+    assert template.keys() == set(["body", "head"])
     expected = """
 <html>
 <head><title></title></head>
@@ -297,7 +303,7 @@ div
                     lambda element, flibble: element.insert("p", flibble))]
 
     assert len(index.transforms) == 1
-    result = index(dict())
+    result = index.render(dict())
     expected = "<html>\n<head></head>\n<body><div><p></p></div></body>\n</html>\n"
     assert expected == result
 
@@ -313,6 +319,22 @@ def test_set_text():
     element = wiseguy.html.jade("div: a.foo")
     set_text = wiseguy.template.set_text(".foo", lambda bar: bar)
     set_text(element, bar="wibble")
+    result = element.normalise()
+    expected = wiseguy.html.jade('div: a.foo wibble').normalise()
+    assert result == expected
+
+def test_replace():
+    element = wiseguy.html.jade("div: a.foo")
+    replace = wiseguy.template.replace(".foo", lambda bar: wiseguy.html.jade("div %s"%bar))
+    replace(element, bar="wibble")
+    result = element.normalise()
+    expected = wiseguy.html.jade('div: div wibble').normalise()
+    assert result == expected
+
+def test_insert():
+    element = wiseguy.html.jade("div: a.foo")
+    insert = wiseguy.template.insert(".foo", lambda bar: bar)
+    insert(element, bar="wibble")
     result = element.normalise()
     expected = wiseguy.html.jade('div: a.foo wibble').normalise()
     assert result == expected
