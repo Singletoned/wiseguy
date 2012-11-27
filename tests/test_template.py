@@ -177,7 +177,7 @@ def test_bound_template():
 
 
 def test_Fragment():
-    class fragment(wiseguy.template.Fragment):
+    class fragment(wiseguy.template.Template):
         element = wiseguy.html.jade(
 '''
 html
@@ -221,13 +221,13 @@ html
 
 def test_SubTemplate():
     class master(wiseguy.template.SubTemplate):
-        class flibble(wiseguy.template.Fragment):
+        class flibble(wiseguy.template.Template):
             element = wiseguy.html.jade("""div: p""")
             transforms = [wiseguy.template.Transform(
                 "p_content",
                 lambda element, p_content: element.insert("p", p_content))]
 
-        class flamble(wiseguy.template.Fragment):
+        class flamble(wiseguy.template.Template):
             element = wiseguy.html.jade("""p: span""")
             transforms = [wiseguy.template.Transform(
                 "span_content",
@@ -293,7 +293,7 @@ html
 
     @wiseguy.template.extends(master)
     class index(wiseguy.template.SubTemplate):
-        class main_body(wiseguy.template.Fragment):
+        class main_body(wiseguy.template.Template):
             element = wiseguy.html.jade('''
 div
   p''')

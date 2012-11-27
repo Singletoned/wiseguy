@@ -10,6 +10,7 @@ import jinja2 as j2
 import validino as v
 
 from wiseguy import web_utils as wu, utils
+import wiseguy.html
 
 
 var_dir = os.path.join(os.path.dirname(__file__), 'var')
@@ -142,13 +143,13 @@ def test_JinjaEnv():
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
-                bar=lambda context: "Foo Page %s"%context['foo_var']))
+                bar=lambda context: wiseguy.html.jade("div Foo Page %s"%context['foo_var'])))
 
-    html = env.render("bar", dict(foo_var="flangit"))
-    assert html == "Foo Page flangit"
+    html = env.render("bar", dict(foo_var="flangit")).strip()
+    assert html == "<div>Foo Page flangit</div>"
 
     response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
-    assert response.data == "Foo Page flibble"
+    assert response.data.strip() == "<div>Foo Page flibble</div>"
 
 def test_render():
     foo = lambda x: x
