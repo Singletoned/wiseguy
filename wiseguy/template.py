@@ -63,7 +63,7 @@ class TemplateMeta(type):
         template.apply(kwargs)
         return template.element
 
-    def render(self, kwargs):
+    def render(self, **kwargs):
         html = self.render_lxml(kwargs)
         return lxml.html.tostring(html, pretty_print=True)
 
