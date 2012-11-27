@@ -28,3 +28,5 @@ P = builder.p
 A = builder.a
 SELECT = builder.select
 OPTION = builder.option
+INPUT = builder.input
+LABEL = builder.label
