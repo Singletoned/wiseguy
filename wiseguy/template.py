@@ -69,15 +69,6 @@ class Template(object):
     __metaclass__ = TemplateMeta
 
 
-class FragmentMeta(TemplateMeta):
-    def __call__(self, context):
-        return self.render_lxml(context)
-
-
-class Fragment(object):
-    __metaclass__ = FragmentMeta
-
-
 class SubTemplateMeta(TemplateMeta):
     def __init__(self, cls_name, bases, cls_dict):
         self.keys = [k for k in cls_dict if not k.startswith("_")]
