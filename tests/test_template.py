@@ -331,10 +331,10 @@ def test_replace():
     expected = wiseguy.html.jade('div: div wibble').normalise()
     assert result == expected
 
-def test_insert():
+def test_add():
     element = wiseguy.html.jade("div: a.foo")
-    insert = wiseguy.template.insert(".foo", lambda bar: bar)
-    insert(element, bar="wibble")
+    add = wiseguy.template.add(".foo", lambda bar: bar)
+    add(element, bar="wibble")
     result = element.normalise()
     expected = wiseguy.html.jade('div: a.foo wibble').normalise()
     assert result == expected
