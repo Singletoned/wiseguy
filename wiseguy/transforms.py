@@ -22,14 +22,14 @@ def script(href):
 def add_stylesheet(href):
     return Transform(
         [],
-        lambda element: element.insert(
+        lambda element: element.add(
             "head",
             stylesheet(href)))
 
 def add_script(href):
     return Transform(
         [],
-        lambda element: element.insert(
+        lambda element: element.add(
             "head",
             script(href)))
 

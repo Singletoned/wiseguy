@@ -23,13 +23,13 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "head",
-                lambda head, element: element.insert("head title", "flibble")),
+                lambda head, element: element.add("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wobble, %s"%body))),]
 
     assert template.element
     assert template.transforms
@@ -85,13 +85,13 @@ html
         transforms=[
             wiseguy.template.Transform(
                 "head",
-                lambda head, element: element.insert("head title", "flibble")),
+                lambda head, element: element.add("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 ("head", "body"),
-                lambda head, body, element: element.insert(
+                lambda head, body, element: element.add(
                     "body div",
                     wiseguy.html.Html("%s, %s"%(head, body))))]
 
@@ -122,13 +122,13 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "head",
-                lambda head, element: element.insert("head title", "flibble")),
+                lambda head, element: element.add("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body)))]
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wobble, %s"%body)))]
 
     html = template.render(body="Foo").strip()
     assert template.keys() == set(["body", "head"])
@@ -188,13 +188,13 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "head",
-                lambda head, element: element.insert("head title", "flibble")),
+                lambda head, element: element.add("head title", "flibble")),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wibble, %s"%body))),
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wibble, %s"%body))),
             wiseguy.template.Transform(
                 "body",
-                lambda body, element: element.insert("body div", wiseguy.html.Html("Wobble, %s"%body))),]
+                lambda body, element: element.add("body div", wiseguy.html.Html("Wobble, %s"%body))),]
 
     html = fragment(dict(body="Foo")).to_string().strip()
     expected = """
@@ -225,13 +225,13 @@ def test_SubTemplate():
             element = wiseguy.html.jade("""div: p""")
             transforms = [wiseguy.template.Transform(
                 "p_content",
-                lambda element, p_content: element.insert("p", p_content))]
+                lambda element, p_content: element.add("p", p_content))]
 
         class flamble(wiseguy.template.Template):
             element = wiseguy.html.jade("""p: span""")
             transforms = [wiseguy.template.Transform(
                 "span_content",
-                lambda element, span_content: element.insert("span", span_content))]
+                lambda element, span_content: element.add("span", span_content))]
 
     result = master(dict())
     assert len(result) == 2
@@ -289,7 +289,7 @@ html
         transforms = [
             wiseguy.template.Transform(
                 "main_body",
-                lambda element, main_body: element.insert("body", main_body))]
+                lambda element, main_body: element.add("body", main_body))]
 
     @wiseguy.template.extends(master)
     class index(wiseguy.template.SubTemplate):
@@ -300,7 +300,7 @@ div
             transforms = [
                 wiseguy.template.Transform(
                     "flibble",
-                    lambda element, flibble: element.insert("p", flibble))]
+                    lambda element, flibble: element.add("p", flibble))]
 
     assert len(index.transforms) == 1
     result = index.render()

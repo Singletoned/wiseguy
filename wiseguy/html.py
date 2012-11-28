@@ -16,7 +16,7 @@ class HtmlElement(lxml.html.HtmlElement):
     def normalise(self):
         return wiseguy.html_tidy.normalise_html(self)
 
-    def insert(self, path, text_or_el):
+    def add(self, path, text_or_el):
         elements = self.cssselect(path)
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:

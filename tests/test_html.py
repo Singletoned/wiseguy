@@ -32,7 +32,7 @@ def test_jade():
     result = d.to_string().strip()
     assert result == expected
 
-def test_template_insert():
+def test_template_add():
     template = """
 html
   head
@@ -41,8 +41,8 @@ html
     h1#title placeholder text
     div#body"""
     t = wg.html.jade(template)
-    t.insert("title, #title", "Hullo Mr Flibble")
-    t.insert("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
+    t.add("title, #title", "Hullo Mr Flibble")
+    t.add("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
 
     result = t.to_string().strip()
     expected = '''
