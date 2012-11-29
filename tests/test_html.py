@@ -43,13 +43,14 @@ html
     t = wg.html.jade(template)
     t.add("title, #title", "Hullo Mr Flibble")
     t.add("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
+    t.add("body", wg.html.Html("<span>This goes before the header</span>"), index=0)
 
     result = t.to_string().strip()
     expected = '''
 <html>
 <head><title>Hullo Mr Flibble</title></head>
 <body>
-<h1 id="title">Hullo Mr Flibble</h1>
+<span>This goes before the header</span><h1 id="title">Hullo Mr Flibble</h1>
 <div id="body"><span class="bar">Welcome to my web</span></div>
 </body>
 </html>'''.strip()

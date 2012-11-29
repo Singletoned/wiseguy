@@ -16,14 +16,17 @@ class HtmlElement(lxml.html.HtmlElement):
     def normalise(self):
         return wiseguy.html_tidy.normalise_html(self)
 
-    def add(self, path, text_or_el):
+    def add(self, path, text_or_el, index=None):
         elements = self.cssselect(path)
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
                 el.text = text_or_el
         else:
             for el in elements:
-                el.append(text_or_el)
+                if index is None:
+                    el.append(text_or_el)
+                else:
+                    el.insert(index, text_or_el)
 
     def replace(self, path, text_or_el):
         elements = self.cssselect(path)
