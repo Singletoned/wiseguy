@@ -333,8 +333,18 @@ def test_replace():
 
 def test_add():
     element = wiseguy.html.jade("div: a.foo")
-    add = wiseguy.template.add(".foo", lambda bar: bar)
-    add(element, bar="wibble")
+    add = wiseguy.template.add(".foo", lambda bar: bar, index=0)
+    add(element, bar="flibble")
     result = element.normalise()
-    expected = wiseguy.html.jade('div: a.foo wibble').normalise()
+    expected = wiseguy.html.jade('div: a.foo flibble').normalise()
+    assert result == expected
+
+    add(element, bar=wiseguy.html.jade("span wibble"))
+    add(element, bar=wiseguy.html.jade("span wobble"))
+    result = element.normalise()
+    expected = wiseguy.html.jade(
+'''
+div: a.foo flibble
+  span wobble
+  span wibble''').normalise()
     assert result == expected

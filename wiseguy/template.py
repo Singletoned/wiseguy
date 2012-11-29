@@ -139,9 +139,10 @@ def replace(path, content_func):
             content_func(**kwargs))
     return _replace
 
-def add(path, content_func):
+def add(path, content_func, index=None):
     def _add(element, **kwargs):
         element.add(
             path,
-            content_func(**kwargs))
+            content_func(**kwargs),
+            index=index)
     return _add
