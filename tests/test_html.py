@@ -77,6 +77,18 @@ html
 </body></html>'''.strip()
     assert expected == result
 
+def test_template_add_class():
+    element = wg.html.jade("div: span.foo")
+    element.add_class("span", "foo")
+    result = element.to_string().strip()
+    expected = '''<div><span class="foo"></span></div>'''
+    assert expected == result
+
+    element.add_class("span", "bar")
+    result = element.to_string().strip()
+    expected = '''<div><span class="foo bar"></span></div>'''
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()
