@@ -89,7 +89,7 @@ def test_template_add_class():
     expected = '''<div><span class="foo bar"></span></div>'''
     assert expected == result
 
-    element.add_class("div", "baz")
+    element.add_class(None, "baz")
     result = element.to_string().strip()
     expected = '''<div class="baz"><span class="foo bar"></span></div>'''
     assert expected == result

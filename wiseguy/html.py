@@ -45,7 +45,10 @@ class HtmlElement(lxml.html.HtmlElement):
             el.attrib[attr] = value
 
     def add_class(self, path, value):
-        elements = self.cssselect(path)
+        if path:
+            elements = self.cssselect(path)
+        else:
+            elements = [self]
         for el in elements:
             classes = el.attrib.get('class', '').split()
             if not value in classes:
