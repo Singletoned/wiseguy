@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import wiseguy.template
+import wiseguy.html
 import wiseguy.utils
 
 
