@@ -75,3 +75,27 @@ def test_dotted_getattr():
         pass
     else:
         raise
+
+def test_Prototype():
+    s = utils.MockObject(
+        foo="slanget",
+        bar="sloople")
+    f = utils.MockObject(
+        foo="flanget",
+        baz="floople")
+    cg = utils.make_prototype(s, f)
+    cg.flamble = "wotsit"
+    assert cg.foo == s.foo
+    assert cg.bar == s.bar
+    assert cg.baz == f.baz
+    assert not callable(cg)
+
+    c = lambda x: "Beeble Boople Lula"
+    cg = utils.make_prototype(s, f, c)
+    cg.flamble = "wotsit"
+    assert cg.foo == s.foo
+    assert cg.bar == s.bar
+    assert cg.baz == f.baz
+    assert callable(cg)
+    assert cg("foo") == "Beeble Boople Lula"
+    assert cg.flamble == "wotsit"

@@ -100,3 +100,29 @@ def print_quick_pprint_diff(item1, item2):
         item2 = pprint.pformat(item2)
     for line in list(difflib.unified_diff(item1.split('\n'), item2.split('\n'))):
         print line
+
+
+def make_prototype(*args):
+    for parent in args:
+        if callable(parent):
+            return CallablePrototype(*args)
+    return Prototype(*args)
+
+class Prototype(object):
+    def __init__(self, *args):
+        self.parents = args
+
+    def __getattr__(self, key):
+        for parent in self.parents:
+            try:
+                return getattr(parent, key)
+            except AttributeError:
+                continue
+        raise AttributeError(key)
+
+class CallablePrototype(Prototype):
+    def __call__(self, *args, **kwargs):
+        for parent in self.parents:
+            if callable(parent):
+                return parent(*args, **kwargs)
+        raise TypeError()
