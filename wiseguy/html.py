@@ -68,9 +68,13 @@ class HtmlElement(lxml.html.HtmlElement):
     def before(self, path, text_or_el):
         elements = self.cssselect(path)
         for el in elements:
-            parent = el.getparent()
-            index = parent.index(el)
-            parent.insert(index, text_or_el)
+            if isinstance(text_or_el, (str, unicode)):
+                previous = el.getprevious()
+                previous.tail = (previous.tail or "") + text_or_el
+            else:
+                parent = el.getparent()
+                index = parent.index(el)
+                parent.insert(index, text_or_el)
 
     join = wiseguy.utils.join
 
