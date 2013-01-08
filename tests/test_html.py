@@ -94,6 +94,21 @@ def test_template_add_class():
     expected = '''<div class="baz"><span class="foo bar"></span></div>'''
     assert expected == result
 
+def test_template_after():
+    element = wg.html.jade('''
+div
+  p.foo
+  p.bar''')
+    element.after("p.foo", wg.html.jade("p.woosit"))
+    result = element.to_string().strip()
+    expected = '''
+<div>
+<p class="foo"></p>
+<p class="woosit"></p>
+<p class="bar"></p>
+</div>'''.strip()
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()
