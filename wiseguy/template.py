@@ -40,7 +40,7 @@ class TemplateMeta(type):
         for transform in list(self.transforms):
             transform.apply(context)
             if transform.applied:
-                transform.action(element=self.element, **transform.context)
+                transform.action(template=self, **transform.context)
                 self.transforms.remove(transform)
                 self.applied_transforms.append(transform)
 
@@ -55,6 +55,10 @@ class TemplateMeta(type):
     def extend(self, template):
         self.transforms.extend(template.transforms)
         self.apply(template(dict()))
+
+    def add_widget(self, path, template):
+        self.element.add(path, template.element)
+        self.transforms.extend(template.transforms)
 
     def render_lxml(self, kwargs):
         template = self.copy()
@@ -118,29 +122,29 @@ def extends(template):
     return _decorator
 
 def set_attr(path, attr, content_func):
-    def _set_attr(element, **kwargs):
-        element.set_attr(
+    def _set_attr(template, **kwargs):
+        template.element.set_attr(
             path,
             attr,
             content_func(**kwargs))
     return _set_attr
 
 def set_text(path, content_func):
-    def _set_text(element, **kwargs):
-        for el in element.cssselect(path):
+    def _set_text(template, **kwargs):
+        for el in template.element.cssselect(path):
             el.text = content_func(**kwargs)
     return _set_text
 
 def replace(path, content_func):
-    def _replace(element, **kwargs):
-        element.replace(
+    def _replace(template, **kwargs):
+        template.element.replace(
             path,
             content_func(**kwargs))
     return _replace
 
 def add(path, content_func, index=None):
-    def _add(element, **kwargs):
-        element.add(
+    def _add(template, **kwargs):
+        template.element.add(
             path,
             content_func(**kwargs),
             index=index)
