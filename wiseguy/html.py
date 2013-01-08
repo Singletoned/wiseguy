@@ -70,7 +70,11 @@ class HtmlElement(lxml.html.HtmlElement):
         for el in elements:
             if isinstance(text_or_el, (str, unicode)):
                 previous = el.getprevious()
-                previous.tail = (previous.tail or "") + text_or_el
+                if previous is None:
+                    parent = el.getparent()
+                    parent.text = (parent.text or "") + text_or_el
+                else:
+                    previous.tail = (previous.tail or "") + text_or_el
             else:
                 parent = el.getparent()
                 index = parent.index(el)
