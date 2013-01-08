@@ -109,6 +109,15 @@ div
 </div>'''.strip()
     assert expected == result
 
+    element.after("p.foo", "Flooble")
+    result = element.to_string().strip()
+    expected = '''
+<div>
+<p class="foo"></p>Flooble<p class="woosit"></p>
+<p class="bar"></p>
+</div>'''.strip()
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()
