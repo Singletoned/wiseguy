@@ -118,6 +118,21 @@ div
 </div>'''.strip()
     assert expected == result
 
+def test_template_before():
+    element = wg.html.jade('''
+div
+  p.foo
+  p.bar''')
+    element.before("p.bar", wg.html.jade("p.woosit"))
+    result = element.to_string().strip()
+    expected = '''
+<div>
+<p class="foo"></p>
+<p class="woosit"></p>
+<p class="bar"></p>
+</div>'''.strip()
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()
