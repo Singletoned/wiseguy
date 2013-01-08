@@ -53,10 +53,8 @@ class TemplateMeta(type):
                 transforms=copy.deepcopy(self.transforms)))
 
     def extend(self, template):
-        new_template = self.copy()
-        new_template.transforms.extend(template.transforms)
-        new_template.apply(template(dict()))
-        return new_template
+        self.transforms.extend(template.transforms)
+        self.apply(template(dict()))
 
     def render_lxml(self, kwargs):
         template = self.copy()
@@ -113,7 +111,8 @@ def register(collection):
 
 def extends(template):
     def _decorator(wrapped_template):
-        new_template = template.extend(
+        new_template = template.copy()
+        new_template.extend(
             wrapped_template)
         return new_template
     return _decorator
