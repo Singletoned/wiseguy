@@ -39,7 +39,7 @@ html
   head
   body
     div
-      p This cost £££'''.strip()
+      p This cost £££'''.strip() + "\n"
     with path.create_temp_dir() as temp_dir:
         temp_html = temp_dir.child("test.html")
         temp_jade = temp_dir.child("test.jade")

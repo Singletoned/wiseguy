@@ -49,4 +49,4 @@ def render_el(el):
 def html2jade(text):
     html = wiseguy.html.Html(text)
     lines = render_el(html)
-    return u"\n".join(lines)
+    return u"\n".join(lines) + "\n"
