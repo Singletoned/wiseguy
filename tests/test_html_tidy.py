@@ -228,6 +228,7 @@ Name:
         result = wg.html_tidy.tidy_html(t).strip()
 
         expected = '''
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <title>A Form&#163;</title>

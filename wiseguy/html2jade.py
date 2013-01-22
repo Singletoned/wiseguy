@@ -36,6 +36,8 @@ def render_el(el):
         for line in el.text.strip().split(u"\n"):
             yield u"// " + line.strip()
     else:
+        if el.tag == "html":
+            yield "!!!"
         yield u"".join(render_tag(el))
     for sub_el in el:
         for line in render_el(sub_el):

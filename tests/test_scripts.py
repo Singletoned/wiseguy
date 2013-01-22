@@ -11,6 +11,7 @@ import wiseguy.scripts.html2jade
 def test_parse_jade():
     jade_input = "html: body: div#main"
     html_expected = '''
+<!DOCTYPE html>
 <html>
   <body>
     <div id="main"></div>
@@ -35,6 +36,7 @@ def test_html2jade():
   </body>
 </html>'''.strip()
     jade_expected = '''
+!!!
 html
   head
   body

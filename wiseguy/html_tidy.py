@@ -45,6 +45,8 @@ def _render_content(el):
             yield line
 
 def _render_el(el, indent_level=1):
+    if el.tag == "html":
+        yield "<!DOCTYPE html>"
     if isinstance(el, lxml.html.HtmlComment):
         yield str(el)
     else:
@@ -101,6 +103,8 @@ def _render_block_tag(el, indent_level=0):
         yield "  "*indent_level + el.tail
 
 def _render_el_tidy(el, indent_level=1):
+    if el.tag == "html":
+        yield "<!DOCTYPE html>"
     if el.tag in inline_tags:
         yield _render_inline_tag(el).next()
     else:
