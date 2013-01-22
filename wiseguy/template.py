@@ -85,9 +85,15 @@ class SubTemplateMeta(TemplateMeta):
             if hasattr(value, 'transforms'):
                 self.transforms.extend(value.transforms)
 
+    def _iter_items(self, context):
+        for key in self.keys:
+            value = getattr(self, key)
+            if callable(value):
+                value = value(context)
+            yield key, value
+
     def __call__(self, context):
-        return dict(
-            (k, getattr(self, k)(context)) for k in self.keys)
+        return dict(self._iter_items(context))
 
 
 class SubTemplate(object):
