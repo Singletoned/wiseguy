@@ -32,3 +32,5 @@ INPUT = builder.input
 LABEL = builder.label
 UL = builder.ul
 LI = builder.li
+BUTTON = builder.button
+FORM = builder.FORM
