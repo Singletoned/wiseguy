@@ -155,3 +155,12 @@ def add(path, content_func, index=None):
             content_func(**kwargs),
             index=index)
     return _add
+
+def add_multiple(path, content_func, index=None):
+    def _add(element, **kwargs):
+        for item in content_func(**kwargs):
+            element.add(
+                path,
+                item,
+                index=index)
+    return _add
