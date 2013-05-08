@@ -32,6 +32,21 @@ def test_jade():
     result = d.to_string().strip()
     assert result == expected
 
+def test_tidy():
+    d = wg.html.jade("html: body: div#main foo")
+    expected = '''
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="main">
+      foo
+    </div>
+  </body>
+</html>
+'''.strip()
+    result = d.to_string(tidy=True)
+    assert result == expected
+
 def test_template_add():
     template = """
 html

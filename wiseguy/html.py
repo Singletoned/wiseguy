@@ -10,8 +10,11 @@ import wiseguy.html_tidy
 
 
 class HtmlElement(lxml.html.HtmlElement):
-    def to_string(self, pretty=True):
-        return lxml.html.tostring(self, pretty_print=pretty)
+    def to_string(self, pretty=True, tidy=False):
+        if tidy:
+            return wiseguy.html_tidy.tidy_html(self)
+        else:
+            return lxml.html.tostring(self, pretty_print=pretty)
 
     def normalise(self):
         return wiseguy.html_tidy.normalise_html(self)
