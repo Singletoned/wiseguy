@@ -169,16 +169,19 @@ def test_extract():
     element = wg.html.jade("""
 html
   body
-    block
-      div#foo.bar
-      | flibble
+    div
+      block
+        div#foo.bar
+        | flibble
+      | some tail
 """)
     element.extract("block")
     result = element.to_string().strip()
     expected = '''
-<html><body>
+<html><body><div>
 <div id="foo" class="bar"></div>flibble
-</body></html>
+some tail
+</div></body></html>
 '''.strip()
     wg.utils.print_quick_pprint_diff(expected, result)
     assert expected == result
