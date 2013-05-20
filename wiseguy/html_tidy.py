@@ -102,9 +102,10 @@ def _render_block_tag(el, indent_level=0):
     if el.tail:
         yield "  "*indent_level + el.tail
 
-def _render_el_tidy(el, indent_level=1):
+def _render_el_tidy(el, indent_level=1, with_doctype=True):
     if el.tag == "html":
-        yield "<!DOCTYPE html>"
+        if with_doctype:
+            yield "<!DOCTYPE html>"
     if el.tag in inline_tags:
         yield _render_inline_tag(el).next()
     else:
@@ -115,5 +116,5 @@ def _render_el_tidy(el, indent_level=1):
 def normalise_html(el):
     return "\n".join([item.strip() for item in _render_el(el) if item.strip()])
 
-def tidy_html(el):
-    return u"\n".join(_render_el_tidy(el))
+def tidy_html(el, with_doctype=True):
+    return u"\n".join(_render_el_tidy(el, with_doctype=with_doctype))

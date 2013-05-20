@@ -248,6 +248,28 @@ Name:
 </html>'''.strip()
         assert result == expected
 
+        result = wg.html_tidy.tidy_html(t, with_doctype=False).strip()
+
+        expected = '''
+<html lang="en">
+  <head>
+    <title>A Form&#163;</title>
+  </head>
+  <body>
+    <!-- And thus it begins... -->
+    <form>
+      <fieldset>
+        <legend><!-- Not the legend of King Arthur! -->Your Information</legend>
+        <div class="control-group">
+          <label class="control-label" for="name">Name:</label>
+          <input id="name">
+        </div>
+      </fieldset>
+    </form>
+  </body>
+</html>'''.strip()
+        assert result == expected
+
     def test_nbsp(self):
         t = wg.html.Html('''
 <p>&nbsp;<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;</p>''')
