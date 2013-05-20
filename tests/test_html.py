@@ -170,17 +170,21 @@ def test_extract():
 html
   body
     div
+      div#one
       block
-        div#foo.bar
+        div#two.bar
         | flibble
       | some tail
+      div#three
 """)
     element.extract("block")
     result = element.to_string().strip()
     expected = '''
 <html><body><div>
-<div id="foo" class="bar"></div>flibble
+<div id="one"></div>
+<div id="two" class="bar"></div>flibble
 some tail
+<div id="three"></div>
 </div></body></html>
 '''.strip()
     wg.utils.print_quick_pprint_diff(expected, result)

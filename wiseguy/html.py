@@ -87,8 +87,9 @@ class HtmlElement(lxml.html.HtmlElement):
         elements = self.cssselect(path)
         for el in elements:
             parent = el.getparent()
+            index = parent.index(el)
             for sub_el in el:
-                parent.append(sub_el)
+                parent.insert(index, sub_el)
                 parent.remove(el)
             if el.tail:
                 sub_el.tail = (sub_el.tail or '') + el.tail
