@@ -165,6 +165,24 @@ div
 </div>'''.strip()
     assert expected == result
 
+def test_extract():
+    element = wg.html.jade("""
+html
+  body
+    block
+      div#foo.bar
+      | flibble
+""")
+    element.extract("block")
+    result = element.to_string().strip()
+    expected = '''
+<html><body>
+<div id="foo" class="bar"></div>flibble
+</body></html>
+'''.strip()
+    wg.utils.print_quick_pprint_diff(expected, result)
+    assert expected == result
+
 def test_HTMLBuilder():
     def gen_elements():
         yield wg.html._HTMLBuilder.p()

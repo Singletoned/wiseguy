@@ -83,6 +83,14 @@ class HtmlElement(lxml.html.HtmlElement):
                 index = parent.index(el)
                 parent.insert(index, text_or_el)
 
+    def extract(self, path):
+        elements = self.cssselect(path)
+        for el in elements:
+            parent = el.getparent()
+            for sub_el in el:
+                parent.append(sub_el)
+                parent.remove(el)
+
     join = wiseguy.utils.join
 
 class HtmlElementLookup(lxml.html.HtmlElementClassLookup):
