@@ -172,7 +172,8 @@ html
     div
       div#one
       block
-        div#two.bar
+        div#two.one
+        div#two.two
         | flibble
       | some tail
       div#three
@@ -182,7 +183,8 @@ html
     expected = '''
 <html><body><div>
 <div id="one"></div>
-<div id="two" class="bar"></div>flibble
+<div id="two" class="one"></div>
+<div id="two" class="two"></div>flibble
 some tail
 <div id="three"></div>
 </div></body></html>

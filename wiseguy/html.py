@@ -88,11 +88,13 @@ class HtmlElement(lxml.html.HtmlElement):
         for el in elements:
             parent = el.getparent()
             index = parent.index(el)
-            for sub_el in el:
-                parent.insert(index, sub_el)
-                parent.remove(el)
+            children = el.getchildren()
             if el.tail:
-                sub_el.tail = (sub_el.tail or '') + el.tail
+                last_child = children[-1]
+                last_child.tail = (last_child.tail or '') + el.tail
+            for sub_el in reversed(children):
+                parent.insert(index, sub_el)
+            parent.remove(el)
 
     join = wiseguy.utils.join
 
