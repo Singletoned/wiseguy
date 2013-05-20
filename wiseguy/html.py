@@ -143,4 +143,3 @@ _HTMLBuilder = lxml.builder.ElementMaker(
 class HtmlBuilder(object):
     def __getattr__(self, key):
         return getattr(_HTMLBuilder, key.lower())
-
