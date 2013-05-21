@@ -36,8 +36,13 @@ class HtmlElement(lxml.html.HtmlElement):
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
                 parent = el.getparent()
-                parent.text = (parent.text or '') + text_or_el
                 parent.remove(el)
+                children = parent.getchildren()
+                if children:
+                    last_child = children[-1]
+                    last_child.tail = (last_child.text or '') + text_or_el
+                else:
+                    parent.text = (parent.text or '') + text_or_el
         else:
             for el in elements:
                 super(lxml.html.HtmlElement, el.getparent()).replace(el, text_or_el)

@@ -78,17 +78,24 @@ html
     h1#title placeholder text
     div#body
     div
-      div.content"""
+      div.content-1
+    div
+      div.placeholder
+      div.content-2
+"""
     t = wg.html.jade(template)
     t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
     t.replace("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
-    t.replace("div.content", "Hullo Again")
+    t.replace("div.content-1", "Hullo Again")
+    t.replace("div.content-2", "Hullo Again")
 
     result = t.to_string().strip()
     expected = '''
 <html><body>
 <h1 id="title">Hullo Mr Flibble</h1>
 <span class="bar">Welcome to my web</span><div>Hullo Again</div>
+<div>
+<div class="placeholder"></div>Hullo Again</div>
 </body></html>'''.strip()
     assert expected == result
 
