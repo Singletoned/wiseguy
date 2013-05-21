@@ -70,10 +70,10 @@ def has_inline_content(el):
         return True
 
 def is_empty(el):
-    if (not el.text) and (not el.getchildren()) and (not isinstance(el, lxml.html.HtmlComment)):
-        return True
-    else:
+    if (el.text or el.getchildren() or isinstance(el, lxml.html.HtmlComment)):
         return False
+    else:
+        return True
 
 def _render_inline_tag(el):
     lines = _render_el(el)
