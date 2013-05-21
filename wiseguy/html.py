@@ -20,7 +20,10 @@ class HtmlElement(lxml.html.HtmlElement):
         return wiseguy.html_tidy.normalise_html(self)
 
     def add(self, path, text_or_el, index=None):
-        elements = self.cssselect(path)
+        if path:
+            elements = self.cssselect(path)
+        else:
+            elements = [self]
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
                 el.text = text_or_el
