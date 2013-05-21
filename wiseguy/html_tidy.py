@@ -70,7 +70,7 @@ def has_inline_content(el):
         return True
 
 def is_empty(el):
-    if (not el.text) and (not el.getchildren()):
+    if (not el.text) and (not el.getchildren()) and (not isinstance(el, lxml.html.HtmlComment)):
         return True
     else:
         return False
