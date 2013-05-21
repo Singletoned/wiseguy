@@ -57,7 +57,7 @@ def _render_el(el, indent_level=1):
             for line in _render_el(sub_element, indent_level=indent_level+1):
                 yield line
         if not el.tag in lxml.html.defs.empty_tags:
-            if not el.tag == "comment":
+            if not isinstance(el, lxml.html.HtmlComment):
                 yield _render_close_tag(el)
     if el.tail:
         yield el.tail.encode('ascii', 'xmlcharrefreplace')
