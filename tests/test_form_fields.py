@@ -454,7 +454,7 @@ class TestSelect(unittest.TestCase):
         context = dict()
         expected = '''
 <div>
-<label for="foo">Foo:</label><select id="foo" name="foo" disabled>
+<label for="foo">Foo:</label><select disabled id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
@@ -470,7 +470,7 @@ class TestSelect(unittest.TestCase):
         context = dict(disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><select id="foo" name="foo" disabled>
+<label for="foo">Foo:</label><select disabled id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
@@ -608,7 +608,17 @@ class TestTextArea(unittest.TestCase):
         context = dict(disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" name="foo" disabled></textarea>
+<label for="foo">Foo:</label><textarea disabled id="foo" name="foo"></textarea>
+</div>
+        '''.strip()
+        result = form_fields.textarea(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
+        context = dict(disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><textarea id="foo" name="foo"></textarea>
 </div>
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
@@ -663,7 +673,7 @@ CKEDITOR.replace(
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><textarea id="foo" name="foo" disabled class="ckeditor"></textarea><script type="text/javascript">
+<label for="foo">Foo:</label><textarea disabled id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
 CKEDITOR.replace(
     'foo',
     {
@@ -865,7 +875,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         expected = '''
 <fieldset class="control-group">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><select id="foo" name="foo" disabled>
+<label for="foo" class="control-label">Foo:</label><div class="controls"><select disabled id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
