@@ -50,18 +50,29 @@ def _input(context, id, label, input_type, value=_default, class_=None, extra_at
         extra_attrs = dict()
     if class_:
         extra_attrs['class'] = class_
-    if 'disabled_form' in context:
-        extra_attrs['disabled'] = "disabled"
-    element = html.DIV(
-        html.LABEL(
-            label,
-            {'for': id}),
-        html.INPUT(
-            extra_attrs,
-            type=input_type,
-            name=id,
-            id=id,
-            value=value))
+    if context.get('disabled_form', False):
+        element = html.DIV(
+            html.LABEL(
+                label,
+                {'for': id}),
+            html.INPUT(
+                extra_attrs,
+                type=input_type,
+                name=id,
+                id=id,
+                value=value,
+                disabled="disabled"))
+    else:
+        element = html.DIV(
+            html.LABEL(
+                label,
+                {'for': id}),
+            html.INPUT(
+                extra_attrs,
+                type=input_type,
+                name=id,
+                id=id,
+                value=value))
     add_errors(context, element, id)
     return element
 
@@ -101,7 +112,7 @@ def _checkbox(context, id, label, value=_default, disabled=False):
     if isinstance(data_value, (list, tuple)):
         if value in data_value:
             elements[1].attrib['checked'] = "checked"
-    if disabled or ('disabled_form' in context):
+    if disabled or context.get('disabled_form', False):
         elements[1].attrib['disabled'] = "disabled"
     return html.DIV(*elements)
 
@@ -143,18 +154,28 @@ def _textarea(context, id, label):
         text = text.decode('utf8')
     else:
         text = unicode(text)
-    element = html.DIV(
-        html.LABEL(
-            label,
-            {'for': id}),
-        html.TEXTAREA(
-            text,
-            name=id,
-            id=id,
-            ))
+    if context.get('disabled_form', False):
+        element = html.DIV(
+            html.LABEL(
+                label,
+                {'for': id}),
+            html.TEXTAREA(
+                text,
+                name=id,
+                id=id,
+                disabled="disabled",
+                ))
+    else:
+        element = html.DIV(
+            html.LABEL(
+                label,
+                {'for': id}),
+            html.TEXTAREA(
+                text,
+                name=id,
+                id=id,
+                ))
     add_errors(context, element, id)
-    if 'disabled_form' in context:
-        element[1].attrib['disabled'] = "disabled"
     return element
 
 
@@ -192,7 +213,7 @@ def tinymce(context, id, label):
 
 
 def _ckeditor(context, id, label, ckeditor_config):
-    if 'disabled_form' in context:
+    if context.get('disabled_form', False):
         ckeditor_config['readOnly'] = "true"
     ck_options = ["%s: %s" % (k,v) for (k,v) in ckeditor_config.items()]
     ck_options = ",\n        ".join(ck_options)
@@ -299,18 +320,28 @@ def _select(context, id, label, options, disabled, blank_option):
         else:
             o = html.OPTION(text, value=value)
         option_elements.append(o)
-    element = html.DIV(
-        html.LABEL(
-            label,
-            {'for': id}),
-        html.SELECT(
-            "\n",
-            *option_elements,
-            name=id,
-            id=id))
+    if disabled or context.get('disabled_form', False):
+        element = html.DIV(
+            html.LABEL(
+                label,
+                {'for': id}),
+            html.SELECT(
+                "\n",
+                *option_elements,
+                name=id,
+                id=id,
+                disabled="disabled"))
+    else:
+        element = html.DIV(
+            html.LABEL(
+                label,
+                {'for': id}),
+            html.SELECT(
+                "\n",
+                *option_elements,
+                name=id,
+                id=id))
     add_errors(context, element, id)
-    if disabled or ('disabled_form' in context):
-        element[1].attrib['disabled'] = "disabled"
     return element
 
 
@@ -327,7 +358,7 @@ def submit(context, id="submit", label="Submit", class_=""):
         type="submit",
         id=id,
         value=label)
-    if 'disabled_form' in context:
+    if context.get('disabled_form', False):
         kwargs['disabled'] = 'disabled'
     if class_:
         args = ({'class': class_},)

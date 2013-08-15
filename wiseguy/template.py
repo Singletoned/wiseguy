@@ -6,25 +6,32 @@ import lxml.html
 
 
 class Transform(object):
-    def __init__(self, keys, action):
+    def __init__(self, keys, action, context=None):
         if isinstance(keys, basestring):
-            self.keys = set([keys])
+            self.keys = frozenset([keys])
         else:
-            self.keys = set(keys)
+            self.keys = frozenset(keys)
         self.action = action
-        self.applied = False
-        self.context = dict()
+        if not keys:
+            self.applied = True
+        else:
+            self.applied = False
+        if not context:
+            self.context = dict()
+        else:
+            self.context = context
 
     def __repr__(self):
         return "<Transform %s>" % self.keys
 
     def apply(self, context):
-        for key in list(self.keys):
+        new_keys = set(self.keys)
+        new_context = dict(self.context)
+        for key in list(new_keys):
             if key in context:
-                self.context[key] = context[key]
-                self.keys.remove(key)
-        if not self.keys:
-            self.applied = True
+                new_context[key] = context[key]
+                new_keys.remove(key)
+        return Transform(new_keys, self.action, new_context)
 
 
 class TemplateMeta(type):
@@ -38,11 +45,13 @@ class TemplateMeta(type):
 
     def apply(self, context):
         for transform in list(self.transforms):
-            transform.apply(context)
-            if transform.applied:
-                transform.action(template=self, **transform.context)
-                self.transforms.remove(transform)
-                self.applied_transforms.append(transform)
+            new_transform = transform.apply(context)
+            self.transforms.remove(transform)
+            if new_transform.applied:
+                new_transform.action(template=self, **new_transform.context)
+                self.applied_transforms.append(new_transform)
+            else:
+                self.transforms.append(new_transform)
 
     def copy(self):
         return TemplateMeta(

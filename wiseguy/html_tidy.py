@@ -57,7 +57,7 @@ def _render_el(el, indent_level=1):
             for line in _render_el(sub_element, indent_level=indent_level+1):
                 yield line
         if not el.tag in lxml.html.defs.empty_tags:
-            if not el.tag == "comment":
+            if not isinstance(el, lxml.html.HtmlComment):
                 yield _render_close_tag(el)
     if el.tail:
         yield el.tail.encode('ascii', 'xmlcharrefreplace')
@@ -70,10 +70,10 @@ def has_inline_content(el):
         return True
 
 def is_empty(el):
-    if (not el.text) and (not el.getchildren()):
-        return True
-    else:
+    if (el.text or el.getchildren() or isinstance(el, lxml.html.HtmlComment)):
         return False
+    else:
+        return True
 
 def _render_inline_tag(el):
     lines = _render_el(el)
@@ -102,9 +102,10 @@ def _render_block_tag(el, indent_level=0):
     if el.tail:
         yield "  "*indent_level + el.tail
 
-def _render_el_tidy(el, indent_level=1):
+def _render_el_tidy(el, indent_level=1, with_doctype=True):
     if el.tag == "html":
-        yield "<!DOCTYPE html>"
+        if with_doctype:
+            yield "<!DOCTYPE html>"
     if el.tag in inline_tags:
         yield _render_inline_tag(el).next()
     else:
@@ -115,5 +116,5 @@ def _render_el_tidy(el, indent_level=1):
 def normalise_html(el):
     return "\n".join([item.strip() for item in _render_el(el) if item.strip()])
 
-def tidy_html(el):
-    return u"\n".join(_render_el_tidy(el))
+def tidy_html(el, with_doctype=True):
+    return u"\n".join(_render_el_tidy(el, with_doctype=with_doctype))

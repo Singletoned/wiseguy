@@ -10,17 +10,23 @@ import wiseguy.html_tidy
 
 
 class HtmlElement(lxml.html.HtmlElement):
-    def to_string(self, pretty=True):
-        return lxml.html.tostring(self, pretty_print=pretty)
+    def to_string(self, pretty=True, tidy=False):
+        if tidy:
+            return wiseguy.html_tidy.tidy_html(self)
+        else:
+            return lxml.html.tostring(self, pretty_print=pretty)
 
     def normalise(self):
         return wiseguy.html_tidy.normalise_html(self)
 
     def add(self, path, text_or_el, index=None):
-        elements = self.cssselect(path)
+        if path:
+            elements = self.cssselect(path)
+        else:
+            elements = [self]
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
-                el.text = text_or_el
+                el.text = (el.text or '') + text_or_el
         else:
             for el in elements:
                 if index is None:
@@ -33,8 +39,14 @@ class HtmlElement(lxml.html.HtmlElement):
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
                 parent = el.getparent()
-                parent.text = (parent.text or '') + text_or_el
+                index = parent.index(el)
                 parent.remove(el)
+                if index:
+                    children = parent.getchildren()
+                    prev_child = children[index-1]
+                    prev_child.tail = (prev_child.text or '') + text_or_el
+                else:
+                    parent.text = (parent.text or '') + text_or_el
         else:
             for el in elements:
                 super(lxml.html.HtmlElement, el.getparent()).replace(el, text_or_el)
@@ -79,6 +91,19 @@ class HtmlElement(lxml.html.HtmlElement):
                 parent = el.getparent()
                 index = parent.index(el)
                 parent.insert(index, text_or_el)
+
+    def extract(self, path):
+        elements = self.cssselect(path)
+        for el in elements:
+            parent = el.getparent()
+            index = parent.index(el)
+            children = el.getchildren()
+            if el.tail:
+                last_child = children[-1]
+                last_child.tail = (last_child.tail or '') + el.tail
+            for sub_el in reversed(children):
+                parent.insert(index, sub_el)
+            parent.remove(el)
 
     join = wiseguy.utils.join
 
@@ -132,4 +157,3 @@ _HTMLBuilder = lxml.builder.ElementMaker(
 class HtmlBuilder(object):
     def __getattr__(self, key):
         return getattr(_HTMLBuilder, key.lower())
-
