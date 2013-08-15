@@ -85,6 +85,7 @@ html
     div
       div.placeholder
       div.content-2
+      div.empty
 """
     t = wg.html.jade(template)
     t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
@@ -98,7 +99,8 @@ html
 <h1 id="title">Hullo Mr Flibble</h1>
 <span class="bar">Welcome to my web</span><div>Hullo Again</div>
 <div>
-<div class="placeholder"></div>Hullo Again</div>
+<div class="placeholder"></div>Hullo Again<div class="empty"></div>
+</div>
 </body></html>'''.strip()
     assert expected == result
 

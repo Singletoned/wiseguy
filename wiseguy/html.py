@@ -39,11 +39,12 @@ class HtmlElement(lxml.html.HtmlElement):
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
                 parent = el.getparent()
+                index = parent.index(el)
                 parent.remove(el)
                 children = parent.getchildren()
                 if children:
-                    last_child = children[-1]
-                    last_child.tail = (last_child.text or '') + text_or_el
+                    prev_child = children[index-1]
+                    prev_child.tail = (prev_child.text or '') + text_or_el
                 else:
                     parent.text = (parent.text or '') + text_or_el
         else:
