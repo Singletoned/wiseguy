@@ -26,7 +26,7 @@ class HtmlElement(lxml.html.HtmlElement):
             elements = [self]
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
-                el.text = text_or_el
+                el.text = (el.text or '') + text_or_el
         else:
             for el in elements:
                 if index is None:

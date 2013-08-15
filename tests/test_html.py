@@ -67,7 +67,7 @@ html
 <html>
 <head><title>Hullo Mr Flibble</title></head>
 <body>
-<span>This goes before the header</span><h1 id="title">Hullo Mr Flibble</h1>
+<span>This goes before the header</span><h1 id="title">placeholder textHullo Mr Flibble</h1>
 <div id="body">Some text<span class="bar">Welcome to my web</span>
 </div>
 </body>
