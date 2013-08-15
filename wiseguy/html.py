@@ -41,8 +41,8 @@ class HtmlElement(lxml.html.HtmlElement):
                 parent = el.getparent()
                 index = parent.index(el)
                 parent.remove(el)
-                children = parent.getchildren()
-                if children:
+                if index:
+                    children = parent.getchildren()
                     prev_child = children[index-1]
                     prev_child.tail = (prev_child.text or '') + text_or_el
                 else:
