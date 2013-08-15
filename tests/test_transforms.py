@@ -4,14 +4,17 @@ import werkzeug
 
 import wiseguy.transforms
 import wiseguy.html
+import wiseguy.utils
+
 
 def test_add_stylesheet():
     transform = wiseguy.transforms.add_stylesheet("foo.css")
-    element = wiseguy.html.jade("html: head")
+    template = wiseguy.utils.MockObject(
+        element = wiseguy.html.jade("html: head"))
 
     assert transform.keys == set()
-    transform.action(element=element)
-    result = element.to_string().strip()
+    transform.action(template=template)
+    result = template.element.to_string().strip()
     expected = """
 <html><head><link href="foo.css" type="text/css" rel="stylesheet"></head></html>
     """.strip()
@@ -20,11 +23,12 @@ def test_add_stylesheet():
 
 def test_add_script():
     transform = wiseguy.transforms.add_script("foo.js")
-    element = wiseguy.html.jade("html: head")
+    template = wiseguy.utils.MockObject(
+        element = wiseguy.html.jade("html: head"))
 
     assert transform.keys == set()
-    transform.action(element=element)
-    result = element.to_string().strip()
+    transform.action(template=template)
+    result = template.element.to_string().strip()
     expected = """
 <html><head><script src="foo.js"></script></head></html>
     """.strip()
@@ -33,7 +37,8 @@ def test_add_script():
 
 def test_fix_urls():
     transform = wiseguy.transforms.fix_urls()
-    element = wiseguy.html.jade('''
+    template = wiseguy.utils.MockObject(
+        element = wiseguy.html.jade('''
 html
   head
     link(href="/static/blueprint.css", type="text/css")
@@ -49,11 +54,11 @@ html
       a(href="http://example.com?foo=bar")
     form(method="POST", action="/form_handler")
     form(method="POST", action="form_handler")
-''')
+'''))
 
     assert transform.keys == set(['url'])
     transform.action(
-        element=element,
+        template=template,
         url=werkzeug.Href("/mountpoint"))
     expected = '''
 <html>
@@ -70,5 +75,5 @@ html
 </body>
 </html>
 '''.strip()
-    result = element.to_string().strip()
+    result = template.element.to_string().strip()
     assert result == expected

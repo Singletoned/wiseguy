@@ -22,14 +22,14 @@ def script(href):
 def add_stylesheet(href):
     return Transform(
         [],
-        lambda element: element.insert(
+        lambda template: template.element.add(
             "head",
             stylesheet(href)))
 
 def add_script(href):
     return Transform(
         [],
-        lambda element: element.insert(
+        lambda template: template.element.add(
             "head",
             script(href)))
 
@@ -60,4 +60,4 @@ def _fix_urls(element, url):
 def fix_urls():
     return Transform(
         "url",
-        lambda element, url: _fix_urls(element, url))
+        lambda template, url: _fix_urls(template.element, url))

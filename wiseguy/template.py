@@ -6,25 +6,32 @@ import lxml.html
 
 
 class Transform(object):
-    def __init__(self, keys, action):
+    def __init__(self, keys, action, context=None):
         if isinstance(keys, basestring):
-            self.keys = set([keys])
+            self.keys = frozenset([keys])
         else:
-            self.keys = set(keys)
+            self.keys = frozenset(keys)
         self.action = action
-        self.applied = False
-        self.context = dict()
+        if not keys:
+            self.applied = True
+        else:
+            self.applied = False
+        if not context:
+            self.context = dict()
+        else:
+            self.context = context
 
     def __repr__(self):
         return "<Transform %s>" % self.keys
 
     def apply(self, context):
-        for key in list(self.keys):
+        new_keys = set(self.keys)
+        new_context = dict(self.context)
+        for key in list(new_keys):
             if key in context:
-                self.context[key] = context[key]
-                self.keys.remove(key)
-        if not self.keys:
-            self.applied = True
+                new_context[key] = context[key]
+                new_keys.remove(key)
+        return Transform(new_keys, self.action, new_context)
 
 
 class TemplateMeta(type):
@@ -38,11 +45,13 @@ class TemplateMeta(type):
 
     def apply(self, context):
         for transform in list(self.transforms):
-            transform.apply(context)
-            if transform.applied:
-                transform.action(element=self.element, **transform.context)
-                self.transforms.remove(transform)
-                self.applied_transforms.append(transform)
+            new_transform = transform.apply(context)
+            self.transforms.remove(transform)
+            if new_transform.applied:
+                new_transform.action(template=self, **new_transform.context)
+                self.applied_transforms.append(new_transform)
+            else:
+                self.transforms.append(new_transform)
 
     def copy(self):
         return TemplateMeta(
@@ -53,17 +62,19 @@ class TemplateMeta(type):
                 transforms=copy.deepcopy(self.transforms)))
 
     def extend(self, template):
-        new_template = self.copy()
-        new_template.transforms.extend(template.transforms)
-        new_template.apply(template(dict()))
-        return new_template
+        self.transforms.extend(template.transforms)
+        self.apply(template(dict()))
+
+    def add_widget(self, path, template):
+        self.element.add(path, template.element)
+        self.transforms.extend(template.transforms)
 
     def render_lxml(self, kwargs):
         template = self.copy()
         template.apply(kwargs)
         return template.element
 
-    def render(self, kwargs):
+    def render(self, **kwargs):
         html = self.render_lxml(kwargs)
         return lxml.html.tostring(html, pretty_print=True)
 
@@ -83,9 +94,15 @@ class SubTemplateMeta(TemplateMeta):
             if hasattr(value, 'transforms'):
                 self.transforms.extend(value.transforms)
 
+    def _iter_items(self, context):
+        for key in self.keys:
+            value = getattr(self, key)
+            if callable(value):
+                value = value(context)
+            yield key, value
+
     def __call__(self, context):
-        return dict(
-            (k, getattr(self, k)(context)) for k in self.keys)
+        return dict(self._iter_items(context))
 
 
 class SubTemplate(object):
@@ -113,35 +130,46 @@ def register(collection):
 
 def extends(template):
     def _decorator(wrapped_template):
-        new_template = template.extend(
+        new_template = template.copy()
+        new_template.extend(
             wrapped_template)
         return new_template
     return _decorator
 
 def set_attr(path, attr, content_func):
-    def _set_attr(element, **kwargs):
-        element.set_attr(
+    def _set_attr(template, **kwargs):
+        template.element.set_attr(
             path,
             attr,
             content_func(**kwargs))
     return _set_attr
 
 def set_text(path, content_func):
-    def _set_text(element, **kwargs):
-        for el in element.cssselect(path):
+    def _set_text(template, **kwargs):
+        for el in template.element.cssselect(path):
             el.text = content_func(**kwargs)
     return _set_text
 
 def replace(path, content_func):
-    def _replace(element, **kwargs):
-        element.replace(
+    def _replace(template, **kwargs):
+        template.element.replace(
             path,
             content_func(**kwargs))
     return _replace
 
-def insert(path, content_func):
-    def _insert(element, **kwargs):
-        element.insert(
+def add(path, content_func, index=None):
+    def _add(template, **kwargs):
+        template.element.add(
             path,
-            content_func(**kwargs))
-    return _insert
+            content_func(**kwargs),
+            index=index)
+    return _add
+
+def add_multiple(path, content_func, index=None):
+    def _add(element, **kwargs):
+        for item in content_func(**kwargs):
+            element.add(
+                path,
+                item,
+                index=index)
+    return _add

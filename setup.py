@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '0.2.10'
+version = '0.2.13'
 
 setup(
     name='wiseguy',
@@ -9,7 +9,14 @@ setup(
     description="Some useful WSGI utils for dealing with Werkzeug and Jinja",
     long_description="""\
 """,
-    classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    classifiers=[
+        "Programming Language :: Python",
+        "License :: Freely Distributable",
+        "Operating System :: OS Independent",
+        "Intended Audience :: Developers",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Development Status :: 4 - Beta",
+    ],
     keywords='',
     author='Ed Singleton',
     author_email='singletoned@gmail.com',
