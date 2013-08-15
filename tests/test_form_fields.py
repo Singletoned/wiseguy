@@ -100,7 +100,17 @@ class TestInput(unittest.TestCase):
         context = dict(data=None, errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo" disabled class="bar">
+<label for="foo">Foo:</label><input disabled type="text" id="foo" value="" name="foo" class="bar">
+</div>
+        '''.strip()
+        result = form_fields.input(context, 'foo', "Foo:", class_="bar")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
+        context = dict(data=None, errors=None, disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo" class="bar">
 </div>
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
@@ -202,7 +212,17 @@ class TestSearch(unittest.TestCase):
         context = dict(data=dict(), errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo" disabled><a href="#">Search</a>
+<label for="foo">Foo:</label><input disabled type="text" id="foo" value="" name="foo"><a href="#">Search</a>
+</div>
+        '''.strip()
+        result = form_fields.search(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
+        context = dict(data=dict(), errors=None, disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><input type="text" id="foo" value="" name="foo"><a href="#">Search</a>
 </div>
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
@@ -289,11 +309,31 @@ class TestCheckbox(unittest.TestCase):
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+        context = dict()
+        expected = '''
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo">
+</div>
+        '''.strip()
+        result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
     def test_disabled_form(self):
         context = dict(disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo" disabled>
+<label for="foo">Foo:</label><input disabled type="checkbox" id="foo" value="" name="foo">
+</div>
+        '''.strip()
+        result = form_fields.checkbox(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
+        context = dict(disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="foo">
 </div>
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
@@ -350,18 +390,29 @@ class TestPassword(unittest.TestCase):
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
         expected = '''
-<label for="foo">Foo:</label>
-<input type="password" id="foo" value="" name="foo">
-<span class="error">Please enter a foo</span>
+<div>
+<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo"><span class="error">Please enter a foo</span>
+</div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
-    def test_errors(self):
+    def test_disabled(self):
         context = dict(data=dict(), errors=None, disabled_form=True)
         expected = '''
 <div>
-<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo" disabled>
+<label for="foo">Foo:</label><input disabled type="password" id="foo" value="" name="foo">
+</div>
+        '''.strip()
+        result = form_fields.password(context, 'foo', "Foo:")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
+        context = dict(data=dict(), errors=None, disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><input type="password" id="foo" value="" name="foo">
 </div>
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
@@ -465,12 +516,42 @@ class TestSelect(unittest.TestCase):
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict()
+        expected = '''
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
+<option value=""></option>
+<option value="bar1">Bar 1</option>
+<option value="bar2">Bar 2</option>
+<option value="bar3">Bar 3</option></select>
+</div>
+'''.strip()
+        result = form_fields.select(context, 'foo', "Foo:", options)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
     def test_disabled_form(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict(disabled_form=True)
         expected = '''
 <div>
 <label for="foo">Foo:</label><select disabled id="foo" name="foo">
+<option value=""></option>
+<option value="bar1">Bar 1</option>
+<option value="bar2">Bar 2</option>
+<option value="bar3">Bar 3</option></select>
+</div>
+'''.strip()
+        result = form_fields.select(context, 'foo', "Foo:", options)
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
+        options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
+        context = dict(disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><select id="foo" name="foo">
 <option value=""></option>
 <option value="bar1">Bar 1</option>
 <option value="bar2">Bar 2</option>
@@ -528,7 +609,17 @@ class TestDatePicker(unittest.TestCase):
         context = dict(disabled_form=True)
         expected = '''
 <label for="foo">Foo:</label>
-<input type="text" id="foo" value="" name="foo" disabled>
+<input disabled type="text" id="foo" value="" name="foo">
+<script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
+        '''.strip()
+        result = form_fields.datepicker(context, 'foo', "Foo:")
+        result = result.strip()
+        assert expected == result
+
+        context = dict(disabled_form=False)
+        expected = '''
+<label for="foo">Foo:</label>
+<input type="text" id="foo" value="" name="foo">
 <script>$(function() {$("#foo").datepicker({dateFormat:'yy-mm-dd'});});</script>
         '''.strip()
         result = form_fields.datepicker(context, 'foo', "Foo:")
@@ -693,6 +784,28 @@ CKEDITOR.replace(
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+        context = dict(data=None, errors=None, disabled_form=False)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><textarea id="foo" name="foo" class="ckeditor"></textarea><script type="text/javascript">
+CKEDITOR.replace(
+    'foo',
+    {
+        toolbar: 'Basic',
+        customConfig: ''});
+</script>
+</div>
+        '''.strip()
+        result = form_fields.ckeditor(
+            context,
+            'foo',
+            "Foo:",
+            ckeditor_config={
+                'toolbar': "'Basic'",
+                'customConfig': "''"})
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
     def test_wysihtml5(self):
         context = dict(data=None, errors=None)
         expected = '''
@@ -760,6 +873,12 @@ class TestSubmit(unittest.TestCase):
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+        context = dict(disabled_form=False)
+        expected = '''
+<input type="submit" id="submit" value="Submit" class="foo bar">'''.strip()
+        result = form_fields.submit(context, class_="foo bar")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
 
 class TestBootstrapFormFields(unittest.TestCase):
     bootstrap_form_fields = form_fields.BootstrapFormFields(
