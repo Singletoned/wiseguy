@@ -9,6 +9,8 @@ import werkzeug.test
 import jinja2 as j2
 import validino as v
 
+import path
+
 from wiseguy import web_utils as wu, utils
 import wiseguy.html
 
@@ -150,6 +152,35 @@ def test_LxmlEnv():
 
     response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data.strip() == "<div>Foo Page flibble</div>"
+
+def test_JadeEnv():
+    with path.create_temp_dir() as d:
+        layout_content = """
+html
+  body
+    block body"""
+        index_content = """
+extends layout.jade
+
+append body
+  div: p: a.foo"""
+        foo_content = """
+extends layout.jade
+
+append body
+  div= foo_var"""
+        d.child('layout.jade').write_text(layout_content)
+        d.child('index.jade').write_text(index_content)
+        d.child('foo.jade').write_text(foo_content)
+        env = wu.JadeEnv(d)
+
+        html = env.render("index").strip()
+        expected = '''<html><body><div><p><a class="foo"></a></p></div></body></html>'''
+        assert expected == html
+
+        response = env.get_response("foo", dict(foo_var="flibble"), "text/html")
+        expected = '''<html><body><div>flibble</div></body></html>'''
+        assert response.data.strip() == expected
 
 def test_render():
     foo = lambda x: x
