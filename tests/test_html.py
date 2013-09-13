@@ -68,8 +68,8 @@ html
 <head><title>Hullo Mr Flibble</title></head>
 <body>
 <span>This goes before the header</span><h1 id="title">placeholder textHullo Mr Flibble</h1>
-<div id="body">Some text<span class="bar">Welcome to my web</span>
-</div>
+<div id="body">
+<span class="bar">Welcome to my web</span>Some text</div>
 </body>
 </html>'''.strip()
     assert expected == result
