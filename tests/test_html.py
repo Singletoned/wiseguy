@@ -54,11 +54,12 @@ html
     title
   body
     h1#title placeholder text
+    div#body
     div#body"""
     t = wg.html.jade(template)
     t.add("title, #title", "Hullo Mr Flibble")
-    t.add("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
-    t.add("body", wg.html.Html("<span>This goes before the header</span>"), index=0)
+    t.add("#body", wg.html.Html("<p class='bar'>Welcome to my web</p>"))
+    t.add("body", wg.html.Html("<p>This goes before the header</p>"), index=0)
 
     t.xpath("//body/div")[0].add(None, "Some text")
 
@@ -67,9 +68,11 @@ html
 <html>
 <head><title>Hullo Mr Flibble</title></head>
 <body>
-<span>This goes before the header</span><h1 id="title">placeholder textHullo Mr Flibble</h1>
-<div id="body">Some text<span class="bar">Welcome to my web</span>
-</div>
+<p>This goes before the header</p>
+<h1 id="title">placeholder textHullo Mr Flibble</h1>
+<div id="body">
+<p class="bar">Welcome to my web</p>Some text</div>
+<div id="body"><p class="bar">Welcome to my web</p></div>
 </body>
 </html>'''.strip()
     assert expected == result
@@ -82,6 +85,7 @@ html
     div#body
     div
       div.content-1
+      div.content-1
     div
       div.placeholder
       div.content-2
@@ -89,15 +93,19 @@ html
 """
     t = wg.html.jade(template)
     t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
-    t.replace("#body", wg.html.Html("<span class='bar'>Welcome to my web</span>"))
-    t.replace("div.content-1", "Hullo Again")
+    t.replace("#body", wg.html.Html("<p class='bar'>Welcome to my web</p>"))
+    t.replace("div.content-1", wg.html.Html("<p>Hullo</p>"))
     t.replace("div.content-2", "Hullo Again")
 
     result = t.to_string().strip()
     expected = '''
 <html><body>
 <h1 id="title">Hullo Mr Flibble</h1>
-<span class="bar">Welcome to my web</span><div>Hullo Again</div>
+<p class="bar">Welcome to my web</p>
+<div>
+<p>Hullo</p>
+<p>Hullo</p>
+</div>
 <div>
 <div class="placeholder"></div>Hullo Again<div class="empty"></div>
 </div>

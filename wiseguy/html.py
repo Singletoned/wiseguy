@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import types
+import copy
 
 import pyjade.ext.html
 import lxml.html, lxml.builder
@@ -26,13 +27,19 @@ class HtmlElement(lxml.html.HtmlElement):
             elements = [self]
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
-                el.text = (el.text or '') + text_or_el
+                children = el.getchildren()
+                if children:
+                    last_child = children[-1]
+                    last_child.tail = (last_child.tail or '') + text_or_el
+                else:
+                    el.text = (el.text or '') + text_or_el
         else:
             for el in elements:
+                sub_el = copy.deepcopy(text_or_el)
                 if index is None:
-                    el.append(text_or_el)
+                    el.append(sub_el)
                 else:
-                    el.insert(index, text_or_el)
+                    el.insert(index, sub_el)
 
     def replace(self, path, text_or_el):
         elements = self.cssselect(path)
@@ -49,7 +56,8 @@ class HtmlElement(lxml.html.HtmlElement):
                     parent.text = (parent.text or '') + text_or_el
         else:
             for el in elements:
-                super(lxml.html.HtmlElement, el.getparent()).replace(el, text_or_el)
+                sub_el = copy.deepcopy(text_or_el)
+                super(lxml.html.HtmlElement, el.getparent()).replace(el, sub_el)
 
     def set_attr(self, path, attr, value):
         elements = self.cssselect(path)
