@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import types
+import copy
 
 import pyjade.ext.html
 import lxml.html, lxml.builder
@@ -34,10 +35,11 @@ class HtmlElement(lxml.html.HtmlElement):
                     el.text = (el.text or '') + text_or_el
         else:
             for el in elements:
+                sub_el = copy.deepcopy(text_or_el)
                 if index is None:
-                    el.append(text_or_el)
+                    el.append(sub_el)
                 else:
-                    el.insert(index, text_or_el)
+                    el.insert(index, sub_el)
 
     def replace(self, path, text_or_el):
         elements = self.cssselect(path)

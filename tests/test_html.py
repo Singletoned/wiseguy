@@ -54,6 +54,7 @@ html
     title
   body
     h1#title placeholder text
+    div#body
     div#body"""
     t = wg.html.jade(template)
     t.add("title, #title", "Hullo Mr Flibble")
@@ -70,6 +71,7 @@ html
 <span>This goes before the header</span><h1 id="title">placeholder textHullo Mr Flibble</h1>
 <div id="body">
 <span class="bar">Welcome to my web</span>Some text</div>
+<div id="body"><span class="bar">Welcome to my web</span></div>
 </body>
 </html>'''.strip()
     assert expected == result
