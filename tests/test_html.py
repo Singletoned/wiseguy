@@ -85,6 +85,7 @@ html
     div#body
     div
       div.content-1
+      div.content-1
     div
       div.placeholder
       div.content-2
@@ -93,7 +94,7 @@ html
     t = wg.html.jade(template)
     t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
     t.replace("#body", wg.html.Html("<p class='bar'>Welcome to my web</p>"))
-    t.replace("div.content-1", "Hullo Again")
+    t.replace("div.content-1", wg.html.Html("<p>Hullo</p>"))
     t.replace("div.content-2", "Hullo Again")
 
     result = t.to_string().strip()
@@ -101,7 +102,10 @@ html
 <html><body>
 <h1 id="title">Hullo Mr Flibble</h1>
 <p class="bar">Welcome to my web</p>
-<div>Hullo Again</div>
+<div>
+<p>Hullo</p>
+<p>Hullo</p>
+</div>
 <div>
 <div class="placeholder"></div>Hullo Again<div class="empty"></div>
 </div>

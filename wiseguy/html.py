@@ -56,7 +56,8 @@ class HtmlElement(lxml.html.HtmlElement):
                     parent.text = (parent.text or '') + text_or_el
         else:
             for el in elements:
-                super(lxml.html.HtmlElement, el.getparent()).replace(el, text_or_el)
+                sub_el = copy.deepcopy(text_or_el)
+                super(lxml.html.HtmlElement, el.getparent()).replace(el, sub_el)
 
     def set_attr(self, path, attr, value):
         elements = self.cssselect(path)
