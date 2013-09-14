@@ -98,9 +98,13 @@ class LxmlEnv(object):
         return res
 
 class JadeEnv(object):
-    def __init__(self, directory):
+    def __init__(self, directory, global_context=None):
         self.directory = path.path(directory)
-        self.globals = {'loader': self._loader}
+        if global_context:
+            self.globals = dict(global_context)
+        else:
+            self.globals = dict()
+        self.globals['loader'] = self._loader
 
     def _loader(self, filename):
         f = self.directory / filename

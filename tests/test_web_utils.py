@@ -168,18 +168,26 @@ append body
 extends layout.jade
 
 append body
-  div= foo_var"""
+  div= foo_var
+  div(class={{bar_var}})
+"""
         d.child('layout.jade').write_text(layout_content)
         d.child('index.jade').write_text(index_content)
         d.child('foo.jade').write_text(foo_content)
-        env = wu.JadeEnv(d)
+        env = wu.JadeEnv(d, dict(bar_var="bibble"))
 
         html = env.render("index").strip()
         expected = '''<html><body><div><p><a class="foo"></a></p></div></body></html>'''
         assert expected == html
 
         response = env.get_response("foo", dict(foo_var="flibble"), "text/html")
-        expected = '''<html><body><div>flibble</div></body></html>'''
+        expected = '''
+<html><body>
+<div>flibble</div>
+<div class="bibble"></div>
+</body></html>'''.strip()
+        print response.data.strip()
+        print expected
         assert response.data.strip() == expected
 
 def test_render():
