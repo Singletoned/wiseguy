@@ -158,7 +158,8 @@ def test_JadeEnv():
         layout_content = """
 html
   body
-    block body"""
+    block body
+    div(class={{baz_var}})"""
         index_content = """
 extends layout.jade
 
@@ -174,10 +175,14 @@ append body
         d.child('layout.jade').write_text(layout_content)
         d.child('index.jade').write_text(index_content)
         d.child('foo.jade').write_text(foo_content)
-        env = wu.JadeEnv(d, dict(bar_var="bibble"))
+        env = wu.JadeEnv(d, dict(bar_var="bibble", baz_var="baz"))
 
         html = env.render("index").strip()
-        expected = '''<html><body><div><p><a class="foo"></a></p></div></body></html>'''
+        expected = '''
+<html><body>
+<div><p><a class="foo"></a></p></div>
+<div class="baz"></div>
+</body></html>'''.strip()
         assert expected == html
 
         response = env.get_response("foo", dict(foo_var="flibble"), "text/html")
@@ -185,6 +190,7 @@ append body
 <html><body>
 <div>flibble</div>
 <div class="bibble"></div>
+<div class="baz"></div>
 </body></html>'''.strip()
         print response.data.strip()
         print expected

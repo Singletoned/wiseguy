@@ -106,11 +106,11 @@ class JadeEnv(object):
             self.globals = dict()
         self.globals['loader'] = self._loader
 
-    def _loader(self, filename):
+    def _loader(self, filename, context):
         f = self.directory / filename
         src = f.text()
         data = jade.generate_data(src)
-        elements = jade.generate_elements(data)
+        elements = jade.generate_elements(data, context=context)
         return elements
 
     def render(self, template_name, context=None):
