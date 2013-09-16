@@ -192,8 +192,6 @@ append body
 <div class="bibble"></div>
 <div class="baz"></div>
 </body></html>'''.strip()
-        print response.data.strip()
-        print expected
         assert response.data.strip() == expected
 
 def test_render():
