@@ -209,7 +209,6 @@ some tail
 <div id="three"></div>
 </div></body></html>
 '''.strip()
-    wg.utils.print_quick_pprint_diff(expected, result)
     assert expected == result
 
 def test_HTMLBuilder():
