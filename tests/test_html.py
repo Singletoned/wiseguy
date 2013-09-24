@@ -10,13 +10,13 @@ def test_process_jade():
     "Test that Jade basically works"
     d = "div#foo.bar Hullo"
     expected = '''<div id="foo" class="bar">Hullo</div>'''
-    result = wg.html.process_jade(d)
+    result = wg.html.jade(d).to_string().strip()
     assert expected == result
 
     # Test that jade works with context
     d = "div#foo.bar= foo"
     expected = '''<div id="foo" class="bar">flibble</div>'''
-    result = wg.html.process_jade(d, context=dict(foo="flibble"))
+    result = wg.html.jade(d, context=dict(foo="flibble")).to_string().strip()
     assert expected == result
 
 def test_jade():
@@ -204,9 +204,7 @@ html
 <html><body><div>
 <div id="one"></div>
 <div id="two" class="one"></div>
-<div id="two" class="two"></div>flibble
-some tail
-<div id="three"></div>
+<div id="two" class="two"></div>flibblesome tail<div id="three"></div>
 </div></body></html>
 '''.strip()
     assert expected == result

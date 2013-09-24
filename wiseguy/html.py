@@ -3,8 +3,9 @@
 import types
 import copy
 
-import pyjade.ext.html
 import lxml.html, lxml.builder
+
+import jade as Jade
 
 import wiseguy.utils
 import wiseguy.html_tidy
@@ -128,25 +129,13 @@ parser.set_element_class_lookup(HtmlElementLookup())
 def Html(src):
     return lxml.html.fromstring(src, parser=parser)
 
-class JadeCompiler(pyjade.ext.html.HTMLCompiler):
-    def __init__(self, node, **options):
-        super(pyjade.ext.html.HTMLCompiler, self).__init__(node, **options)
-        self.global_context = options.get('context', {})
-
 def jade(src, context=None):
     import wiseguy.jade_mixins
     new_context = dict(wiseguy.jade_mixins.mixins)
     if context:
         new_context.update(context)
-    text = process_jade(src, context=new_context)
-    el = lxml.html.fromstring(text, parser=parser)
-    return el
-
-def process_jade(src, context=None):
-    parser = pyjade.parser.Parser(src)
-    block = parser.parse()
-    compiler = JadeCompiler(block, pretty=False, context=context)
-    return compiler.compile()
+    elements = Jade.to_elements(src, context=new_context)
+    return elements.next()
 
 def add_generator(elem, item):
     for i in item:

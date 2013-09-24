@@ -350,7 +350,8 @@ def test_add():
     result = template.element.normalise()
     expected = wiseguy.html.jade(
 '''
-div: a.foo flibble
-  span wobble
-  span wibble''').normalise()
+div
+  a.foo flibble
+    span wobble
+    span wibble''').normalise()
     assert result == expected
