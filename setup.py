@@ -27,11 +27,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "Werkzeug>=0.6",
-        "Jinja2>=2.4",
         "lxml",
         "cssselect",
-        "sqlalchemy>0.6",
     ],
     entry_points="""
       # -*- Entry points: -*-
