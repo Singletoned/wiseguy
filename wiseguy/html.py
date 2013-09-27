@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import types
+import copy
 
-import pyjade.ext.html
 import lxml.html, lxml.builder
+
+import jade as Jade
 
 import wiseguy.utils
 import wiseguy.html_tidy
@@ -26,13 +28,19 @@ class HtmlElement(lxml.html.HtmlElement):
             elements = [self]
         if isinstance(text_or_el, (str, unicode)):
             for el in elements:
-                el.text = (el.text or '') + text_or_el
+                children = el.getchildren()
+                if children:
+                    last_child = children[-1]
+                    last_child.tail = (last_child.tail or '') + text_or_el
+                else:
+                    el.text = (el.text or '') + text_or_el
         else:
             for el in elements:
+                sub_el = copy.deepcopy(text_or_el)
                 if index is None:
-                    el.append(text_or_el)
+                    el.append(sub_el)
                 else:
-                    el.insert(index, text_or_el)
+                    el.insert(index, sub_el)
 
     def replace(self, path, text_or_el):
         elements = self.cssselect(path)
@@ -49,7 +57,8 @@ class HtmlElement(lxml.html.HtmlElement):
                     parent.text = (parent.text or '') + text_or_el
         else:
             for el in elements:
-                super(lxml.html.HtmlElement, el.getparent()).replace(el, text_or_el)
+                sub_el = copy.deepcopy(text_or_el)
+                super(lxml.html.HtmlElement, el.getparent()).replace(el, sub_el)
 
     def set_attr(self, path, attr, value):
         elements = self.cssselect(path)
@@ -120,25 +129,13 @@ parser.set_element_class_lookup(HtmlElementLookup())
 def Html(src):
     return lxml.html.fromstring(src, parser=parser)
 
-class JadeCompiler(pyjade.ext.html.HTMLCompiler):
-    def __init__(self, node, **options):
-        super(pyjade.ext.html.HTMLCompiler, self).__init__(node, **options)
-        self.global_context = options.get('context', {})
-
 def jade(src, context=None):
     import wiseguy.jade_mixins
     new_context = dict(wiseguy.jade_mixins.mixins)
     if context:
         new_context.update(context)
-    text = process_jade(src, context=new_context)
-    el = lxml.html.fromstring(text, parser=parser)
-    return el
-
-def process_jade(src, context=None):
-    parser = pyjade.parser.Parser(src)
-    block = parser.parse()
-    compiler = JadeCompiler(block, pretty=False, context=context)
-    return compiler.compile()
+    elements = Jade.to_elements(src, context=new_context)
+    return elements.next()
 
 def add_generator(elem, item):
     for i in item:

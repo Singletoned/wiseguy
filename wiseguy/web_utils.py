@@ -8,6 +8,9 @@ import werkzeug as wz
 import validino
 import jinja2
 
+import path
+import jade
+
 from wiseguy import form_fields, utils
 
 
@@ -87,6 +90,36 @@ class LxmlEnv(object):
         local_context.update(context)
         element = getattr(self.env, template_name)(local_context)
         html = element.to_string()
+        return html
+
+    def get_response(self, template_name, context, mimetype="text/html"):
+        body = self.render(template_name, context)
+        res = wz.Response(body, mimetype=mimetype)
+        return res
+
+class JadeEnv(object):
+    def __init__(self, directory, global_context=None):
+        self.directory = path.path(directory)
+        if global_context:
+            self.globals = dict(global_context)
+        else:
+            self.globals = dict()
+        self.globals['loader'] = self._loader
+
+    def _loader(self, filename, context):
+        f = self.directory / filename
+        src = f.text()
+        data = jade.generate_data(src)
+        elements = jade.generate_elements(data, context=context)
+        return elements
+
+    def render(self, template_name, context=None):
+        local_context = dict(self.globals)
+        if context:
+            local_context.update(context)
+        f = self.directory.child("%s.jade"%template_name)
+        text = f.text()
+        html = jade.to_html(text, context=local_context)
         return html
 
     def get_response(self, template_name, context, mimetype="text/html"):
