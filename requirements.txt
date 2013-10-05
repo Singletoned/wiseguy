@@ -6,6 +6,5 @@ cssselect
 nose
 pytest
 forked-path
-pyjade
 -e git+git://github.com/Singletoned/validino.git#egg=validino
 -e git+git://github.com/Singletoned/testino.git#egg=testino
