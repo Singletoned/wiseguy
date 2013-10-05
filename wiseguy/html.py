@@ -5,8 +5,6 @@ import copy
 
 import lxml.html, lxml.builder
 
-import jade as Jade
-
 import wiseguy.utils
 import wiseguy.html_tidy
 
@@ -128,14 +126,6 @@ parser.set_element_class_lookup(HtmlElementLookup())
 
 def Html(src):
     return lxml.html.fromstring(src, parser=parser)
-
-def jade(src, context=None):
-    import wiseguy.jade_mixins
-    new_context = dict(wiseguy.jade_mixins.mixins)
-    if context:
-        new_context.update(context)
-    elements = Jade.to_elements(src, context=new_context)
-    return elements.next()
 
 def add_generator(elem, item):
     for i in item:
