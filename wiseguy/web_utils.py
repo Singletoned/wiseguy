@@ -125,6 +125,8 @@ class JadeEnv(object):
         if context:
             local_context.update(context)
         f = self.directory.child("%s.jade"%template_name)
+        if not f.exists():
+            raise TemplateNotFound()
         text = f.text()
         html = jade.to_html(text, context=local_context)
         return html

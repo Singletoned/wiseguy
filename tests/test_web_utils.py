@@ -209,6 +209,9 @@ append body
 </body></html>'''.strip()
         assert response.data.strip() == expected
 
+        with raises(wu.TemplateNotFound):
+            html = env.render("blooble").strip()
+
 def test_render():
     foo = lambda x: x
     mock_request = object()
