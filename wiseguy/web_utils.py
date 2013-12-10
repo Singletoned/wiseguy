@@ -14,6 +14,9 @@ import jade
 from wiseguy import form_fields, utils
 
 
+class TemplateNotFound(Exception):
+    pass
+
 def wsgi_wrapper(app, request_class=wz.Request):
     def application(environ, start_response):
         req = request_class(environ)
