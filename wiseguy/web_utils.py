@@ -146,7 +146,11 @@ class CascadingEnv(object):
         self.envs = args
 
     def render(self, template_name, context=None):
-        return self.envs[0].render(template_name, context)
+        for env in self.envs:
+            try:
+                return env.render(template_name, context)
+            except TemplateNotFound:
+                pass
 
 
 def make_url_map(mountpoint, sub_url_map):

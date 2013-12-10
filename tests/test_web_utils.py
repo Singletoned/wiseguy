@@ -331,7 +331,7 @@ def test_create_render():
 
 def test_CascadingEnv():
     with path.create_temp_dir() as d:
-        d.child('bar3.jade').write_text("""div Jade Page\n  !=foo_var""")
+        d.child('bar3.jade').write_text("""div Jade Page\n  !=" "+foo_var""")
 
         env = wu.CascadingEnv(
             wu.LxmlEnv(
@@ -345,6 +345,14 @@ def test_CascadingEnv():
 
         expected = "<div>Lxml Page flam</div>"
         result = env.render("bar1", dict(foo_var="flam")).strip()
+        assert result == expected
+
+        expected = "<div>Jinja Page flom</div>"
+        result = env.render("bar2", dict(foo_var="flom")).strip()
+        assert result == expected
+
+        expected = "<div>Jade Page flim</div>"
+        result = env.render("bar3", dict(foo_var="flim")).strip()
         assert result == expected
 
 
