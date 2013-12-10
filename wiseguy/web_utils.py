@@ -71,7 +71,11 @@ class JinjaEnv(object):
         self.globals = env.globals
 
     def render(self, template_name, context):
-        return self.env.get_template(template_name).render(context)
+        try:
+            template = self.env.get_template(template_name)
+        except jinja2.TemplateNotFound:
+            raise TemplateNotFound()
+        return template.render(context)
 
     def get_response(self, template_name, context, mimetype="text/html"):
         body = self.render(template_name, context)

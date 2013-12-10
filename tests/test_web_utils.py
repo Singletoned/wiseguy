@@ -154,6 +154,9 @@ def test_JinjaEnv():
 
     assert env.from_string("foo").render() == "foo"
 
+    with raises(wu.TemplateNotFound):
+        html = env.render("blanger", dict(blim="blam"))
+
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
