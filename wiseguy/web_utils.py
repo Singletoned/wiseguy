@@ -140,6 +140,15 @@ class JadeEnv(object):
         res = wz.Response(body, mimetype=mimetype)
         return res
 
+
+class CascadingEnv(object):
+    def __init__(self, *args):
+        self.envs = args
+
+    def render(self, template_name, context=None):
+        return self.envs[0].render(template_name, context)
+
+
 def make_url_map(mountpoint, sub_url_map):
     url_map = UrlMap([
         wz.routing.Submount(

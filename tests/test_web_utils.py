@@ -329,6 +329,25 @@ def test_create_render():
     assert u"/other_page" in res.response[0]
 
 
+def test_CascadingEnv():
+    with path.create_temp_dir() as d:
+        d.child('bar3.jade').write_text("""div Jade Page\n  !=foo_var""")
+
+        env = wu.CascadingEnv(
+            wu.LxmlEnv(
+                utils.MockObject(
+                    bar1=lambda context: wiseguy.html.jade(
+                        "div Lxml Page %s"%context['foo_var']))),
+            wu.JinjaEnv(
+                j2.Environment(
+                    loader=j2.DictLoader(dict(bar2="<div>Jinja Page {{foo_var}}</div>")))),
+            wu.JadeEnv(d, dict()))
+
+        expected = "<div>Lxml Page flam</div>"
+        result = env.render("bar1", dict(foo_var="flam")).strip()
+        assert result == expected
+
+
 def test_make_client_env():
     def check_result(result):
         assert not "master template" in result
