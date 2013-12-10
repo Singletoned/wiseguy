@@ -91,7 +91,11 @@ class LxmlEnv(object):
     def render(self, template_name, context):
         local_context = dict(self.globals)
         local_context.update(context)
-        element = getattr(self.env, template_name)(local_context)
+        try:
+            template = getattr(self.env, template_name)
+        except AttributeError:
+            raise TemplateNotFound()
+        element = template(local_context)
         html = element.to_string()
         return html
 

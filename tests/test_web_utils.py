@@ -165,6 +165,9 @@ def test_LxmlEnv():
     response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data.strip() == "<div>Foo Page flibble</div>"
 
+    with raises(wu.TemplateNotFound):
+        html = env.render("foo", dict(blim="blam")).strip()
+
 def test_JadeEnv():
     with path.create_temp_dir() as d:
         layout_content = """
