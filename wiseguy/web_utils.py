@@ -144,11 +144,19 @@ class JadeEnv(object):
 class CascadingEnv(object):
     def __init__(self, *args):
         self.envs = args
+        self.globals = dict()
 
     def render(self, template_name, context=None):
         for env in self.envs:
             try:
                 return env.render(template_name, context)
+            except TemplateNotFound:
+                pass
+
+    def get_response(self, template_name, context=None):
+        for env in self.envs:
+            try:
+                return env.get_response(template_name, context)
             except TemplateNotFound:
                 pass
 

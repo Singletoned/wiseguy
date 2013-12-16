@@ -346,14 +346,20 @@ def test_CascadingEnv():
         expected = "<div>Lxml Page flam</div>"
         result = env.render("bar1", dict(foo_var="flam")).strip()
         assert result == expected
+        result = env.get_response("bar1", dict(foo_var="flam"))
+        assert result.data.strip() == expected
 
         expected = "<div>Jinja Page flom</div>"
         result = env.render("bar2", dict(foo_var="flom")).strip()
         assert result == expected
+        result = env.get_response("bar2", dict(foo_var="flom"))
+        assert result.data.strip() == expected
 
         expected = "<div>Jade Page flim</div>"
         result = env.render("bar3", dict(foo_var="flim")).strip()
         assert result == expected
+        result = env.get_response("bar3", dict(foo_var="flim"))
+        assert result.data.strip() == expected
 
 
 def test_make_client_env():
