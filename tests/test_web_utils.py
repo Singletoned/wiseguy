@@ -365,6 +365,9 @@ def test_CascadingEnv():
         with raises(wu.TemplateNotFound):
             result = env.render("flib", dict())
 
+        with raises(wu.TemplateNotFound):
+            result = env.get_response("flib", dict())
+
 
 def test_make_client_env():
     def check_result(result):

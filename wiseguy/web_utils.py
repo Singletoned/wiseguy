@@ -160,6 +160,7 @@ class CascadingEnv(object):
                 return env.get_response(template_name, context, mimetype)
             except TemplateNotFound:
                 pass
+        raise TemplateNotFound()
 
 
 def make_url_map(mountpoint, sub_url_map):
