@@ -352,8 +352,9 @@ def test_CascadingEnv():
         expected = "<div>Jinja Page flom</div>"
         result = env.render("bar2", dict(foo_var="flom")).strip()
         assert result == expected
-        result = env.get_response("bar2", dict(foo_var="flom"))
+        result = env.get_response("bar2", dict(foo_var="flom"), mimetype="blah")
         assert result.data.strip() == expected
+        assert result.mimetype == "blah"
 
         expected = "<div>Jade Page flim</div>"
         result = env.render("bar3", dict(foo_var="flim")).strip()
