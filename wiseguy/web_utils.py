@@ -152,6 +152,7 @@ class CascadingEnv(object):
                 return env.render(template_name, context)
             except TemplateNotFound:
                 pass
+        raise TemplateNotFound()
 
     def get_response(self, template_name, context=None, mimetype="text/html"):
         for env in self.envs:

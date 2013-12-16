@@ -362,6 +362,9 @@ def test_CascadingEnv():
         result = env.get_response("bar3", dict(foo_var="flim"))
         assert result.data.strip() == expected
 
+        with raises(wu.TemplateNotFound):
+            result = env.render("flib", dict())
+
 
 def test_make_client_env():
     def check_result(result):
