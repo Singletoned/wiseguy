@@ -202,9 +202,11 @@ append body
   div= foo_var
   div(class={{bar_var}})
 """
+        flam_content = """div= wangle"""
         d.child('layout.jade').write_text(layout_content)
         d.child('index.jade').write_text(index_content)
         d.child('foo.jade').write_text(foo_content)
+        d.child('flam.jade').write_text(flam_content)
         env = wu.JadeEnv(d, dict(bar_var="bibble", baz_var="baz"))
 
         html = env.render("index").strip()
@@ -226,6 +228,10 @@ append body
 
         with raises(wu.TemplateNotFound):
             html = env.render("blooble").strip()
+
+        env.update_globals(dict(wangle="wotsit"))
+        html = env.render("flam", dict()).strip()
+        assert html == "<div>wotsit</div>"
 
 def test_render():
     foo = lambda x: x

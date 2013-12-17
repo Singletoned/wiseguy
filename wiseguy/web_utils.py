@@ -130,6 +130,9 @@ class JadeEnv(object):
         elements = jade.generate_elements(data, context=context)
         return elements
 
+    def update_globals(self, context):
+        self.globals.update(context)
+
     def render(self, template_name, context=None):
         local_context = dict(self.globals)
         if context:
