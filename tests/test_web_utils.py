@@ -167,7 +167,8 @@ def test_JinjaEnv():
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
-                bar=lambda context: wiseguy.html.jade("div Foo Page %s"%context['foo_var'])))
+                bar=lambda context: wiseguy.html.jade("div Foo Page %s"%context['foo_var']),
+                flam=lambda context: wiseguy.html.jade("div Flam Page %s"%context['wangle']),))
 
     html = env.render("bar", dict(foo_var="flangit")).strip()
     assert html == "<div>Foo Page flangit</div>"
@@ -177,6 +178,10 @@ def test_LxmlEnv():
 
     with raises(wu.TemplateNotFound):
         html = env.render("foo", dict(blim="blam")).strip()
+
+    env.update_globals(dict(wangle="wotsit"))
+    html = env.render("flam", dict()).strip()
+    assert html == "<div>Flam Page wotsit</div>"
 
 def test_JadeEnv():
     with path.create_temp_dir() as d:

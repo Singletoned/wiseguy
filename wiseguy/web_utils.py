@@ -95,6 +95,9 @@ class LxmlEnv(object):
             global_context = dict()
         self.globals = global_context
 
+    def update_globals(self, context):
+        self.globals.update(context)
+
     def render(self, template_name, context):
         local_context = dict(self.globals)
         local_context.update(context)
