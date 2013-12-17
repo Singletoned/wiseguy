@@ -70,6 +70,9 @@ class JinjaEnv(object):
         self.env = env
         self.globals = env.globals
 
+    def update_globals(self, context):
+        self.env.globals.update(context)
+
     def render(self, template_name, context):
         try:
             template = self.env.get_template(template_name)

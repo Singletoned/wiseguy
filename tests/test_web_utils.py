@@ -144,7 +144,10 @@ def test_make_url_map():
 def test_JinjaEnv():
     env = wu.JinjaEnv(
         j2.Environment(
-            loader=j2.DictLoader(dict(bar="Foo Page {{foo_var}}"))))
+            loader=j2.DictLoader(
+                dict(
+                    bar="Foo Page {{foo_var}}",
+                    flam="Flam Page {{wangle}}"))))
 
     html = env.render("bar", dict(foo_var="flangit"))
     assert html == "Foo Page flangit"
@@ -156,6 +159,10 @@ def test_JinjaEnv():
 
     with raises(wu.TemplateNotFound):
         html = env.render("blanger", dict(blim="blam"))
+
+    env.update_globals(dict(wangle="wotsit"))
+    html = env.render("flam", dict())
+    assert html == "Flam Page wotsit"
 
 def test_LxmlEnv():
     env = wu.LxmlEnv(
