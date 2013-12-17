@@ -358,7 +358,10 @@ def test_CascadingEnv():
                         "div Lxml Page %s"%context['foo_var']))),
             wu.JinjaEnv(
                 j2.Environment(
-                    loader=j2.DictLoader(dict(bar2="<div>Jinja Page {{foo_var}}</div>")))),
+                    loader=j2.DictLoader(
+                        dict(
+                            bar2="<div>Jinja Page {{foo_var}}</div>",
+                            flam="<div>Flam Page {{wangle}}</div>")))),
             wu.JadeEnv(d, dict()))
 
         expected = "<div>Lxml Page flam</div>"
@@ -385,6 +388,10 @@ def test_CascadingEnv():
 
         with raises(wu.TemplateNotFound):
             result = env.get_response("flib", dict())
+
+        env.update_globals(dict(wangle="wotsit"))
+        html = env.render("flam", dict()).strip()
+        assert html == "<div>Flam Page wotsit</div>"
 
 
 def test_make_client_env():

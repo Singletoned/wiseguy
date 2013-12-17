@@ -155,6 +155,10 @@ class CascadingEnv(object):
         self.envs = args
         self.globals = dict()
 
+    def update_globals(self, context):
+        for env in self.envs:
+            env.update_globals(context)
+
     def render(self, template_name, context=None):
         for env in self.envs:
             try:
