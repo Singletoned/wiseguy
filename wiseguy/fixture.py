@@ -8,6 +8,8 @@ import traceback
 import sqlalchemy as sa
 import sqlalchemy.interfaces
 
+from wiseguy import utils
+
 
 class FixtureTeardownError(Exception):
     """An error that happened in Fixture.__exit__
