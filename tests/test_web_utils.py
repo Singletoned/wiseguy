@@ -381,11 +381,11 @@ class TestFormHandler(unittest.TestCase):
 
         result = self.FooForm(MockRequest)
         expected = "This is GET with item_id: None and data: None and errors: None"
-        assert result == expected
+        self.assertEqual(result, expected)
 
         result = self.FooForm(MockRequest, item_id="foo")
         expected = "This is GET with item_id: foo and data: None and errors: None"
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_POST(self):
         class MockRequest(object):
@@ -395,7 +395,7 @@ class TestFormHandler(unittest.TestCase):
 
         result = self.FooForm(MockRequest)
         expected = "This is POST with item_id: None and data: {'foo': 'blam'}"
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_POST_with_error(self):
         class MockRequest(object):
@@ -405,7 +405,7 @@ class TestFormHandler(unittest.TestCase):
 
         result = self.FooForm(MockRequest)
         expected = "This is GET with item_id: None and data: {'do_raise': True} and errors: {None: 'You told me to raise'}"
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_POST_with_nested_data(self):
         class MockRequest(object):
@@ -415,7 +415,7 @@ class TestFormHandler(unittest.TestCase):
 
         result = self.FooForm(MockRequest)
         expected = "This is POST with item_id: None and data: {'flamble': [1, 2, 3], 'flooble': 'flooble'}"
-        assert result == expected
+        self.assertEqual(result, expected)
 
 
 def test_create_require():
@@ -516,8 +516,8 @@ class test_Handler(unittest.TestCase):
 
         foo_handler = FooHandler()
 
-        assert foo_handler.url_route == "/foo"
-        assert foo_handler() == "FOO!"
+        self.assertEqual(foo_handler.url_route, "/foo")
+        self.assertEqual(foo_handler(), "FOO!")
 
     def test_inheritance(self):
         class FooHandler(wu.Handler):
@@ -532,4 +532,4 @@ class test_Handler(unittest.TestCase):
 
         bar_handler = BarHandler()
         assert isinstance(bar_handler.foo, FooHandler)
-        assert bar_handler.foo._parent == bar_handler
+        self.assertEqual(bar_handler.foo._parent, bar_handler)

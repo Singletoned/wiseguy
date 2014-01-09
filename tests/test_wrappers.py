@@ -49,7 +49,7 @@ class TestWrappers(unittest.TestCase):
             self.bootstrap_form_fields.select({}, 'foo', "Foo:", options),
             5)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_width_input(self):
         context = dict(data=None, errors=None)
@@ -61,7 +61,7 @@ class TestWrappers(unittest.TestCase):
             self.bootstrap_form_fields.input(context, 'foo', "Foo:"),
             5)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         context = dict()
@@ -72,7 +72,7 @@ class TestWrappers(unittest.TestCase):
         result = wrappers.compulsory(
             self.bootstrap_form_fields.input(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_class(self):
         context = dict()
@@ -85,4 +85,4 @@ class TestWrappers(unittest.TestCase):
             "//fieldset",
             "flamble")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)

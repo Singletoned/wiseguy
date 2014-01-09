@@ -14,7 +14,7 @@ class TestSelect(unittest.TestCase):
 <option value="bar3">Bar 3</option></select>
         '''.strip()
         result = wiseguy.jade_mixins.select('foo', options).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_values(self):
         options = ["one", "two", "three"]
@@ -25,7 +25,7 @@ class TestSelect(unittest.TestCase):
 <option value="three">three</option></select>
         '''.strip()
         result = wiseguy.jade_mixins.select('foo', options).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_blank_option(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -37,4 +37,4 @@ class TestSelect(unittest.TestCase):
 <option value="bar3">Bar 3</option></select>
 '''.strip()
         result = wiseguy.jade_mixins.select('foo', options, blank_option=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
