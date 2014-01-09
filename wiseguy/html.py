@@ -5,8 +5,6 @@ import copy
 
 import lxml.html, lxml.builder
 
-import jade as Jade
-
 import wiseguy.utils
 import wiseguy.html_tidy
 
@@ -130,6 +128,7 @@ def Html(src):
     return lxml.html.fromstring(src, parser=parser)
 
 def jade(src, context=None):
+    import jade as Jade
     import wiseguy.jade_mixins
     new_context = dict(wiseguy.jade_mixins.mixins)
     if context:
