@@ -43,7 +43,9 @@ def _boostrapise(func, context, id, class_=None, controls_length=1, **kwargs):
     return element
 
 
-def _input(context, id, label, input_type, value=_default, class_=None, extra_attrs=None):
+def _input(context, id, label, input_type, value=_default, class_=None, extra_attrs=None, name=None):
+    if name is None:
+        name = id
     if value is _default:
         value = unicode((context.get('data', False) or {}).get(id, ''))
     if not extra_attrs:
@@ -58,7 +60,7 @@ def _input(context, id, label, input_type, value=_default, class_=None, extra_at
             html.INPUT(
                 extra_attrs,
                 type=input_type,
-                name=id,
+                name=name,
                 id=id,
                 value=value,
                 disabled="disabled"))
@@ -70,7 +72,7 @@ def _input(context, id, label, input_type, value=_default, class_=None, extra_at
             html.INPUT(
                 extra_attrs,
                 type=input_type,
-                name=id,
+                name=name,
                 id=id,
                 value=value))
     add_errors(context, element, id)
@@ -106,8 +108,8 @@ def search(context, id, label, help=None):
     return _search(context, id, label, input_type="text", help=help)
 
 
-def _checkbox(context, id, label, value=_default, disabled=False):
-    elements = _input(context, id, label, input_type="checkbox", value=value)
+def _checkbox(context, id, label, value=_default, disabled=False, name=None):
+    elements = _input(context, id, label, input_type="checkbox", value=value, name=name)
     data_value = (context.get('data', False) or {}).get(id, '')
     if isinstance(data_value, (list, tuple)):
         if value in data_value:
@@ -118,9 +120,9 @@ def _checkbox(context, id, label, value=_default, disabled=False):
 
 
 @j2.contextfunction
-def checkbox(context, id, label, value=_default, disabled=False):
+def checkbox(context, id, label, value=_default, disabled=False, name=None):
     "A simple input element"
-    return _checkbox(context, id, label, value, disabled)
+    return _checkbox(context, id, label, value, disabled, name)
 
 
 @j2.contextfunction
@@ -424,14 +426,15 @@ class BootstrapFormFields(object):
             blank_option=blank_option)
 
     @j2.contextfunction
-    def checkbox(self, context, id, label, value=_default):
+    def checkbox(self, context, id, label, value=_default, name=None):
         "A Bootstrap checkbox element"
         return _boostrapise(
             _checkbox,
             context=context,
             id=id,
             label=label,
-            value=value)
+            value=value,
+            name=name)
 
     @j2.contextfunction
     def textarea(self, context, id, label):
