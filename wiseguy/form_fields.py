@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from itertools import count
+
 import jinja2 as j2
 import lxml.html
 from lxml.html import builder as html
@@ -8,8 +10,10 @@ from wiseguy import utils
 
 _default = object()
 
+_id_count = count()
 def _gen_element_id(input_type, id):
-    return id
+    return '%s_%s_%04x' % (input_type, id, _id_count)
+
 
 def add_errors(context, element, id):
     "Add an error, if present, to the list of elements"
