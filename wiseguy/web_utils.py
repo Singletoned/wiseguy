@@ -14,6 +14,9 @@ import jade
 from wiseguy import form_fields, utils
 
 
+class TemplateNotFound(Exception):
+    pass
+
 def wsgi_wrapper(app, request_class=wz.Request):
     def application(environ, start_response):
         req = request_class(environ)
@@ -67,8 +70,15 @@ class JinjaEnv(object):
         self.env = env
         self.globals = env.globals
 
+    def update_globals(self, context):
+        self.env.globals.update(context)
+
     def render(self, template_name, context):
-        return self.env.get_template(template_name).render(context)
+        try:
+            template = self.env.get_template(template_name)
+        except jinja2.TemplateNotFound:
+            raise TemplateNotFound()
+        return template.render(context)
 
     def get_response(self, template_name, context, mimetype="text/html"):
         body = self.render(template_name, context)
@@ -85,10 +95,17 @@ class LxmlEnv(object):
             global_context = dict()
         self.globals = global_context
 
+    def update_globals(self, context):
+        self.globals.update(context)
+
     def render(self, template_name, context):
         local_context = dict(self.globals)
         local_context.update(context)
-        element = getattr(self.env, template_name)(local_context)
+        try:
+            template = getattr(self.env, template_name)
+        except AttributeError:
+            raise TemplateNotFound()
+        element = template(local_context)
         html = element.to_string()
         return html
 
@@ -113,11 +130,16 @@ class JadeEnv(object):
         elements = jade.generate_elements(data, context=context)
         return elements
 
+    def update_globals(self, context):
+        self.globals.update(context)
+
     def render(self, template_name, context=None):
         local_context = dict(self.globals)
         if context:
             local_context.update(context)
         f = self.directory.child("%s.jade"%template_name)
+        if not f.exists():
+            raise TemplateNotFound()
         text = f.text()
         html = jade.to_html(text, context=local_context)
         return html
@@ -126,6 +148,33 @@ class JadeEnv(object):
         body = self.render(template_name, context)
         res = wz.Response(body, mimetype=mimetype)
         return res
+
+
+class CascadingEnv(object):
+    def __init__(self, *args):
+        self.envs = args
+        self.globals = dict()
+
+    def update_globals(self, context):
+        for env in self.envs:
+            env.update_globals(context)
+
+    def render(self, template_name, context=None):
+        for env in self.envs:
+            try:
+                return env.render(template_name, context)
+            except TemplateNotFound:
+                pass
+        raise TemplateNotFound()
+
+    def get_response(self, template_name, context=None, mimetype="text/html"):
+        for env in self.envs:
+            try:
+                return env.get_response(template_name, context, mimetype)
+            except TemplateNotFound:
+                pass
+        raise TemplateNotFound()
+
 
 def make_url_map(mountpoint, sub_url_map):
     url_map = UrlMap([
