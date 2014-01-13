@@ -426,14 +426,15 @@ class BootstrapFormFields(object):
             blank_option=blank_option)
 
     @j2.contextfunction
-    def checkbox(self, context, id, label, value=_default):
+    def checkbox(self, context, id, label, value=_default, name=None):
         "A Bootstrap checkbox element"
         return _boostrapise(
             _checkbox,
             context=context,
             id=id,
             label=label,
-            value=value)
+            value=value,
+            name=name)
 
     @j2.contextfunction
     def textarea(self, context, id, label):

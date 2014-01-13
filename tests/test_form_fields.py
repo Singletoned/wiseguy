@@ -946,10 +946,10 @@ class TestBootstrapFormFields(unittest.TestCase):
         context = dict(data=None, errors=None)
         expected = '''
 <fieldset class="control-group span2">
-<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="foo"></div>
+<label for="foo" class="control-label">Foo:</label><div class="controls"><input type="checkbox" id="foo" value="flibble" name="bar"></div>
 </fieldset>'''.strip()
         result = wrappers.with_class(
-            self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble"),
+            self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble", name="bar"),
             "/fieldset",
             "span2")
         result = lxml.html.tostring(result, pretty_print=True)
