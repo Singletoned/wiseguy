@@ -242,6 +242,17 @@ class TestCheckbox(unittest.TestCase):
         result = lxml.html.tostring(result, pretty_print=True).strip()
         assert expected == result
 
+    def test_with_name(self):
+        context = dict(data=None, errors=None)
+        expected = '''
+<div>
+<label for="foo">Foo:</label><input type="checkbox" id="foo" value="" name="bar">
+</div>
+'''.strip()
+        result = form_fields.checkbox(context, 'foo', "Foo:", name="bar")
+        result = lxml.html.tostring(result, pretty_print=True).strip()
+        assert expected == result
+
     def test_with_value(self):
         context = dict(data=None, errors=None)
         expected = '''
