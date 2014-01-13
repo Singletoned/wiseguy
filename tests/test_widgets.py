@@ -22,7 +22,7 @@ class TestPagination(unittest.TestCase):
         '''.strip()
         result = widgets.prev_li(context, item_url)
         result = lxml.html.tostring(result)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_prev_li_enabled(self):
         context = dict(offset=1, limit=5)
@@ -31,7 +31,7 @@ class TestPagination(unittest.TestCase):
         '''.strip()
         result = widgets.prev_li(context, item_url)
         result = lxml.html.tostring(result)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_prev_li_with_kwargs_filter(self):
         context = dict(offset=1, limit=5, DEFAULT_LIMIT=5)
@@ -40,7 +40,7 @@ class TestPagination(unittest.TestCase):
         '''.strip()
         result = widgets.prev_li(context, item_url, self.kwargs_filter)
         result = lxml.html.tostring(result)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_next_li_disabled(self):
         context = dict(offset=0, limit=5, total=5)
@@ -49,7 +49,7 @@ class TestPagination(unittest.TestCase):
         '''.strip()
         result = widgets.next_li(context, item_url)
         result = lxml.html.tostring(result)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_next_li_enabled(self):
         context = dict(offset=0, limit=5, total=10)
@@ -58,7 +58,7 @@ class TestPagination(unittest.TestCase):
         '''.strip()
         result = widgets.next_li(context, item_url)
         result = lxml.html.tostring(result)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_next_li_with_kwargs_filter(self):
         context = dict(offset=0, limit=5, total=10, DEFAULT_LIMIT=5)
@@ -67,7 +67,7 @@ class TestPagination(unittest.TestCase):
         '''.strip()
         result = widgets.next_li(context, item_url, self.kwargs_filter)
         result = lxml.html.tostring(result)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_simple(self):
         context = dict(offset=0, total=25, limit=5, url=url)
@@ -83,7 +83,7 @@ class TestPagination(unittest.TestCase):
 </ul></div>
 '''.strip()
         result = widgets.pagination(context, item_url).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_ordered(self):
         context = dict(offset=0, total=25, limit=5, order="-flibble", url=url)
@@ -99,7 +99,7 @@ class TestPagination(unittest.TestCase):
 </ul></div>
 '''.strip()
         result = widgets.pagination(context, item_url).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_class(self):
         context = dict(offset=0, total=25, limit=5, url=url)
@@ -115,7 +115,7 @@ class TestPagination(unittest.TestCase):
 </ul></div>
 '''.strip()
         result = widgets.pagination(context, item_url, class_="centered").strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_kwargs_filter(self):
         context = dict(offset=10, total=25, limit=5, url=url, DEFAULT_LIMIT=5)
@@ -131,7 +131,7 @@ class TestPagination(unittest.TestCase):
 </ul></div>
 '''.strip()
         result = widgets.pagination(context, item_url, self.kwargs_filter).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestPagecounter(unittest.TestCase):
@@ -146,7 +146,7 @@ class TestPagecounter(unittest.TestCase):
             dict(page=4, offset=15, limit=5, start=16, end=20, active=False),
             dict(page=5, offset=20, limit=5, start=21, end=25, active=False),
         ]
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestBreadcrumbs(unittest.TestCase):
@@ -156,7 +156,7 @@ class TestBreadcrumbs(unittest.TestCase):
         '''.strip()
         pages = [("/", "My Site")]
         result = widgets.breadcrumbs(pages).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_two_levels(self):
         expected = '''
@@ -169,4 +169,4 @@ class TestBreadcrumbs(unittest.TestCase):
         '''.strip()
         pages = [("/", "My Site"), ("/foo", "Foo")]
         result = widgets.breadcrumbs(pages).strip()
-        assert expected == result
+        self.assertEqual(expected, result)

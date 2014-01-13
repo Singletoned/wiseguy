@@ -16,7 +16,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_empty(self):
         context = dict()
@@ -27,7 +27,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         context = dict()
@@ -39,7 +39,7 @@ class TestInput(unittest.TestCase):
         result = wrappers.compulsory(
             form_fields.input(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_data(self):
         context = dict(data=dict(foo='blah'), errors=None)
@@ -50,7 +50,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
@@ -61,7 +61,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_non_ascii(self):
         context = dict(data=dict(foo=u'blah£'), errors=None)
@@ -72,7 +72,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_non_text(self):
         context = dict(data=dict(foo=1), errors=None)
@@ -83,7 +83,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_class(self):
         context = dict(data=None, errors=None)
@@ -94,7 +94,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         context = dict(data=None, errors=None, disabled_form=True)
@@ -105,7 +105,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(data=None, errors=None, disabled_form=False)
         expected = '''
@@ -115,7 +115,7 @@ class TestInput(unittest.TestCase):
         '''.strip()
         result = form_fields.input(context, 'foo', "Foo:", class_="bar")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestSearch(unittest.TestCase):
@@ -128,7 +128,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_empty(self):
         context = dict()
@@ -139,7 +139,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         context = dict()
@@ -151,7 +151,7 @@ class TestSearch(unittest.TestCase):
         result = wrappers.compulsory(
             form_fields.search(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_data(self):
         context = dict(data=dict(foo='blah'), errors=None)
@@ -162,7 +162,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
@@ -173,7 +173,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_non_ascii(self):
         context = dict(data=dict(foo=u'blah£'), errors=None)
@@ -184,7 +184,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_non_text(self):
         context = dict(data=dict(foo=1), errors=None)
@@ -195,7 +195,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_help(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
@@ -206,7 +206,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:", help='''<a href="#">Help</a>''')
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         context = dict(data=dict(), errors=None, disabled_form=True)
@@ -217,7 +217,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(data=dict(), errors=None, disabled_form=False)
         expected = '''
@@ -227,7 +227,7 @@ class TestSearch(unittest.TestCase):
         '''.strip()
         result = form_fields.search(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestCheckbox(unittest.TestCase):
@@ -240,7 +240,7 @@ class TestCheckbox(unittest.TestCase):
 '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_value(self):
         context = dict(data=None, errors=None)
@@ -251,7 +251,7 @@ class TestCheckbox(unittest.TestCase):
 '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", value="wibble")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_empty(self):
         context = dict()
@@ -262,7 +262,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         context = dict()
@@ -274,7 +274,7 @@ class TestCheckbox(unittest.TestCase):
         result = wrappers.compulsory(
             form_fields.checkbox(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_data(self):
         context = dict(data=dict(foo=['blah', 'wangle']), errors=None)
@@ -285,7 +285,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", value="blah")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
@@ -296,7 +296,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled(self):
         context = dict()
@@ -307,7 +307,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:", disabled=True)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict()
         expected = '''
@@ -317,7 +317,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         context = dict(disabled_form=True)
@@ -328,7 +328,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(disabled_form=False)
         expected = '''
@@ -338,7 +338,7 @@ class TestCheckbox(unittest.TestCase):
         '''.strip()
         result = form_fields.checkbox(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestPassword(unittest.TestCase):
@@ -351,7 +351,7 @@ class TestPassword(unittest.TestCase):
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_empty(self):
         context = dict()
@@ -362,7 +362,7 @@ class TestPassword(unittest.TestCase):
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         context = dict()
@@ -374,7 +374,7 @@ class TestPassword(unittest.TestCase):
         result = wrappers.compulsory(
             form_fields.password(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_data(self):
         context = dict(data=dict(foo='blah'), errors=None)
@@ -385,7 +385,7 @@ class TestPassword(unittest.TestCase):
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
@@ -396,7 +396,7 @@ class TestPassword(unittest.TestCase):
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled(self):
         context = dict(data=dict(), errors=None, disabled_form=True)
@@ -407,7 +407,7 @@ class TestPassword(unittest.TestCase):
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(data=dict(), errors=None, disabled_form=False)
         expected = '''
@@ -417,7 +417,7 @@ class TestPassword(unittest.TestCase):
         '''.strip()
         result = form_fields.password(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestSelect(unittest.TestCase):
@@ -434,7 +434,7 @@ class TestSelect(unittest.TestCase):
         '''.strip()
         result = form_fields.select({}, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -450,7 +450,7 @@ class TestSelect(unittest.TestCase):
         result = wrappers.compulsory(
             form_fields.select({}, 'foo', "Foo:", options))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_data(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -466,7 +466,7 @@ class TestSelect(unittest.TestCase):
         '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_errors(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -482,7 +482,7 @@ class TestSelect(unittest.TestCase):
         '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_values(self):
         options = ["one", "two", "three"]
@@ -498,7 +498,7 @@ class TestSelect(unittest.TestCase):
         '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -514,7 +514,7 @@ class TestSelect(unittest.TestCase):
 '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options, disabled=True)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict()
@@ -529,7 +529,7 @@ class TestSelect(unittest.TestCase):
 '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -545,7 +545,7 @@ class TestSelect(unittest.TestCase):
 '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
         context = dict(disabled_form=False)
@@ -560,7 +560,7 @@ class TestSelect(unittest.TestCase):
 '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_without_blank_option(self):
         options = [('bar1', "Bar 1"), ('bar2', "Bar 2"), ('bar3', "Bar 3")]
@@ -575,7 +575,7 @@ class TestSelect(unittest.TestCase):
 '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_non_ascii(self):
         options = [(1, "One"), (2, "2"), ('3', u"Bar £")]
@@ -590,7 +590,7 @@ class TestSelect(unittest.TestCase):
 '''.strip()
         result = form_fields.select(context, 'foo', "Foo:", options, blank_option=False)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestDatePicker(unittest.TestCase):
@@ -603,7 +603,7 @@ class TestDatePicker(unittest.TestCase):
         '''.strip()
         result = form_fields.datepicker(context, 'foo', "Foo:")
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         context = dict(disabled_form=True)
@@ -614,7 +614,7 @@ class TestDatePicker(unittest.TestCase):
         '''.strip()
         result = form_fields.datepicker(context, 'foo', "Foo:")
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(disabled_form=False)
         expected = '''
@@ -624,7 +624,7 @@ class TestDatePicker(unittest.TestCase):
         '''.strip()
         result = form_fields.datepicker(context, 'foo', "Foo:")
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestTextArea(unittest.TestCase):
@@ -637,7 +637,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_empty(self):
         context = dict()
@@ -648,7 +648,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_compulsory(self):
         context = dict()
@@ -660,7 +660,7 @@ class TestTextArea(unittest.TestCase):
         result = wrappers.compulsory(
             form_fields.textarea(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_data(self):
         context = dict(data=dict(foo='Flibble Giblets'), errors=None)
@@ -671,7 +671,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_non_ascii(self):
         context = dict(data=dict(foo='Flibble Giblets£'), errors=None)
@@ -682,7 +682,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_errors(self):
         context = dict(data=dict(), errors=dict(foo="Please enter a foo"))
@@ -693,7 +693,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         context = dict(disabled_form=True)
@@ -704,7 +704,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(disabled_form=False)
         expected = '''
@@ -714,7 +714,7 @@ class TestTextArea(unittest.TestCase):
         '''.strip()
         result = form_fields.textarea(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestEditor(unittest.TestCase):
@@ -735,7 +735,7 @@ editor_deselector : "mceNoEditor"
         result = wrappers.compulsory(
             form_fields.tinymce(context, 'foo', "Foo:"))
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_ckeditor(self):
         context = dict(data=None, errors=None)
@@ -758,7 +758,7 @@ CKEDITOR.replace(
                 'toolbar': "'Basic'",
                 'customConfig': "''"})
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_ckeditor_disabled_form(self):
         context = dict(data=None, errors=None, disabled_form=True)
@@ -782,7 +782,7 @@ CKEDITOR.replace(
                 'toolbar': "'Basic'",
                 'customConfig': "''"})
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(data=None, errors=None, disabled_form=False)
         expected = '''
@@ -804,7 +804,7 @@ CKEDITOR.replace(
                 'toolbar': "'Basic'",
                 'customConfig': "''"})
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_wysihtml5(self):
         context = dict(data=None, errors=None)
@@ -833,7 +833,7 @@ new wysihtml5.Editor(
         '''.strip()
         result = form_fields.wysihtml5(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 
 class TestSubmit(unittest.TestCase):
@@ -842,28 +842,28 @@ class TestSubmit(unittest.TestCase):
         expected = '''<input type="submit" id="submit" value="Submit">'''
         result = form_fields.submit(context)
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_labels(self):
         context = dict()
         expected = '''<input type="submit" id="foo" value="Foo!">'''
         result = form_fields.submit(context, 'foo', "Foo!")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_bad_value(self):
         context = dict()
         expected = '''<input type="submit" id="foo" value="Foo&amp;&lt;">'''
         result = form_fields.submit(context, 'foo', "Foo&<")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_with_classes(self):
         context = dict()
         expected = '''<input type="submit" id="submit" value="Submit" class="foo bar">'''
         result = form_fields.submit(context, class_="foo bar")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_disabled_form(self):
         context = dict(disabled_form=True)
@@ -871,14 +871,14 @@ class TestSubmit(unittest.TestCase):
 <input disabled type="submit" id="submit" value="Submit" class="foo bar">'''.strip()
         result = form_fields.submit(context, class_="foo bar")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
         context = dict(disabled_form=False)
         expected = '''
 <input type="submit" id="submit" value="Submit" class="foo bar">'''.strip()
         result = form_fields.submit(context, class_="foo bar")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
 class TestBootstrapFormFields(unittest.TestCase):
     bootstrap_form_fields = form_fields.BootstrapFormFields(
@@ -900,7 +900,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "span4")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_input_with_errors(self):
         context = dict(data=None, errors=dict(foo="Please enter a foo"))
@@ -913,7 +913,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = self.bootstrap_form_fields.input(context, 'foo', "Foo:")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_search(self):
         context = dict(data=None, errors=None)
@@ -929,7 +929,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "search-form image-search-widget span4")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_checkbox(self):
         context = dict(data=None, errors=None)
@@ -943,7 +943,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "span2")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_checkbox_with_value(self):
         context = dict(data=dict(foo=['blah', 'flibble']), errors=None)
@@ -954,7 +954,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = self.bootstrap_form_fields.checkbox(context, 'foo', "Foo:", value="flibble")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_password(self):
         context = dict(data=dict(foo="blah"), errors=None)
@@ -968,7 +968,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "span3")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_select(self):
         context = dict(data=None, errors=None)
@@ -987,7 +987,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "span5")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_select_disabled(self):
         context = dict(data=None, errors=None)
@@ -1003,7 +1003,7 @@ class TestBootstrapFormFields(unittest.TestCase):
         result = self.bootstrap_form_fields.select({}, 'foo', "Foo:", options, disabled=True)
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_textarea(self):
         context = dict(data=None, errors=None)
@@ -1016,7 +1016,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "/fieldset",
             "span8")
         result = lxml.html.tostring(result, pretty_print=True)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_datepicker(self):
         context = dict()
@@ -1032,7 +1032,7 @@ class TestBootstrapFormFields(unittest.TestCase):
             "span5")
         result = lxml.html.tostring(result, pretty_print=True)
         result = result.strip()
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_tinymce(self):
         context = dict(data=None, errors=None)
@@ -1055,7 +1055,7 @@ editor_deselector : "mceNoEditor"
             "/fieldset",
             "span6")
         result = lxml.html.tostring(result, pretty_print=True)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_ckeditor(self):
         context = dict(data=None, errors=None)
@@ -1079,7 +1079,7 @@ CKEDITOR.replace(
             "/fieldset",
             "span6")
         result = lxml.html.tostring(result, pretty_print=True)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_wysihtml5(self):
         context = dict(data=None, errors=None)
@@ -1113,11 +1113,11 @@ new wysihtml5.Editor(
             "/fieldset",
             "span6")
         result = lxml.html.tostring(result, pretty_print=True)
-        assert expected == result
+        self.assertEqual(expected, result)
 
     def test_submit(self):
         context = dict()
         expected = '''<input type="submit" id="foo" value="Foo!" class="btn">'''
         result = self.bootstrap_form_fields.submit(context, 'foo', "Foo!", class_="btn")
         result = lxml.html.tostring(result, pretty_print=True).strip()
-        assert expected == result
+        self.assertEqual(expected, result)

@@ -21,7 +21,7 @@ World!
 The End
 </div>
 '''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_nbsp(self):
         t = wg.html.Html('''
@@ -35,7 +35,7 @@ The End
 &#160;
 </p>'''.strip()
         result = wg.html_tidy.normalise_html(t).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_empty_tag_with_tail(self):
         t = wg.html.Html('''<p>Hello<img>World</p>''')
@@ -46,7 +46,7 @@ Hello
 World
 </p>'''.strip()
         result = wg.html_tidy.normalise_html(t).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
 
 class Test_render_inline_tag(unittest.TestCase):
@@ -58,7 +58,7 @@ class Test_render_inline_tag(unittest.TestCase):
 <br>The End</span>'''
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
         expected = '''<span>Hullo <strong>World</strong>! <br>The End</span>'''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_span_in_para(self):
         data = '''
@@ -71,7 +71,7 @@ World
 </p>'''
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
         expected = '''<p><span>Hullo <strong> World</strong>! <br>The End</span></p>'''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_nbsp(self):
         data = '''
@@ -79,14 +79,14 @@ World
         expected = '''
 <p>&#160;<span>&#160;&#160;&#160;&#160;</span>&#160;</p>'''.strip()
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_comment(self):
         data = '''
 <p><!-- Flibble -->This is not a comment</p>'''
         expected = '''<p><!-- Flibble -->This is not a comment</p>'''
         result = wg.html_tidy._render_inline_tag(wg.html.Html(data)).next().strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
 class Test_render_block_tag(unittest.TestCase):
     def test_empty_tag(self):
@@ -95,7 +95,7 @@ class Test_render_block_tag(unittest.TestCase):
         expected = '''
 <div></div>
 '''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_with_tail(self):
         data = '''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>The End</div>'''
@@ -105,7 +105,7 @@ class Test_render_block_tag(unittest.TestCase):
   Hullo <strong>World!</strong><br>The End
 </div>
 '''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_with_inline_tag(self):
         data = '''
@@ -123,7 +123,7 @@ A Form
   </head>
   <body></body>
 </html>'''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_nbsp(self):
         data = '''
@@ -133,7 +133,7 @@ A Form
   &#160;<span>&#160;&#160;&#160;&#160;</span>&#160;
 </p>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_render_empty_tag_with_tail(self):
         data = '''<div>Hello<img>World'''
@@ -142,7 +142,7 @@ A Form
   Hello<img>World
 </div>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_render_non_empty_block_tag_with_tail(self):
         data = '''<div>Hello<div>Mr</div>Flibble</div>'''
@@ -155,7 +155,7 @@ A Form
   Flibble
 </div>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_render_empty_block_tag_with_tail(self):
         data = '''<div>Hello<div></div>World</div>'''
@@ -166,7 +166,7 @@ A Form
   World
 </div>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_image(self):
         data = '''
@@ -177,7 +177,7 @@ A Form
 </p>
 '''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_comment(self):
         data = '''
@@ -188,7 +188,7 @@ A Form
   This is not a comment
 </p>'''.strip()
         result = "\n".join(wg.html_tidy._render_block_tag(wg.html.Html(data))).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
 class Test_tidy_html(unittest.TestCase):
     def test_fragment(self):
@@ -200,7 +200,7 @@ u'''<div id="foo" class="bar" style="bloop"> Hullo <strong>World!</strong><br>Th
   Hullo <strong>World!</strong><br>The End&#163;
 </div>
 '''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_document(self):
         t = wg.html.Html(
@@ -246,7 +246,7 @@ Name:
     </form>
   </body>
 </html>'''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
         result = wg.html_tidy.tidy_html(t, with_doctype=False).strip()
 
@@ -268,7 +268,7 @@ Name:
     </form>
   </body>
 </html>'''.strip()
-        assert result == expected
+        self.assertEqual(result, expected)
 
     def test_nbsp(self):
         t = wg.html.Html('''
@@ -278,4 +278,4 @@ Name:
   &#160;<span>&#160;&#160;&#160;&#160;</span>&#160;
 </p>'''.strip()
         result = wg.html_tidy.tidy_html(t).strip()
-        assert result == expected
+        self.assertEqual(result, expected)
