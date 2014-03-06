@@ -2,6 +2,8 @@
 
 import unittest
 import os
+import sys
+import contextlib
 
 import lxml.html
 import werkzeug as wz
@@ -14,6 +16,16 @@ import path
 from wiseguy import web_utils as wu, utils
 import wiseguy.html
 
+@contextlib.contextmanager
+def raises(error):
+    try:
+        yield
+        raise Exception("%s not raised"%error)
+    except error:
+        pass
+    except:
+        (exc_type, exc_value, traceback) =  sys.exc_info()
+        raise Exception("%s raised instead of %s" % (repr(exc_value), error))
 
 var_dir = os.path.join(os.path.dirname(__file__), 'var')
 
@@ -132,7 +144,10 @@ def test_make_url_map():
 def test_JinjaEnv():
     env = wu.JinjaEnv(
         j2.Environment(
-            loader=j2.DictLoader(dict(bar="Foo Page {{foo_var}}"))))
+            loader=j2.DictLoader(
+                dict(
+                    bar="Foo Page {{foo_var}}",
+                    flam="Flam Page {{wangle}}"))))
 
     html = env.render("bar", dict(foo_var="flangit"))
     assert html == "Foo Page flangit"
@@ -142,16 +157,31 @@ def test_JinjaEnv():
 
     assert env.from_string("foo").render() == "foo"
 
+    with raises(wu.TemplateNotFound):
+        html = env.render("blanger", dict(blim="blam"))
+
+    env.update_globals(dict(wangle="wotsit"))
+    html = env.render("flam", dict())
+    assert html == "Flam Page wotsit"
+
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
-                bar=lambda context: wiseguy.html.jade("div Foo Page %s"%context['foo_var'])))
+                bar=lambda context: wiseguy.html.jade("div Foo Page %s"%context['foo_var']),
+                flam=lambda context: wiseguy.html.jade("div Flam Page %s"%context['wangle']),))
 
     html = env.render("bar", dict(foo_var="flangit")).strip()
     assert html == "<div>Foo Page flangit</div>"
 
     response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data.strip() == "<div>Foo Page flibble</div>"
+
+    with raises(wu.TemplateNotFound):
+        html = env.render("foo", dict(blim="blam")).strip()
+
+    env.update_globals(dict(wangle="wotsit"))
+    html = env.render("flam", dict()).strip()
+    assert html == "<div>Flam Page wotsit</div>"
 
 def test_JadeEnv():
     with path.create_temp_dir() as d:
@@ -172,9 +202,11 @@ append body
   div= foo_var
   div(class={{bar_var}})
 """
+        flam_content = """div= wangle"""
         d.child('layout.jade').write_text(layout_content)
         d.child('index.jade').write_text(index_content)
         d.child('foo.jade').write_text(foo_content)
+        d.child('flam.jade').write_text(flam_content)
         env = wu.JadeEnv(d, dict(bar_var="bibble", baz_var="baz"))
 
         html = env.render("index").strip()
@@ -193,6 +225,13 @@ append body
 <div class="baz"></div>
 </body></html>'''.strip()
         assert response.data.strip() == expected
+
+        with raises(wu.TemplateNotFound):
+            html = env.render("blooble").strip()
+
+        env.update_globals(dict(wangle="wotsit"))
+        html = env.render("flam", dict()).strip()
+        assert html == "<div>wotsit</div>"
 
 def test_render():
     foo = lambda x: x
@@ -306,6 +345,53 @@ def test_create_render():
     res = contact(req)
     assert u"Redirecting..." in res.response[0]
     assert u"/other_page" in res.response[0]
+
+
+def test_CascadingEnv():
+    with path.create_temp_dir() as d:
+        d.child('bar3.jade').write_text("""div Jade Page\n  !=" "+foo_var""")
+
+        env = wu.CascadingEnv(
+            wu.LxmlEnv(
+                utils.MockObject(
+                    bar1=lambda context: wiseguy.html.jade(
+                        "div Lxml Page %s"%context['foo_var']))),
+            wu.JinjaEnv(
+                j2.Environment(
+                    loader=j2.DictLoader(
+                        dict(
+                            bar2="<div>Jinja Page {{foo_var}}</div>",
+                            flam="<div>Flam Page {{wangle}}</div>")))),
+            wu.JadeEnv(d, dict()))
+
+        expected = "<div>Lxml Page flam</div>"
+        result = env.render("bar1", dict(foo_var="flam")).strip()
+        assert result == expected
+        result = env.get_response("bar1", dict(foo_var="flam"))
+        assert result.data.strip() == expected
+
+        expected = "<div>Jinja Page flom</div>"
+        result = env.render("bar2", dict(foo_var="flom")).strip()
+        assert result == expected
+        result = env.get_response("bar2", dict(foo_var="flom"), mimetype="blah")
+        assert result.data.strip() == expected
+        assert result.mimetype == "blah"
+
+        expected = "<div>Jade Page flim</div>"
+        result = env.render("bar3", dict(foo_var="flim")).strip()
+        assert result == expected
+        result = env.get_response("bar3", dict(foo_var="flim"))
+        assert result.data.strip() == expected
+
+        with raises(wu.TemplateNotFound):
+            result = env.render("flib", dict())
+
+        with raises(wu.TemplateNotFound):
+            result = env.get_response("flib", dict())
+
+        env.update_globals(dict(wangle="wotsit"))
+        html = env.render("flam", dict()).strip()
+        assert html == "<div>Flam Page wotsit</div>"
 
 
 def test_make_client_env():
