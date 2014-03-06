@@ -58,6 +58,7 @@ class BaseApp(object):
     def __call__(self, req):
         req.app = self
         req.map_adapter = self.url_map.bind_to_environ(req.environ)
+        req.url_for = req.map_adapter.build
         res = _do_dispatch(self, req)
         if not isinstance(res, wz.BaseResponse):
             template_name, mimetype, values = res
