@@ -21,7 +21,7 @@ try:
 except ImportError:
     pass
 
-from wiseguy import form_fields, utils
+from wiseguy import utils
 
 
 class TemplateNotFound(Exception):
