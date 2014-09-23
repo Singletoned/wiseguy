@@ -11,8 +11,15 @@ try:
 except ImportError:
     pass
 
-import path
-import jade
+try:
+    import path
+except ImportError:
+    pass
+
+try:
+    import jade
+except ImportError:
+    pass
 
 from wiseguy import form_fields, utils
 
