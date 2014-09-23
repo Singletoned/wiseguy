@@ -276,14 +276,6 @@ class UUIDConverter(wz.routing.BaseConverter):
             return uuid.UUID(value)
 
 
-def create_env_and_render(loader_type, path, name):
-    "Create a Jinja2 Environment and pass it to create_render"
-    env = jinja2.Environment(
-        loader=getattr(jinja2, loader_type)(path, name),
-    )
-    env.globals.update(dict(form_fields=form_fields))
-    return create_render(env)
-
 def create_render(env):
     "Create a render decorator that passes the return value of a function to the named template"
     def render(template_name, mimetype='text/html'):
