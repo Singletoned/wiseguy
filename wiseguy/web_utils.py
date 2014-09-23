@@ -6,7 +6,10 @@ import os
 
 import werkzeug as wz
 import validino
-import jinja2
+try:
+    import jinja2
+except ImportError:
+    pass
 
 import path
 import jade
