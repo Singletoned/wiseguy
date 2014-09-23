@@ -5,7 +5,12 @@ import uuid
 import os
 
 import werkzeug as wz
-import validino
+try:
+    import validino
+    _validator_error = validino.Invalid
+except ImportError:
+    _validator_error = None
+
 try:
     import jinja2
 except ImportError:
@@ -329,7 +334,6 @@ class Handler(object):
 
 
 class FormHandler(object):
-    _validator_error = validino.Invalid
     def __new__(cls, request, **kwargs):
         if request.method == 'GET':
             return cls.GET(request, **kwargs)
