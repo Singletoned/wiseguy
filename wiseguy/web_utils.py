@@ -345,7 +345,7 @@ class FormHandler(object):
                 request.form.to_dict(flat=False))
             try:
                 return cls.POST(request, data=data, **kwargs)
-            except cls._validator_error, e:
+            except _validator_error, e:
                 errors = e.unpack_errors()
                 return cls.GET(request, data=data, errors=errors, **kwargs)
 
