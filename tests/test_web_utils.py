@@ -10,6 +10,7 @@ import werkzeug as wz
 import werkzeug.test
 import jinja2 as j2
 import validino as v
+import jade
 
 import path
 
@@ -165,8 +166,8 @@ def test_JinjaEnv():
 def test_LxmlEnv():
     env = wu.LxmlEnv(
             utils.MockObject(
-                bar=lambda context: wiseguy.html.jade("div Foo Page %s"%context['foo_var']),
-                flam=lambda context: wiseguy.html.jade("div Flam Page %s"%context['wangle']),))
+                bar=lambda context: jade.jade("div Foo Page %s"%context['foo_var']),
+                flam=lambda context: jade.jade("div Flam Page %s"%context['wangle']),))
 
     html = env.render("bar", dict(foo_var="flangit")).strip()
     assert html == "<div>Foo Page flangit</div>"
@@ -352,7 +353,7 @@ def test_CascadingEnv():
         env = wu.CascadingEnv(
             wu.LxmlEnv(
                 utils.MockObject(
-                    bar1=lambda context: wiseguy.html.jade(
+                    bar1=lambda context: jade.jade(
                         "div Lxml Page %s"%context['foo_var']))),
             wu.JinjaEnv(
                 j2.Environment(
