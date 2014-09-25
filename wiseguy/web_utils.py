@@ -268,6 +268,12 @@ class UrlMap(wz.routing.Map):
             return f
         return decorate
 
+    def add_subapp(self, subapp, path, prefix):
+        self.views.update(dict([("%s.%s"%(prefix, k),v) for k,v in subapp.url_map.views.iteritems()]))
+        self.add(
+            wz.routing.EndpointPrefix(
+                prefix+".",
+                [wz.routing.Submount(path, subapp.url_map.iter_rules())]))
 
 class UUIDConverter(wz.routing.BaseConverter):
     def __init__(self, url_map):

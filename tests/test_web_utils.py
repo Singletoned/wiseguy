@@ -590,6 +590,24 @@ def test_url_map_submount():
     result = endpoint(**kwargs)
     assert result == "Hullo"
 
+def test_url_map_add_subapp():
+    sub_url_map = wu.UrlMap()
+
+    @sub_url_map.expose("/index")
+    def index(request):
+        pass
+
+    sub_app = wu.BaseApp(
+        config=dict(),
+        url_map=sub_url_map,
+        env=wu.CascadingEnv())
+
+    url_map = wu.UrlMap()
+    url_map.add_subapp(sub_app, "/sub", "sub")
+
+    assert url_map.views.has_key("sub.index")
+    assert url_map.views["sub.index"] == index
+
 
 class test_Handler(unittest.TestCase):
     def test_simple(self):
