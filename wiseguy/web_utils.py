@@ -81,6 +81,9 @@ class BaseApp(object):
             res = self.env.get_response(template_name, values, mimetype)
         return res
 
+    def wsgi(self, request_class=wz.Request):
+        return wsgi_wrapper(self, request_class)
+
 class JinjaEnv(object):
     def __init__(self, env):
         self.env = env

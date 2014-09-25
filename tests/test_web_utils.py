@@ -79,9 +79,7 @@ def test_base_app():
         config=dict(mountpoint=u"/submount"),
         url_map=url_map,
         env=env)
-    wsgi_app = wu.wsgi_wrapper(
-        app,
-        request_class=TestRequest)
+    wsgi_app = app.wsgi(request_class=TestRequest)
 
     assert app.mountpoint() == u"/submount"
     assert app.mountpoint(u"bar") == u"/submount/bar"
