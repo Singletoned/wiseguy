@@ -322,6 +322,26 @@ def test_UrlMap():
     check_url(u"/test_callable", u"GET", '', u"This is a callable object")
 
 
+def test_UrlMap_expose_subapp():
+    url_map = wu.UrlMap()
+
+    application = wu.BaseApp(
+        config=dict(),
+        url_map=wu.UrlMap(),
+        env=j2.Environment(),
+        name="Mr Testy")
+
+    url_map.expose_subapp('/subapp', application)
+
+    assert "<BaseApp Mr Testy>" in url_map.views
+    rules = list(url_map.iter_rules())
+    assert len(rules) == 2
+    for rule in rules:
+        assert rule.methods == None
+    assert rules[0].rule == "/subapp"
+    assert rules[1].rule == "/subapp<path:path_info>"
+
+
 def test_UUIDConverter():
     url_map = wz.routing.Map([
         wz.routing.Rule("/<uuid:foo_id>", endpoint="foo")],

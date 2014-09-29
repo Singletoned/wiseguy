@@ -264,6 +264,12 @@ class UrlMap(wz.routing.Map):
             return func
         return decorate
 
+    def expose_subapp(self, rule, app):
+        endpoint = repr(app)
+        self.views[endpoint] = app
+        self.add(wz.routing.Rule(rule, endpoint=endpoint))
+        self.add(wz.routing.Rule(rule+"<path:path_info>", endpoint=endpoint))
+
     def expose_submount(self, path):
         def decorate(f):
             self.views.update(f.url_map.views)
