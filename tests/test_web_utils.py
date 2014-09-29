@@ -92,6 +92,11 @@ def test_base_app():
         assert rule.rule.startswith('/submount')
 
     environ = wz.test.create_environ('/submount/')
+    test_request = TestRequest(environ)
+    response = app(test_request, "foo", "bar", dict(a=1, b=2))
+    assert response.data == "Index"
+
+    environ = wz.test.create_environ('/submount/')
     response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Index"]
 

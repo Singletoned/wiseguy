@@ -74,7 +74,7 @@ class BaseApp(object):
     def __repr__(self):
         return "<BaseApp %s>" % self.name
 
-    def __call__(self, req):
+    def __call__(self, req, *args, **kwargs):
         req.app = self
         req.map_adapter = self.url_map.bind_to_environ(req.environ)
         req.url_for = req.map_adapter.build
