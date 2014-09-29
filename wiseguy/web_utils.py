@@ -89,9 +89,11 @@ class BaseApp(object):
         return wsgi_wrapper(self, request_class)
 
 class JinjaEnv(object):
-    def __init__(self, env):
+    def __init__(self, env, context=None):
         self.env = env
         self.globals = env.globals
+        if context:
+            self.update_globals(context)
 
     def update_globals(self, context):
         self.env.globals.update(context)

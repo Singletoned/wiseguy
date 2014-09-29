@@ -162,7 +162,12 @@ def test_JinjaEnv():
             loader=j2.DictLoader(
                 dict(
                     bar="Foo Page {{foo_var}}",
-                    flam="Flam Page {{wangle}}"))))
+                    flam="Flam Page {{wangle}}",
+                    bangle="{{a}}, {{b}}"))),
+        context=dict(a=1, b=2))
+
+    html = env.render("bangle", {})
+    assert html == "1, 2"
 
     html = env.render("bar", dict(foo_var="flangit"))
     assert html == "Foo Page flangit"
