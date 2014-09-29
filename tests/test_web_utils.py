@@ -127,6 +127,17 @@ def test_base_app_minimal():
         url_map=url_map,
         env=env)
 
+def test_base_app_name():
+    url_map = wu.UrlMap()
+    env = j2.Environment()
+    application = wu.BaseApp(
+        config=dict(),
+        url_map=url_map,
+        env=env,
+        name="Mr Base App")
+    assert application.name == "Mr Base App"
+    assert repr(application) == "<BaseApp Mr Base App>"
+
 def test_make_url_map():
     flibble_conv = lambda: "flibble"
     sub_url_map = wu.UrlMap(

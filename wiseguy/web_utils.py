@@ -60,7 +60,7 @@ def _do_dispatch(app, req):
     return res
 
 class BaseApp(object):
-    def __init__(self, config, url_map, env):
+    def __init__(self, config, url_map, env, name=None):
         self.config = config
         self.env = env
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
@@ -69,6 +69,10 @@ class BaseApp(object):
         self.url_map = make_url_map(
             self.mountpoint(),
             url_map)
+        self.name = name
+
+    def __repr__(self):
+        return "<BaseApp %s>" % self.name
 
     def __call__(self, req):
         req.app = self
