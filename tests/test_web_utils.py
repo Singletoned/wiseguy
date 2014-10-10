@@ -64,12 +64,20 @@ def test_base_app():
             super(self.__class__, self).__init__(environ)
             self.url = wz.Href("/submount")
 
+        def __repr__(self):
+            return "<TestRequest>"
+
+    class OtherTestRequest(wz.BaseRequest):
+        def __repr__(self):
+            return "<OtherTestRequest>"
+
     url_map = wu.UrlMap()
     url_map.expose('/')(lambda r: wz.Response("Index"))
     url_map.expose('/foo')(lambda r: wz.Response("Foo Page"))
     url_map.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
     url_map.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
     url_map.expose('/config')(lambda request: wz.Response(request.app.config['mountpoint']))
+    url_map.expose('/req')(lambda r: wz.Response(str(r)))
 
     env = wu.JinjaEnv(
         j2.Environment(
@@ -79,8 +87,22 @@ def test_base_app():
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
         url_map=url_map,
-        env=env)
+        env=env,
+        request_class=OtherTestRequest)
     wsgi_app = app.wsgi(request_class=TestRequest)
+    other_wsgi_app = app.wsgi()
+
+    response = wsgi_app(
+        environ=wz.test.create_environ('/submount/req'),
+        start_response=lambda status, headers: (status, headers))
+    response = list(response)
+    assert response == ["<TestRequest>"]
+
+    response = other_wsgi_app(
+        environ=wz.test.create_environ('/submount/req'),
+        start_response=lambda status, headers: (status, headers))
+    response = list(response)
+    assert response == ["<OtherTestRequest>"]
 
     assert app.mountpoint() == u"/submount"
     assert app.mountpoint(u"bar") == u"/submount/bar"
