@@ -60,7 +60,7 @@ def _do_dispatch(app, req):
     return res
 
 class BaseApp(object):
-    def __init__(self, config, url_map, env, name=None, request_class=wz.Request):
+    def __init__(self, config, url_map, env, name=None, request_class=wz.Request, middlewares=None):
         self.config = config
         self.env = env
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
@@ -71,6 +71,10 @@ class BaseApp(object):
             url_map)
         self.name = name
         self.request_class = request_class
+        if middlewares:
+            self.middlewares = middlewares
+        else:
+            self.middlewares = []
 
     def __repr__(self):
         return "<BaseApp %s>" % self.name
@@ -90,6 +94,8 @@ class BaseApp(object):
         if not request_class:
             request_class = self.request_class
         wsgi_app = wsgi_wrapper(self, request_class)
+        for middleware in self.middlewares:
+            wsgi_app = middleware(wsgi_app)
         return wsgi_app
 
 class JinjaEnv(object):

@@ -165,6 +165,17 @@ def test_base_app_name():
     assert application.name == "Mr Base App"
     assert repr(application) == "<BaseApp Mr Base App>"
 
+def test_middlewares():
+    url_map = wu.UrlMap()
+    env = j2.Environment()
+    application = wu.BaseApp(
+        config=dict(),
+        url_map=url_map,
+        env=env,
+        middlewares=[lambda app: "foo"])
+    wsgi_app = application.wsgi()
+    assert wsgi_app == "foo"
+
 def test_make_url_map():
     flibble_conv = lambda: "flibble"
     sub_url_map = wu.UrlMap(
