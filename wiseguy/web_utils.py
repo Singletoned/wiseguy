@@ -3,6 +3,7 @@
 from functools import wraps
 import uuid
 import os
+import collections
 
 import werkzeug as wz
 try:
@@ -61,7 +62,8 @@ def _do_dispatch(app, req):
 
 class BaseApp(object):
     def __init__(self, config, url_map, env, name=None, request_class=wz.Request, middlewares=None):
-        self.config = config
+        Config = collections.namedtuple("Config", config.iterkeys())
+        self.config = Config(**config)
         self.env = env
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
         self.env.globals.update(
@@ -81,6 +83,7 @@ class BaseApp(object):
 
     def __call__(self, req, *args, **kwargs):
         req.app = self
+        req.config = self.config
         req.map_adapter = self.url_map.bind_to_environ(req.environ)
         req.url_for = req.map_adapter.build
         res = _do_dispatch(self, req)

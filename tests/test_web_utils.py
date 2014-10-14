@@ -76,7 +76,7 @@ def test_base_app():
     url_map.expose('/foo')(lambda r: wz.Response("Foo Page"))
     url_map.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
     url_map.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
-    url_map.expose('/config')(lambda request: wz.Response(request.app.config['mountpoint']))
+    url_map.expose('/config')(lambda request: wz.Response(request.app.config.mountpoint))
     url_map.expose('/req')(lambda r: wz.Response(str(r)))
 
     env = wu.JinjaEnv(
@@ -107,7 +107,7 @@ def test_base_app():
     assert app.mountpoint() == u"/submount"
     assert app.mountpoint(u"bar") == u"/submount/bar"
 
-    assert app.config['mountpoint'] == u"/submount"
+    assert app.config.mountpoint == u"/submount"
     assert 'url' in app.env.globals
 
     for rule in app.url_map.iter_rules():
@@ -153,6 +153,16 @@ def test_base_app_minimal():
         config=dict(),
         url_map=url_map,
         env=env)
+
+def test_base_app_config():
+    url_map = wu.UrlMap()
+    env = j2.Environment()
+    application = wu.BaseApp(
+        config=dict(foo=1, bar=2),
+        url_map=url_map,
+        env=env)
+    assert application.config.foo == 1
+    assert application.config.bar == 2
 
 def test_base_app_name():
     url_map = wu.UrlMap()
