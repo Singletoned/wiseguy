@@ -79,7 +79,7 @@ def test_base_app():
     url_map.expose('/config')(lambda request: wz.Response(request.app.config.mountpoint))
     url_map.expose('/req')(lambda r: wz.Response(str(r)))
 
-    env = wu.JinjaEnv(
+    renderer = wu.JinjaRenderer(
         j2.Environment(
             loader=j2.DictLoader(dict(bar="Bar Page {{bar_var}}")),
             extensions=['jinja2.ext.i18n']))
@@ -87,7 +87,7 @@ def test_base_app():
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
         url_map=url_map,
-        env=env,
+        renderer=renderer,
         request_class=OtherTestRequest)
     wsgi_app = app.wsgi(request_class=TestRequest)
     other_wsgi_app = app.wsgi()
@@ -108,7 +108,7 @@ def test_base_app():
     assert app.mountpoint(u"bar") == u"/submount/bar"
 
     assert app.config.mountpoint == u"/submount"
-    assert 'url' in app.env.globals
+    assert 'url' in app.renderer.globals
 
     for rule in app.url_map.iter_rules():
         assert rule.rule.startswith('/submount')
@@ -148,40 +148,40 @@ def test_base_app():
 
 def test_base_app_minimal():
     url_map = wu.UrlMap()
-    env = j2.Environment()
+    renderer = j2.Environment()
     application = wu.BaseApp(
         config=dict(),
         url_map=url_map,
-        env=env)
+        renderer=renderer)
 
 def test_base_app_config():
     url_map = wu.UrlMap()
-    env = j2.Environment()
+    renderer = j2.Environment()
     application = wu.BaseApp(
         config=dict(foo=1, bar=2),
         url_map=url_map,
-        env=env)
+        renderer=renderer)
     assert application.config.foo == 1
     assert application.config.bar == 2
 
 def test_base_app_name():
     url_map = wu.UrlMap()
-    env = j2.Environment()
+    renderer = j2.Environment()
     application = wu.BaseApp(
         config=dict(),
         url_map=url_map,
-        env=env,
+        renderer=renderer,
         name="Mr Base App")
     assert application.name == "Mr Base App"
     assert repr(application) == "<BaseApp Mr Base App>"
 
 def test_middlewares():
     url_map = wu.UrlMap()
-    env = j2.Environment()
+    renderer = j2.Environment()
     application = wu.BaseApp(
         config=dict(),
         url_map=url_map,
-        env=env,
+        renderer=renderer,
         middlewares=[lambda app: "foo"])
     wsgi_app = application.wsgi()
     assert wsgi_app == "foo"
@@ -199,8 +199,8 @@ def test_make_url_map():
     assert adapter.match('/blammo/foo') == ("foo", {})
     assert url_map.converters['flibble'] == flibble_conv
 
-def test_JinjaEnv():
-    env = wu.JinjaEnv(
+def test_JinjaRenderer():
+    renderer = wu.JinjaRenderer(
         j2.Environment(
             loader=j2.DictLoader(
                 dict(
@@ -209,44 +209,44 @@ def test_JinjaEnv():
                     bangle="{{a}}, {{b}}"))),
         context=dict(a=1, b=2))
 
-    html = env.render("bangle", {})
+    html = renderer.render("bangle", {})
     assert html == "1, 2"
 
-    html = env.render("bar", dict(foo_var="flangit"))
+    html = renderer.render("bar", dict(foo_var="flangit"))
     assert html == "Foo Page flangit"
 
-    response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
+    response = renderer.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data == "Foo Page flibble"
 
-    assert env.from_string("foo").render() == "foo"
+    assert renderer.from_string("foo").render() == "foo"
 
     with raises(wu.TemplateNotFound):
-        html = env.render("blanger", dict(blim="blam"))
+        html = renderer.render("blanger", dict(blim="blam"))
 
-    env.update_globals(dict(wangle="wotsit"))
-    html = env.render("flam", dict())
+    renderer.update_globals(dict(wangle="wotsit"))
+    html = renderer.render("flam", dict())
     assert html == "Flam Page wotsit"
 
-def test_LxmlEnv():
-    env = wu.LxmlEnv(
+def test_LxmlRenderer():
+    renderer = wu.LxmlRenderer(
             utils.MockObject(
                 bar=lambda context: jade.jade("div Foo Page %s"%context['foo_var']),
                 flam=lambda context: jade.jade("div Flam Page %s"%context['wangle']),))
 
-    html = env.render("bar", dict(foo_var="flangit")).strip()
+    html = renderer.render("bar", dict(foo_var="flangit")).strip()
     assert html == "<div>Foo Page flangit</div>"
 
-    response = env.get_response("bar", dict(foo_var="flibble"), "text/html")
+    response = renderer.get_response("bar", dict(foo_var="flibble"), "text/html")
     assert response.data.strip() == "<div>Foo Page flibble</div>"
 
     with raises(wu.TemplateNotFound):
-        html = env.render("foo", dict(blim="blam")).strip()
+        html = renderer.render("foo", dict(blim="blam")).strip()
 
-    env.update_globals(dict(wangle="wotsit"))
-    html = env.render("flam", dict()).strip()
+    renderer.update_globals(dict(wangle="wotsit"))
+    html = renderer.render("flam", dict()).strip()
     assert html == "<div>Flam Page wotsit</div>"
 
-def test_JadeEnv():
+def test_JadeRenderer():
     with path.create_temp_dir() as d:
         layout_content = """
 html
@@ -270,9 +270,9 @@ append body
         d.child('index.jade').write_text(index_content)
         d.child('foo.jade').write_text(foo_content)
         d.child('flam.jade').write_text(flam_content)
-        env = wu.JadeEnv(d, dict(bar_var="bibble", baz_var="baz"))
+        renderer = wu.JadeRenderer(d, dict(bar_var="bibble", baz_var="baz"))
 
-        html = env.render("index").strip()
+        html = renderer.render("index").strip()
         expected = '''
 <html><body>
 <div><p><a class="foo"></a></p></div>
@@ -280,7 +280,7 @@ append body
 </body></html>'''.strip()
         assert expected == html
 
-        response = env.get_response("foo", dict(foo_var="flibble"), "text/html")
+        response = renderer.get_response("foo", dict(foo_var="flibble"), "text/html")
         expected = '''
 <html><body>
 <div>flibble</div>
@@ -290,10 +290,10 @@ append body
         assert response.data.strip() == expected
 
         with raises(wu.TemplateNotFound):
-            html = env.render("blooble").strip()
+            html = renderer.render("blooble").strip()
 
-        env.update_globals(dict(wangle="wotsit"))
-        html = env.render("flam", dict()).strip()
+        renderer.update_globals(dict(wangle="wotsit"))
+        html = renderer.render("flam", dict()).strip()
         assert html == "<div>wotsit</div>"
 
 def test_render():
@@ -371,7 +371,7 @@ def test_UrlMap_expose_subapp():
     application = wu.BaseApp(
         config=dict(),
         url_map=wu.UrlMap(),
-        env=j2.Environment(),
+        renderer=j2.Environment(),
         name="Mr Testy")
 
     url_map.expose_subapp('/subapp', application)
@@ -401,9 +401,9 @@ def test_create_render():
         u'about': u"This is the about page.  Path: {{ request.path }}"
     }
 
-    env = j2.Environment(loader=j2.DictLoader(templates))
+    renderer = j2.Environment(loader=j2.DictLoader(templates))
 
-    render = wu.create_render(env)
+    render = wu.create_render(renderer)
 
     @render(u"index")
     def index_page(req):
@@ -430,50 +430,50 @@ def test_create_render():
     assert u"/other_page" in res.response[0]
 
 
-def test_CascadingEnv():
+def test_CascadingRenderer():
     with path.create_temp_dir() as d:
         d.child('bar3.jade').write_text("""div Jade Page\n  !=" "+foo_var""")
 
-        env = wu.CascadingEnv(
-            wu.LxmlEnv(
+        renderer = wu.CascadingRenderer(
+            wu.LxmlRenderer(
                 utils.MockObject(
                     bar1=lambda context: jade.jade(
                         "div Lxml Page %s"%context['foo_var']))),
-            wu.JinjaEnv(
+            wu.JinjaRenderer(
                 j2.Environment(
                     loader=j2.DictLoader(
                         dict(
                             bar2="<div>Jinja Page {{foo_var}}</div>",
                             flam="<div>Flam Page {{wangle}}</div>")))),
-            wu.JadeEnv(d, dict()))
+            wu.JadeRenderer(d, dict()))
 
         expected = "<div>Lxml Page flam</div>"
-        result = env.render("bar1", dict(foo_var="flam")).strip()
+        result = renderer.render("bar1", dict(foo_var="flam")).strip()
         assert result == expected
-        result = env.get_response("bar1", dict(foo_var="flam"))
+        result = renderer.get_response("bar1", dict(foo_var="flam"))
         assert result.data.strip() == expected
 
         expected = "<div>Jinja Page flom</div>"
-        result = env.render("bar2", dict(foo_var="flom")).strip()
+        result = renderer.render("bar2", dict(foo_var="flom")).strip()
         assert result == expected
-        result = env.get_response("bar2", dict(foo_var="flom"), mimetype="blah")
+        result = renderer.get_response("bar2", dict(foo_var="flom"), mimetype="blah")
         assert result.data.strip() == expected
         assert result.mimetype == "blah"
 
         expected = "<div>Jade Page flim</div>"
-        result = env.render("bar3", dict(foo_var="flim")).strip()
+        result = renderer.render("bar3", dict(foo_var="flim")).strip()
         assert result == expected
-        result = env.get_response("bar3", dict(foo_var="flim"))
+        result = renderer.get_response("bar3", dict(foo_var="flim"))
         assert result.data.strip() == expected
 
         with raises(wu.TemplateNotFound):
-            result = env.render("flib", dict())
+            result = renderer.render("flib", dict())
 
         with raises(wu.TemplateNotFound):
-            result = env.get_response("flib", dict())
+            result = renderer.get_response("flib", dict())
 
-        env.update_globals(dict(wangle="wotsit"))
-        html = env.render("flam", dict()).strip()
+        renderer.update_globals(dict(wangle="wotsit"))
+        html = renderer.render("flam", dict()).strip()
         assert html == "<div>Flam Page wotsit</div>"
 
 
@@ -651,7 +651,7 @@ def test_url_map_add_subapp():
     sub_app = wu.BaseApp(
         config=dict(),
         url_map=sub_url_map,
-        env=wu.CascadingEnv())
+        renderer=wu.CascadingRenderer())
 
     url_map = wu.UrlMap()
     url_map.add_subapp(sub_app, "/sub", "sub")

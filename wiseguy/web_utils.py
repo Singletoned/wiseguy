@@ -61,12 +61,12 @@ def _do_dispatch(app, req):
     return res
 
 class BaseApp(object):
-    def __init__(self, config, url_map, env, name=None, request_class=wz.Request, middlewares=None):
+    def __init__(self, config, url_map, renderer, name=None, request_class=wz.Request, middlewares=None):
         Config = collections.namedtuple("Config", config.iterkeys())
         self.config = Config(**config)
-        self.env = env
+        self.renderer = renderer
         self.mountpoint = wz.Href(config.get('mountpoint', '/'))
-        self.env.globals.update(
+        self.renderer.globals.update(
             dict(url=self.mountpoint))
         self.url_map = make_url_map(
             self.mountpoint(),
@@ -90,7 +90,7 @@ class BaseApp(object):
         if not isinstance(res, wz.BaseResponse):
             template_name, mimetype, values = res
             values = dict(request=req, **values)
-            res = self.env.get_response(template_name, values, mimetype)
+            res = self.renderer.get_response(template_name, values, mimetype)
         return res
 
     def wsgi(self, request_class=None):
@@ -101,7 +101,7 @@ class BaseApp(object):
             wsgi_app = middleware(wsgi_app)
         return wsgi_app
 
-class JinjaEnv(object):
+class JinjaRenderer(object):
     def __init__(self, env, context=None):
         self.env = env
         self.globals = env.globals
@@ -126,7 +126,7 @@ class JinjaEnv(object):
     def from_string(self, text):
         return self.env.from_string(text)
 
-class LxmlEnv(object):
+class LxmlRenderer(object):
     def __init__(self, env, global_context=None):
         self.env = env
         if not global_context:
@@ -152,7 +152,7 @@ class LxmlEnv(object):
         res = wz.Response(body, mimetype=mimetype)
         return res
 
-class JadeEnv(object):
+class JadeRenderer(object):
     def __init__(self, directory, global_context=None):
         self.directory = path.path(directory)
         if global_context:
@@ -188,27 +188,27 @@ class JadeEnv(object):
         return res
 
 
-class CascadingEnv(object):
+class CascadingRenderer(object):
     def __init__(self, *args):
-        self.envs = args
+        self.renderers = args
         self.globals = dict()
 
     def update_globals(self, context):
-        for env in self.envs:
-            env.update_globals(context)
+        for renderer in self.renderers:
+            renderer.update_globals(context)
 
     def render(self, template_name, context=None):
-        for env in self.envs:
+        for renderer in self.renderers:
             try:
-                return env.render(template_name, context)
+                return renderer.render(template_name, context)
             except TemplateNotFound:
                 pass
         raise TemplateNotFound()
 
     def get_response(self, template_name, context=None, mimetype="text/html"):
-        for env in self.envs:
+        for renderer in self.renderers:
             try:
-                return env.get_response(template_name, context, mimetype)
+                return renderer.get_response(template_name, context, mimetype)
             except TemplateNotFound:
                 pass
         raise TemplateNotFound()
@@ -297,7 +297,7 @@ class UUIDConverter(wz.routing.BaseConverter):
             return uuid.UUID(value)
 
 
-def create_render(env):
+def create_render(renderer):
     "Create a render decorator that passes the return value of a function to the named template"
     def render(template_name, mimetype='text/html'):
         "Render the return value of the function in the named template, unless it is already a Response object"
@@ -309,7 +309,7 @@ def create_render(env):
                     values.update({u'request':args[0]})
                 except (TypeError, AttributeError):
                     return values
-                body = env.get_template(template_name).render(values)
+                body = renderer.get_template(template_name).render(values)
                 return wz.Response(body, mimetype=mimetype)
             return func
         return decorate
