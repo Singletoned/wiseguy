@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from jade import jade
+
 import wiseguy.template
 import wiseguy.html
 import wiseguy.utils
@@ -14,7 +16,7 @@ def test_Transform():
 
 def test_Template():
     class template(wiseguy.template.Template):
-        element = wiseguy.html.jade(
+        element = jade(
 '''
 html
   head
@@ -77,7 +79,7 @@ html
 
 def test_Template_multi_transform():
     class template(wiseguy.template.Template):
-        element = wiseguy.html.jade(
+        element = jade(
 '''
 html
   head
@@ -114,7 +116,7 @@ html
 
 def test_Template_multiple_renderings():
     class template(wiseguy.template.Template):
-        element = wiseguy.html.jade(
+        element = jade(
 '''
 html
   head
@@ -162,15 +164,15 @@ def test_bound_template():
     BoundTemplate = wiseguy.template.bound_template(template_set.add)
 
     class template_1(BoundTemplate):
-        element = wiseguy.html.jade("html")
+        element = jade("html")
         transforms = []
 
     class template_2(BoundTemplate):
-        element = wiseguy.html.jade("html")
+        element = jade("html")
         transforms = []
 
     class template_3(BoundTemplate):
-        element = wiseguy.html.jade("html")
+        element = jade("html")
         transforms = []
 
     assert template_1 in template_set
@@ -180,7 +182,7 @@ def test_bound_template():
 
 def test_Fragment():
     class fragment(wiseguy.template.Template):
-        element = wiseguy.html.jade(
+        element = jade(
 '''
 html
   head
@@ -224,13 +226,13 @@ html
 def test_SubTemplate():
     class master(wiseguy.template.SubTemplate):
         class flibble(wiseguy.template.Template):
-            element = wiseguy.html.jade("""div: p""")
+            element = jade("""div: p""")
             transforms = [wiseguy.template.Transform(
                 "p_content",
                 lambda template, p_content: template.element.add("p", p_content))]
 
         class flamble(wiseguy.template.Template):
-            element = wiseguy.html.jade("""p: span""")
+            element = jade("""p: span""")
             transforms = [wiseguy.template.Transform(
                 "span_content",
                 lambda template, span_content: template.element.add("span", span_content))]
@@ -262,16 +264,16 @@ def test_register_template():
 
     @wiseguy.template.register(template_dict)
     class template_1(wiseguy.template.Template):
-        element = wiseguy.html.jade("html")
+        element = jade("html")
         transforms = []
 
     @wiseguy.template.register(template_dict)
     class template_2(wiseguy.template.Template):
-        element = wiseguy.html.jade("html")
+        element = jade("html")
         transforms = []
 
     class template_3(wiseguy.template.Template):
-        element = wiseguy.html.jade("html")
+        element = jade("html")
         transforms = []
 
     assert template_1 in template_dict.values()
@@ -284,7 +286,7 @@ def test_register_template():
 
 def test_extends():
     class master(wiseguy.template.Template):
-        element = wiseguy.html.jade('''
+        element = jade('''
 html
   head
   body''')
@@ -296,7 +298,7 @@ html
     @wiseguy.template.extends(master)
     class index(wiseguy.template.SubTemplate):
         class main_body(wiseguy.template.Template):
-            element = wiseguy.html.jade('''
+            element = jade('''
 div
   p''')
             transforms = [
@@ -311,44 +313,44 @@ div
 
 def test_set_attr():
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade("div: a.foo"))
+        element = jade("div: a.foo"))
     set_attr = wiseguy.template.set_attr(".foo", "href", lambda bar: bar)
     set_attr(template, bar="wibble")
     result = template.element.normalise()
-    expected = wiseguy.html.jade('div: a.foo(href="wibble")').normalise()
+    expected = jade('div: a.foo(href="wibble")').normalise()
     assert result == expected
 
 def test_set_text():
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade("div: a.foo"))
+        element = jade("div: a.foo"))
     set_text = wiseguy.template.set_text(".foo", lambda bar: bar)
     set_text(template, bar="wibble")
     result = template.element.normalise()
-    expected = wiseguy.html.jade('div: a.foo wibble').normalise()
+    expected = jade('div: a.foo wibble').normalise()
     assert result == expected
 
 def test_replace():
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade("div: a.foo"))
-    replace = wiseguy.template.replace(".foo", lambda bar: wiseguy.html.jade("div %s"%bar))
+        element = jade("div: a.foo"))
+    replace = wiseguy.template.replace(".foo", lambda bar: jade("div %s"%bar))
     replace(template, bar="wibble")
     result = template.element.normalise()
-    expected = wiseguy.html.jade('div: div wibble').normalise()
+    expected = jade('div: div wibble').normalise()
     assert result == expected
 
 def test_add():
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade("div: a.foo"))
+        element = jade("div: a.foo"))
     add = wiseguy.template.add(".foo", lambda bar: bar, index=0)
     add(template, bar="flibble")
     result = template.element.normalise()
-    expected = wiseguy.html.jade('div: a.foo flibble').normalise()
+    expected = jade('div: a.foo flibble').normalise()
     assert result == expected
 
-    add(template, bar=wiseguy.html.jade("span wibble"))
-    add(template, bar=wiseguy.html.jade("span wobble"))
+    add(template, bar=jade("span wibble"))
+    add(template, bar=jade("span wobble"))
     result = template.element.normalise()
-    expected = wiseguy.html.jade(
+    expected = jade(
 '''
 div
   a.foo flibble

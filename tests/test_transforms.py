@@ -2,6 +2,8 @@
 
 import werkzeug
 
+from jade import jade
+
 import wiseguy.transforms
 import wiseguy.html
 import wiseguy.utils
@@ -10,7 +12,7 @@ import wiseguy.utils
 def test_add_stylesheet():
     transform = wiseguy.transforms.add_stylesheet("foo.css")
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade("html: head"))
+        element = jade("html: head"))
 
     assert transform.keys == set()
     transform.action(template=template)
@@ -24,7 +26,7 @@ def test_add_stylesheet():
 def test_add_script():
     transform = wiseguy.transforms.add_script("foo.js")
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade("html: head"))
+        element = jade("html: head"))
 
     assert transform.keys == set()
     transform.action(template=template)
@@ -38,7 +40,7 @@ def test_add_script():
 def test_fix_urls():
     transform = wiseguy.transforms.fix_urls()
     template = wiseguy.utils.MockObject(
-        element = wiseguy.html.jade('''
+        element = jade('''
 html
   head
     link(href="/static/blueprint.css", type="text/css")

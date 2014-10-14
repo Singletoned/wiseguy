@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pyjade
+from jade import jade
 
 import wiseguy as wg
 import wiseguy.html
@@ -10,17 +10,17 @@ def test_process_jade():
     "Test that Jade basically works"
     d = "div#foo.bar Hullo"
     expected = '''<div id="foo" class="bar">Hullo</div>'''
-    result = wg.html.jade(d).to_string().strip()
+    result = jade(d).to_string().strip()
     assert expected == result
 
     # Test that jade works with context
     d = "div#foo.bar= foo"
     expected = '''<div id="foo" class="bar">flibble</div>'''
-    result = wg.html.jade(d, context=dict(foo="flibble")).to_string().strip()
+    result = jade(d, context=dict(foo="flibble")).to_string().strip()
     assert expected == result
 
 def test_jade():
-    d = wg.html.jade("html: body: div#main")
+    d = jade("html: body: div#main")
     assert d.tag == "html"
 
     expected = '''<html><body><div id="main"></div></body></html>'''
@@ -33,7 +33,7 @@ def test_jade():
     assert result == expected
 
 def test_tidy():
-    d = wg.html.jade("html: body: div#main foo")
+    d = jade("html: body: div#main foo")
     expected = '''
 <!DOCTYPE html>
 <html>
@@ -56,7 +56,7 @@ html
     h1#title placeholder text
     div#body
     div#body"""
-    t = wg.html.jade(template)
+    t = jade(template)
     t.add("title, #title", "Hullo Mr Flibble")
     t.add("#body", wg.html.Html("<p class='bar'>Welcome to my web</p>"))
     t.add("body", wg.html.Html("<p>This goes before the header</p>"), index=0)
@@ -91,8 +91,8 @@ html
       div.content-2
       div.empty
 """
-    t = wg.html.jade(template)
-    t.replace("#title", wg.html.jade("h1#title Hullo Mr Flibble"))
+    t = jade(template)
+    t.replace("#title", jade("h1#title Hullo Mr Flibble"))
     t.replace("#body", wg.html.Html("<p class='bar'>Welcome to my web</p>"))
     t.replace("div.content-1", wg.html.Html("<p>Hullo</p>"))
     t.replace("div.content-2", "Hullo Again")
@@ -113,7 +113,7 @@ html
     assert expected == result
 
 def test_template_add_class():
-    element = wg.html.jade("div: span.foo")
+    element = jade("div: span.foo")
     element.add_class("span", "foo")
     result = element.to_string().strip()
     expected = '''<div><span class="foo"></span></div>'''
@@ -130,11 +130,11 @@ def test_template_add_class():
     assert expected == result
 
 def test_template_after():
-    element = wg.html.jade('''
+    element = jade('''
 div
   p.foo
   p.bar''')
-    element.after("p.foo", wg.html.jade("p.woosit"))
+    element.after("p.foo", jade("p.woosit"))
     result = element.to_string().strip()
     expected = '''
 <div>
@@ -154,11 +154,11 @@ div
     assert expected == result
 
 def test_template_before():
-    element = wg.html.jade('''
+    element = jade('''
 div
   p.foo
   p.bar''')
-    element.before("p.bar", wg.html.jade("p.woosit"))
+    element.before("p.bar", jade("p.woosit"))
     result = element.to_string().strip()
     expected = '''
 <div>
@@ -186,7 +186,7 @@ div
     assert expected == result
 
 def test_extract():
-    element = wg.html.jade("""
+    element = jade("""
 html
   body
     div
