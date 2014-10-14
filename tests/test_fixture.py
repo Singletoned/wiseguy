@@ -4,7 +4,6 @@ import itertools
 
 import pytest
 import sqlalchemy as sa
-import nose.plugins.skip
 
 from tests import fixture_test_schema as schema
 from wiseguy import fixture, utils
