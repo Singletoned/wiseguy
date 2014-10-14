@@ -477,39 +477,6 @@ def test_CascadingEnv():
         assert html == "<div>Flam Page wotsit</div>"
 
 
-def test_make_client_env():
-    def check_result(result):
-        assert not "master template" in result
-        assert "This is global" in result
-
-    mrflibble_env = wu.make_client_env(
-        var_dir=var_dir,
-        client="mrflibble",
-        extra_globals=dict(a_global_func=lambda:"This is global"))
-    result = mrflibble_env.get_template("index.html").render()
-    assert "Mr Flibble" in result
-    assert not "default" in result
-    check_result(result)
-
-    result = mrflibble_env.get_template("page.html").render()
-    assert "default page" in result
-    assert not "flibble" in result
-    check_result(result)
-
-    ladywotsit_env = wu.make_client_env(
-        var_dir=var_dir,
-        client="ladywotsit",
-        extra_globals=dict(a_global_func=lambda:"This is global"))
-    result = ladywotsit_env.get_template("index.html").render()
-    assert "default" in result
-    assert not "Mr Flibble" in result
-    check_result(result)
-
-    result = ladywotsit_env.get_template("page.html").render()
-    assert "default page" in result
-    assert not "flibble" in result
-    check_result(result)
-
 def test_Controller():
     class FooController(wu.Controller):
         url_map = wu.UrlMap()
