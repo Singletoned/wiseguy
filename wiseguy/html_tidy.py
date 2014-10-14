@@ -96,7 +96,8 @@ def _render_block_tag(el, indent_level=0):
                 yield indent+"".join(_render_content(el)).strip()
             else:
                 for line in _render_content(el):
-                    yield indent + line
+                    if line.strip():
+                        yield indent + line
             if not el.tag in lxml.html.defs.empty_tags:
                 yield _render_close_tag(el)
     if el.tail:
