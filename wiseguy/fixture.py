@@ -3,10 +3,15 @@
 from collections import defaultdict
 from types import ClassType, FunctionType
 import datetime, itertools
+import functools
 import traceback
 
 import sqlalchemy as sa
 import sqlalchemy.interfaces
+
+import path
+
+from . import utils
 
 
 class FixtureTeardownError(Exception):
@@ -193,7 +198,7 @@ class DatumMeta(type):
         return frozenset(self.to_dict().items())
 
     def to_mock(self):
-        return utils.MockObject(**self.to_dict())
+        return MockObject(**self.to_dict())
 
     def insert_db(self, session):
         data = {}
@@ -220,6 +225,24 @@ class DatumMeta(type):
 
 class Datum(object):
     __metaclass__ = DatumMeta
+
+class TesterManager(object):
+    def __init__(self, tester_base, loader):
+        self.tester_base = tester_base
+        self.loader = loader
+        self._data = loader._data
+        self.session = loader.session
+
+    def __getattr__(self, key):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        else:
+            self._add_tester_class(key)
+            return self.__dict__[key]
+
+    def _add_tester_class(self, key):
+        tester_object = self.loader._make_tester_object(key)
+        setattr(self, key, tester_object)
 
 class SQLAlchemyTester(object):
     def __init__(self, session):
@@ -264,6 +287,16 @@ class MongoTester(object):
 
     def find_one(self, **kwargs):
         return self.collection.find_one(kwargs)
+
+class JsonTester(object):
+    def __init__(self, data):
+        self.data = data
+
+    def count(self):
+        return len(self.data)
+
+    def all(self):
+        return self.data
 
 class FixtureMeta(type):
     def __new__(meta, class_name, bases, class_dict):
@@ -358,51 +391,8 @@ class MyProxy(sa.interfaces.ConnectionProxy):
 class Fixture(object):
     __metaclass__ = FixtureMeta
 
-    def __init__(self, loader):
-        self._loader = loader
-        self._tester_classes = set()
-        self._data_added = None
-        self._data_updated = None
+    def __init__(self):
         self._data = TesterManagerDataDict(self._data)
-
-    def __enter__(self):
-        self.session = self._loader.session_factory()
-        entity_classes, self._data_added, self._data_updated = self._loader.add_data(self._data)
-        for entity_class in entity_classes:
-            tester_class = self._loader._make_tester_class(entity_class, self.session)
-            self._tester_classes.add(tester_class)
-            # TesterManager.FooTester = FooTester
-            setattr(self, entity_class.__name__, tester_class(self.session))
-        return self
-
-    def __exit__(self, exc_type, value, traceback):
-        try:
-            self._loader.delete_data(self._data_added)
-            self._loader.restore_data(self._data_updated)
-        except sa.exc.IntegrityError, e:
-            raise FixtureTeardownError(e, exc_type, value, traceback)
-
-    def _add_data(self, overwrite_data=False, keep_constraints=False):
-        self.session = self._loader.session_factory()
-        entity_classes, self._data_added, self._data_updated = self._loader.add_data(
-            self._data,
-            overwrite_data=overwrite_data,
-            keep_constraints=keep_constraints)
-        return self
-
-    def _add_tester_class(self, key):
-        entity_class = self._loader.session_factory.classes[key]
-        tester_class = self._loader._make_tester_class(entity_class, self.session)
-        setattr(self, entity_class.__name__, tester_class(self.session))
-
-    def __getattr__(self, key):
-        if key in self.__dict__:
-            return self.__dict__[key]
-        elif (hasattr(self._loader.session_factory, 'classes')) and (key in self._loader.session_factory.classes) and hasattr(self, 'session'):
-            self._add_tester_class(key)
-            return getattr(self, key)
-        else:
-            raise AttributeError
 
 
 class no_autoflush(object):
@@ -420,23 +410,26 @@ class no_autoflush(object):
 class NoConstraints(object):
     def __init__(self, session):
         self.session = session
-        self.engine_name = self.session.connection().engine.name
+        if hasattr(self.session, 'default_engine_name'):
+            self.engine_name = self.session.default_engine_name
+        else:
+            self.engine_name = self.session.bind.engine.name
 
     def __enter__(self):
         self.session.close()
         "Disable all constraints on the session"
-        if self.engine_name == 'mssql':
-            self.session.execute(
-                '''EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"''')
+        # if self.engine_name == 'mssql':
+        #     self.session.execute(
+        #         '''EXEC sp_msforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"''')
         self.session.commit()
         self.session.close()
 
     def __exit__(self, excp_type, value, traceback):
         "Restore all constraints on the session"
         self.session.close()
-        if self.engine_name == 'mssql':
-            self.session.execute(
-                '''EXEC sp_msforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"''')
+        # if self.engine_name == 'mssql':
+        #     self.session.execute(
+        #         '''EXEC sp_msforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"''')
         self.session.commit()
         self.session.close()
 
@@ -451,6 +444,43 @@ class EmptyWith(object):
     def __exit__(self, type, value, traceback):
         pass
 
+class BaseLoadManager(object):
+    def __init__(self, fixture):
+        self.fixture = fixture()
+        self._data = fixture._data
+        self._tester_classes = set()
+
+    def __enter__(self):
+        self.session = self.session_factory()
+        entity_classes, self._data_added, self._data_updated = self.add_data()
+        return TesterManager(SQLAlchemyTester, self)
+
+    def __exit__(self, exc_type, value, traceback):
+        try:
+            self.delete_data(self._data_added)
+            self.restore_data(self._data_updated)
+        except sa.exc.IntegrityError, e:
+            raise FixtureTeardownError(e, exc_type, value, traceback)
+
+    def __call__(self, func):
+        @functools.wraps(func)
+        def inner():
+            with self:
+                return func(TesterManager(SQLAlchemyTester, self))
+        return inner
+
+    def _make_tester_object(self, key):
+        entity_class = self.session_factory.classes[key]
+        t_class_name = "%sTester" % entity_class.__name__
+        t_base_name = "%sBase" % t_class_name
+        t_class_bases = (self.tester_base,)
+        # Create the FooTester
+        t_class = type(
+            t_class_name,
+            t_class_bases,
+            {'_entity': entity_class})
+        return t_class(self.session)
+
 
 class BaseLoader(object):
     """A base class for loaders.
@@ -460,41 +490,17 @@ class BaseLoader(object):
         self.env = EnvWrapper(env)
         self.session_factory = session_factory
 
-    def _make_tester_class(self, entity_class, session):
-        t_class_name = "%sTester" % entity_class.__name__
-        t_base_name = "%sBase" % t_class_name
-        t_class_bases = (SQLAlchemyTester,)
-        # Create the FooTester
-        t_class = type(
-            t_class_name,
-            t_class_bases,
-            {'_entity': entity_class})
-        return t_class
+    def __call__(self, fixture):
+        return self.load_manager(fixture)
 
 
-class NoDataLoader(BaseLoader):
-    """A Loader that doesn't load data"""
-    def add_data(self, data):
-        entity_classes = set()
-        for data_class in data.values():
-            entity_class = self.env[data_class._entity_name]
-            entity_classes.add(entity_class)
-        return (entity_classes, [], [])
-
-    def delete_data(self, data):
-        pass
-
-    def restore_data(self, data):
-        pass
-
-
-class MongoLoader(BaseLoader):
+class MongoLoadManager(BaseLoadManager):
     """A loader for MongoDB"""
-    def add_data(self, data):
+    def add_data(self):
         session = self.session_factory()
         entity_classes = set()
         data_added = defaultdict(list)
-        for data_class in data.values():
+        for data_class in self._data.values():
             entity_class = self.env[data_class._entity_name]
             entity_classes.add(entity_class)
             for datum in data_class:
@@ -524,9 +530,20 @@ class MongoLoader(BaseLoader):
         return t_class
 
 
-class SQLAlchemyLoader(BaseLoader):
+class MongoLoader(BaseLoader):
+    load_manager = MongoLoadManager
+
+
+class SQLAlchemyLoadManager(BaseLoadManager):
     """A basic holder for an env and a session."""
-    def add_data(self, data, overwrite_data=True, keep_constraints=False):
+    tester_base = SQLAlchemyTester
+
+    def __init__(self, env, session_factory, fixture):
+        super(SQLAlchemyLoadManager, self).__init__(fixture)
+        self.env = EnvWrapper(env)
+        self.session_factory = session_factory
+
+    def add_data(self, overwrite_data=True, keep_constraints=False):
         session = self.session_factory()
         entity_classes = set()
         data_added = defaultdict(list)
@@ -537,7 +554,7 @@ class SQLAlchemyLoader(BaseLoader):
             constraint_checker = NoConstraints
         with constraint_checker(session):
             with no_autoflush(session):
-                for data_class in data.values():
+                for data_class in self._data.values():
                     entity_class = self.env[data_class._entity_name]
                     entity_classes.add(entity_class)
                     for datum in data_class:
@@ -565,14 +582,14 @@ class SQLAlchemyLoader(BaseLoader):
         def process_item(table, p_keys):
             # Break joins into seperate tables
             result = []
-            if isinstance(table, sqlalchemy.types.expression.Join):
-                for join_table in [table.left, table.right]:
-                    data = [dict(
-                        [(key, datum[key]) for key in datum
-                         if hasattr(join_table.c, key)]) for datum in p_keys]
-                    result.append((join_table, data))
-            else:
-                result.append((table, p_keys))
+            # if isinstance(table, sqlalchemy.types.expression.Join):
+            #     for join_table in [table.left, table.right]:
+            #         data = [dict(
+            #             [(key, datum[key]) for key in datum
+            #              if hasattr(join_table.c, key)]) for datum in p_keys]
+            #         result.append((join_table, data))
+            # else:
+            result.append((table, p_keys))
             return result
 
         for table, p_keys in items:
@@ -608,6 +625,91 @@ class SQLAlchemyLoader(BaseLoader):
                         _item_from_dict(item, original_data)
                 session.commit()
         session.close()
+
+
+class SQLAlchemyLoader(BaseLoader):
+    load_manager = SQLAlchemyLoadManager
+
+    def __call__(self, fixture):
+        return self.load_manager(self.env, self.session_factory, fixture)
+
+
+class NoDataLoadManager(SQLAlchemyLoadManager):
+    """A Loader that doesn't load data"""
+    def add_data(self):
+        entity_classes = set()
+        for data_class in self._data.values():
+            entity_class = self.env[data_class._entity_name]
+            entity_classes.add(entity_class)
+        return (entity_classes, [], [])
+
+    def delete_data(self, data):
+        pass
+
+    def restore_data(self, data):
+        pass
+
+
+class NoDataLoader(SQLAlchemyLoader):
+    load_manager = NoDataLoadManager
+
+
+class JsonLoadManager(BaseLoadManager):
+    """For loading data into a specialised JSON format"""
+    tester_base = JsonTester
+
+    def __init__(self, data_dir, fixture):
+        super(JsonLoadManager, self).__init__(fixture)
+        self.data_dir = path.path(data_dir)
+        self.session = None
+        self.session_factory = None
+
+    def __enter__(self):
+        entity_classes, self._data_added, self._data_updated = self.add_data()
+        return TesterManager(JsonTester, self)
+
+    def __exit__(self, exc_type, value, traceback):
+        pass
+
+    def add_data(self):
+        entity_classes = set()
+        data_added = defaultdict(list)
+        for data_class in self._data.values():
+            entity_class = data_class._entity_name[:-4]
+            entity_classes.add(entity_class)
+            data_added = defaultdict(list)
+            data = dict()
+            for e in data_class:
+                data.setdefault(e.venue_id, []).append(e.to_dict())
+            for venue_id in data:
+                data_added[entity_class].extend(data[venue_id])
+                data_dir = self.data_dir / "venues" / venue_id
+                if not data_dir.exists():
+                    data_dir.makedirs()
+                data_file =  data_dir / entity_class+".json"
+                with open(data_file, 'w') as f:
+                    newman.utils.json.dump(data[venue_id], f)
+        return (entity_classes, data_added, [])
+
+    def _make_tester_object(self, key):
+        t_class_name = "%sTester" % key
+        t_base_name = "%sBase" % t_class_name
+        t_class_bases = (JsonTester,)
+        # Create the FooTester
+        t_class = type(
+            t_class_name,
+            t_class_bases,
+            {})
+        return t_class(self._data_added[key])
+
+class JsonLoader(BaseLoader):
+    """For loading data into a specialised JSON format"""
+    def __init__(self, env, data_dir):
+        self.env = env
+        self.data_dir = path.path(data_dir)
+
+    def __call__(self, fixture):
+        return JsonLoadManager(self.data_dir, fixture)
 
 
 def batch(items, count):
