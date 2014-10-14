@@ -2,7 +2,7 @@
 
 import itertools
 
-import py.test
+import pytest
 import sqlalchemy as sa
 import nose.plugins.skip
 
@@ -15,9 +15,9 @@ def test_storage():
         s = fixture.EnvWrapper(data)
         assert s.FooData == 'Bar'
         assert s['FooData'] == 'Bar'
-        with py.test.raises(fixture.KeyAndAttributeError):
+        with pytest.raises(fixture.KeyAndAttributeError):
             s.plop
-        with py.test.raises(fixture.KeyAndAttributeError):
+        with pytest.raises(fixture.KeyAndAttributeError):
             s['plop']
 
     datas = [
