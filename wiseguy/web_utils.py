@@ -100,6 +100,17 @@ class BaseApp(object):
             wsgi_app = middleware(wsgi_app)
         return wsgi_app
 
+
+class JinjaResponse(wz.BaseResponse):
+    def __init__(self, template_name, context, *args, **kwargs):
+        super(JinjaResponse, self).__init__(*args, **kwargs)
+        self.template_name = template_name
+        self.context = context
+
+    def render(self, renderer):
+        self.data = renderer.render(self.template_name, self.context)
+
+
 class JinjaRenderer(object):
     def __init__(self, env, context=None):
         self.env = env

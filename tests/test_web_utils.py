@@ -199,6 +199,21 @@ def test_make_url_map():
     assert adapter.match('/blammo/foo') == ("foo", {})
     assert url_map.converters['flibble'] == flibble_conv
 
+
+def test_JinjaResponse():
+    renderer = wu.JinjaRenderer(
+        j2.Environment(
+            loader=j2.DictLoader(
+                dict(foo="Foo Page {{bar}} {{a}}"))),
+        context=dict(a=1, b=2))
+    response = wu.JinjaResponse(
+        "foo",
+        {'bar': "baz"})
+    assert response.data == ""
+    response.render(renderer)
+    assert response.data == "Foo Page baz 1"
+
+
 def test_JinjaRenderer():
     renderer = wu.JinjaRenderer(
         j2.Environment(
