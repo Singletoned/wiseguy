@@ -35,7 +35,7 @@ html
                 "body",
                 lambda body, template: template.element.add("body div", wiseguy.html.Html("Wobble, %s"%body))),]
 
-    assert template.element
+    assert template.element is not None
     assert template.transforms
     assert len(template.transforms) == 3
     assert len(template.applied_transforms) == 0
