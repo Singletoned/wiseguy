@@ -2,7 +2,6 @@
 
 from functools import wraps
 import uuid
-import os
 import collections
 
 import werkzeug as wz
