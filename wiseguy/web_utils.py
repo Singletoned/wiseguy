@@ -45,7 +45,7 @@ def wsgi_wrapper(app, request_class=wz.Request):
 def _do_dispatch(app, req):
     try:
         rule, kwargs = req.map_adapter.match(return_rule=True)
-        if kwargs.has_key('path_info'):
+        if 'path_info' in kwargs:
             path_info = kwargs.pop('path_info')
             if not path_info.startswith("/"):
                 path_info = "/" + path_info
