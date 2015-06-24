@@ -90,6 +90,8 @@ class BaseApp(object):
             template_name, mimetype, values = res
             values = dict(request=req, **values)
             res = self.renderer.get_response(template_name, values, mimetype)
+        elif isinstance(res, JinjaResponse):
+            res = res.render(self.renderer)
         return res
 
     def wsgi(self, request_class=None):

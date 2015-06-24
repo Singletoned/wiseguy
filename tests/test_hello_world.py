@@ -9,12 +9,14 @@ url_map = wiseguy.web_utils.UrlMap()
 @url_map.expose(u"/")
 @wiseguy.web_utils.render('index.html')
 def index(request):
-    return dict(greeting="Hello", name="World")
+    return wiseguy.web_utils.JinjaResponse(
+        "index.html",
+        dict(greeting="Hello", name="World"))
 
 renderer = wiseguy.web_utils.JinjaRenderer(
     jinja2.Environment(
         loader=jinja2.DictLoader(
-            {'index.html': "<p>{{greeting}}, {{name}}!</p>"})))
+            {'index.html': "<html><body><p>{{greeting}}, {{name}}!</p></body></html>"})))
 
 application = wiseguy.web_utils.BaseApp(
     config=dict(),

@@ -75,6 +75,7 @@ def test_base_app():
     url_map.expose('/')(lambda r: wz.Response("Index"))
     url_map.expose('/foo')(lambda r: wz.Response("Foo Page"))
     url_map.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
+    url_map.expose('/jinja')(lambda r: wu.JinjaResponse('bar', {'bar_var': "bam"}))
     url_map.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
     url_map.expose('/config')(lambda request: wz.Response(request.app.config.mountpoint))
     url_map.expose('/req')(lambda r: wz.Response(str(r)))
@@ -145,6 +146,10 @@ def test_base_app():
     response = list(response)[0]
     assert "Redirecting..." in response
     assert "/submount/baz" in response
+
+    environ = wz.test.create_environ('/submount/jinja')
+    response = wsgi_app(environ, lambda s, h: s)
+    assert list(response) == ["Bar Page bam"]
 
 def test_base_app_minimal():
     url_map = wu.UrlMap()
