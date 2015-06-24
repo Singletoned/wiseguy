@@ -32,6 +32,7 @@ from wiseguy import utils
 class TemplateNotFound(Exception):
     pass
 
+
 def wsgi_wrapper(app, request_class=wz.Request):
     def application(environ, start_response):
         req = request_class(environ)
@@ -39,6 +40,7 @@ def wsgi_wrapper(app, request_class=wz.Request):
         res = res(environ, start_response)
         return res
     return application
+
 
 def _do_dispatch(app, req):
     try:
@@ -58,6 +60,7 @@ def _do_dispatch(app, req):
     except wz.exceptions.HTTPException, e:
         res = e.get_response(req.environ)
     return res
+
 
 class BaseApp(object):
     def __init__(self, config, url_map, renderer, name=None, request_class=wz.Request, middlewares=None):
@@ -138,6 +141,7 @@ class JinjaRenderer(object):
 
     def from_string(self, text):
         return self.env.from_string(text)
+
 
 class LxmlRenderer(object):
     def __init__(self, env, global_context=None):
