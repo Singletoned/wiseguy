@@ -7,7 +7,6 @@ import contextlib
 
 import lxml.html
 import werkzeug as wz
-import werkzeug.test
 import jinja2 as j2
 import validino as v
 import jade
@@ -15,7 +14,6 @@ import jade
 import path
 
 from wiseguy import web_utils as wu, utils
-import wiseguy.html
 
 @contextlib.contextmanager
 def raises(error):
