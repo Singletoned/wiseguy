@@ -210,8 +210,9 @@ def test_JinjaResponse():
         "foo",
         {'bar': "baz"})
     assert response.data == ""
-    response.render(renderer)
+    returned_response = response.render(renderer)
     assert response.data == "Foo Page baz 1"
+    assert returned_response == response
 
 
 def test_JinjaRenderer():

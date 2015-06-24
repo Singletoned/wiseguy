@@ -109,6 +109,7 @@ class JinjaResponse(wz.BaseResponse):
 
     def render(self, renderer):
         self.data = renderer.render(self.template_name, self.context)
+        return self
 
 
 class JinjaRenderer(object):
