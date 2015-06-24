@@ -151,6 +151,7 @@ def test_base_app():
     response = wsgi_app(environ, lambda s, h: s)
     assert list(response) == ["Bar Page bam"]
 
+
 def test_base_app_minimal():
     url_map = wu.UrlMap()
     renderer = j2.Environment()
@@ -158,6 +159,7 @@ def test_base_app_minimal():
         config=dict(),
         url_map=url_map,
         renderer=renderer)
+
 
 def test_base_app_config():
     url_map = wu.UrlMap()
@@ -168,6 +170,7 @@ def test_base_app_config():
         renderer=renderer)
     assert application.config.foo == 1
     assert application.config.bar == 2
+
 
 def test_base_app_name():
     url_map = wu.UrlMap()
@@ -180,6 +183,7 @@ def test_base_app_name():
     assert application.name == "Mr Base App"
     assert repr(application) == "<BaseApp Mr Base App>"
 
+
 def test_middlewares():
     url_map = wu.UrlMap()
     renderer = j2.Environment()
@@ -190,6 +194,7 @@ def test_middlewares():
         middlewares=[lambda app: "foo"])
     wsgi_app = application.wsgi()
     assert wsgi_app == "foo"
+
 
 def test_make_url_map():
     flibble_conv = lambda: "flibble"
