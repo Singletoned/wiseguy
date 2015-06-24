@@ -71,14 +71,14 @@ def test_base_app():
         def __repr__(self):
             return "<OtherTestRequest>"
 
-    url_map = wu.UrlMap()
-    url_map.expose('/')(lambda r: wz.Response("Index"))
-    url_map.expose('/foo')(lambda r: wz.Response("Foo Page"))
-    url_map.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
-    url_map.expose('/jinja')(lambda r: wu.JinjaResponse('bar', {'bar_var': "bam"}))
-    url_map.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
-    url_map.expose('/config')(lambda request: wz.Response(request.app.config.mountpoint))
-    url_map.expose('/req')(lambda r: wz.Response(str(r)))
+    um = wu.UrlMap()
+    um.expose('/')(lambda r: wz.Response("Index"))
+    um.expose('/foo')(lambda r: wz.Response("Foo Page"))
+    um.expose('/bar')(lambda r: ('bar', 'text/html', {'bar_var': "flumble"}))
+    um.expose('/jinja')(lambda r: wu.JinjaResponse('bar', {'bar_var': "bam"}))
+    um.expose('/wrong')(lambda request: wz.redirect(request.url('/baz')))
+    um.expose('/config')(lambda request: wz.Response(request.app.config.mountpoint))
+    um.expose('/req')(lambda r: wz.Response(str(r)))
 
     renderer = wu.JinjaRenderer(
         j2.Environment(
@@ -87,7 +87,7 @@ def test_base_app():
 
     app = wu.BaseApp(
         config=dict(mountpoint=u"/submount"),
-        url_map=url_map,
+        url_map=um,
         renderer=renderer,
         request_class=OtherTestRequest)
     wsgi_app = app.wsgi(request_class=TestRequest)
