@@ -15,15 +15,16 @@ import path
 
 from wiseguy import web_utils as wu, utils
 
+
 @contextlib.contextmanager
 def raises(error):
     try:
         yield
-        raise Exception("%s not raised"%error)
+        raise Exception("%s not raised" % error)
     except error:
         pass
     except:
-        (exc_type, exc_value, traceback) =  sys.exc_info()
+        (exc_type, exc_value, traceback) = sys.exc_info()
         raise Exception("%s raised instead of %s" % (repr(exc_value), error))
 
 var_dir = os.path.join(os.path.dirname(__file__), 'var')
