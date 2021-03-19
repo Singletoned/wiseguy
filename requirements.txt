@@ -1,4 +1,4 @@
-Jinja2==2.6
+Jinja2==2.11.3
 SQLAlchemy==0.7.9
 Werkzeug==0.8.1
 lxml>=3.0
